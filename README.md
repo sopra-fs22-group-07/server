@@ -94,3 +94,7 @@ do the following:
 ## Testing
 
 Have a look here: https://www.baeldung.com/spring-boot-testing
+
+## Diagrams
+
+Class diagram: https://lucid.app/lucidchart/7f230dca-7fe6-4d8f-bb70-13a0f86d467f/edit?from_internal=true
