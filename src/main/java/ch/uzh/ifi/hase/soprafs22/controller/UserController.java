@@ -78,7 +78,7 @@ public class UserController {
         return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.CREATED);
     }
 
-    @PutMapping("/logout/{userId}")
+    @PutMapping("/logout")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public void endSession(@RequestHeader(value = "authorization", required = false) String token,
