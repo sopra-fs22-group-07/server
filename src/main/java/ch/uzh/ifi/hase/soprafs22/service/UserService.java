@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -54,6 +55,20 @@ public class UserService {
     return newUser;
   }
 
+    public void endSession(String token){
+        User user = this.userRepository.findByToken(token);
+
+        String baseErrorMessage = "user with token %s was not found";
+
+        // check if user is not found
+        if (user == null ) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format(baseErrorMessage, token));
+        }
+        user.setStatus(UserStatus.OFFLINE);
+        this.userRepository.save(user);
+    }
+
   /**
    * This is a helper method that will check the uniqueness criteria of the
    * username and the name
@@ -78,4 +93,26 @@ public class UserService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
     }
   }
+
+    /**
+     * This is a helper method that will check the uniqueness criteria of the
+     * username and the password
+     * defined in the User entity. The method will do nothing if the input is unique
+     * and throw an error otherwise.
+     *
+     * @param inputUser user as input
+     * @throws org.springframework.web.server.ResponseStatusException
+     * @see User
+     */
+    public User checkPassword(User inputUser) {
+        User userByUsername = userRepository.findByUsername(inputUser.getUsername());
+        // test if user exists and correct password is given
+        if (userByUsername == null || !Objects.equals(inputUser.getPassword(), userByUsername.getPassword())){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "Your Username or password is incorrect");
+        }
+        userByUsername.setStatus(UserStatus.ONLINE);
+        this.userRepository.save(userByUsername);
+        return userByUsername;
+    }
 }
