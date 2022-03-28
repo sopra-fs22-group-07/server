@@ -31,6 +31,7 @@ public class User implements Serializable {
     @Column(nullable = false, unique = true)
     private String username;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, unique = true)
@@ -38,7 +39,7 @@ public class User implements Serializable {
 
     private Date creationDate = new Date();
 
-    @Column(nullable = false)
+    // @Column(nullable = false)
     private UserStatus status;
 
     @Column(nullable = false)
@@ -95,6 +96,10 @@ public class User implements Serializable {
     public Date getBirthday(){return this.birthday; }
 
     public void setBirthday(Date birthday){this.birthday = birthday; }
+
+    public Gender getGender(){return this.gender; }
+
+    public void setBirthday(Gender gender){this.gender = gender; }
 
     public String getPassword(){return this.password; }
 
