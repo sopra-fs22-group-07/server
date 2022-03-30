@@ -20,6 +20,7 @@ public class DTOMapperTest {
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setName("name");
     userPostDTO.setUsername("username");
+    userPostDTO.setPassword("password");
 
     // MAP -> Create user
     User user = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);

@@ -1,9 +1,12 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Date;
 
 /**
  * Internal User Representation
@@ -12,68 +15,93 @@ import java.io.Serializable;
  * Every variable will be mapped into a database field with the @Column
  * annotation
  * - nullable = false -> this cannot be left empty
- * - unique = true -> this value must be unqiue across the database -> composes
+ * - unique = true -> this value must be unique across the database -> composes
  * the primary key
  */
 @Entity
 @Table(name = "USER")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-  @Column(nullable = false)
-  private String name;
+    @Column(nullable = false, unique = true)
+    private String username;
 
-  @Column(nullable = false, unique = true)
-  private String username;
+    @Column(nullable = false)
+    private String name;
 
-  @Column(nullable = false, unique = true)
-  private String token;
+    @Column(nullable = false, unique = true)
+    private String token;
 
-  @Column(nullable = false)
-  private UserStatus status;
+    private Date creationDate = new Date();
 
-  public Long getId() {
-    return id;
-  }
+    // @Column(nullable = false)
+    private UserStatus status;
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    @Column(nullable = false)
+    private String password;
 
-  public String getName() {
-    return name;
-  }
+    private Date birthday;
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    private Gender gender;
 
-  public String getUsername() {
-    return username;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setUsername(String username) {
-    this.username = username;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public String getToken() {
-    return token;
-  }
+    public String getUsername() {
+        return username;
+    }
 
-  public void setToken(String token) {
-    this.token = token;
-  }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-  public UserStatus getStatus() {
-    return status;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public void setStatus(UserStatus status) {
-    this.status = status;
-  }
+    public String getName() {
+        return name;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public Date getCreationDate(){return this.creationDate; }
+
+    public void setCreationDate(Date creationDate){this.creationDate = creationDate; }
+
+    public Date getBirthday(){return this.birthday; }
+
+    public void setBirthday(Date birthday){this.birthday = birthday; }
+
+    public Gender getGender(){return this.gender; }
+
+    public void setBirthday(Gender gender){this.gender = gender; }
+
+    public String getPassword(){return this.password; }
+
+    public void setPassword(String password){this.password = password; }
 }

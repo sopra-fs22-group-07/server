@@ -5,7 +5,10 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -55,4 +58,32 @@ public class UserController {
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
   }
+
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO UserPostDTO) {
+        // convert API user to internal representation convertUserPostDTOtoEntity
+        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(UserPostDTO);
+
+        // check username and password, throws UNAUTHORIZED if false
+        User returnUser = userService.checkPassword(userInput);
+
+        MultiValueMap<String, String> httpHeaders = new HttpHeaders();
+        httpHeaders.set("token", returnUser.getToken());
+
+        UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
+
+        // convert internal representation of user back to API
+        return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/logout")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void endSession(@RequestHeader(value = "authorization", required = false) String token,
+                           @PathVariable String userId) {
+        // logout, sets logged_in to false
+        userService.endSession(token);
+    }
 }
