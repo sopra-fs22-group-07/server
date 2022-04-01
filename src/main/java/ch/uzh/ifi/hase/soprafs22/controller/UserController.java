@@ -60,11 +60,10 @@ public class UserController {
   }
 
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO UserPostDTO) {
+    public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
         // convert API user to internal representation convertUserPostDTOtoEntity
-        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(UserPostDTO);
+        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
         // check username and password, throws UNAUTHORIZED if false
         User returnUser = userService.checkPassword(userInput);
@@ -75,7 +74,7 @@ public class UserController {
         UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
 
         // convert internal representation of user back to API
-        return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
     }
 
     @PutMapping("/logout")
@@ -84,6 +83,6 @@ public class UserController {
     public void endSession(@RequestHeader(value = "authorization", required = false) String token,
                            @PathVariable String userId) {
         // logout, sets logged_in to false
-        userService.endSession(token);
+        userService.logoutUser(token);
     }
 }
