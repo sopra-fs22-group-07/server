@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - dev
 
 jobs:
   build:
@@ -16,6 +17,9 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.15
+          
+      - name: test the project and upload test report -> sonarqube
+        run: ./gradlew test jacocoTestReport sonarqube --info
 
       - name: Build with Gradle
         run: ./gradlew build
