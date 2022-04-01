@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * This tests if the UserController works.
  */
 @WebMvcTest(UserController.class)
-public class UserControllerTest {
+class UserControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
@@ -44,7 +44,7 @@ public class UserControllerTest {
   private UserService userService;
 
   @Test
-  public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
+  void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
     // given
     User user = new User();
     user.setName("Firstname Lastname");
@@ -69,7 +69,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void createUser_validInput_userCreated() throws Exception {
+  void createUser_validInput_userCreated() throws Exception {
     // given
     User user = new User();
     user.setId(1L);
@@ -97,6 +97,59 @@ public class UserControllerTest {
         .andExpect(jsonPath("$.username", is(user.getUsername())))
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }
+
+  @Test
+  void validUser_login() throws Exception {
+      // given
+      User user = new User();
+      user.setId(1L);
+      user.setName("Test User");
+      user.setUsername("testUsername");
+      user.setToken("1");
+      user.setPassword("1234");
+      user.setStatus(UserStatus.ONLINE);
+
+      UserPostDTO userPostDTO = new UserPostDTO();
+      userPostDTO.setName("Test User");
+      userPostDTO.setPassword("1234");
+
+
+      given(userService.checkPassword(Mockito.any())).willReturn(user);
+
+      // when/then -> do the request + validate the result
+      MockHttpServletRequestBuilder postRequest = post("/login")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(userPostDTO));
+
+      // then
+      mockMvc.perform(postRequest)
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.id", is(user.getId().intValue())))
+              .andExpect(jsonPath("$.name", is(user.getName())))
+              .andExpect(jsonPath("$.username", is(user.getUsername())))
+              .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
+  }
+
+  @Test
+  void invalidUser_noLogin() throws Exception {
+      // given
+      UserPostDTO userPostDTO = new UserPostDTO();
+      userPostDTO.setName("Test User");
+      userPostDTO.setPassword("1234");
+
+      given(userService.checkPassword(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+
+      // when/then -> do the request + validate the result
+      MockHttpServletRequestBuilder postRequest = post("/login")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(userPostDTO));
+
+      // then
+      mockMvc.perform(postRequest)
+              .andExpect(status().isUnauthorized());
+  }
+
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

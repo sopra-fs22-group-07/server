@@ -9,11 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserServiceTest {
+class UserServiceTest {
 
   @Mock
   private UserRepository userRepository;
@@ -32,6 +35,7 @@ public class UserServiceTest {
     testUser.setId(1L);
     testUser.setName("testName");
     testUser.setUsername("testUsername");
+    testUser.setPassword("1234");
 
     // when -> any object is being save in the userRepository -> return the dummy
     // testUser
@@ -39,7 +43,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void createUser_validInputs_success() {
+  void createUser_validInputs_success() {
     // when -> any object is being save in the userRepository -> return the dummy
     // testUser
     User createdUser = userService.createUser(testUser);
@@ -55,7 +59,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void createUser_duplicateName_throwsException() {
+  void createUser_duplicateName_throwsException() {
     // given -> a first user has already been created
     userService.createUser(testUser);
 
@@ -69,7 +73,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void createUser_duplicateInputs_throwsException() {
+  void createUser_duplicateInputs_throwsException() {
     // given -> a first user has already been created
     userService.createUser(testUser);
 
@@ -80,6 +84,43 @@ public class UserServiceTest {
     // then -> attempt to create second user with same user -> check that an error
     // is thrown
     assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
+  }
+
+  @Test
+  void loginUser_success() {
+      // given
+      User inputUser = new User();
+      inputUser.setId(1L);
+      inputUser.setName("testName");
+      inputUser.setUsername("testUsername");
+      inputUser.setPassword("1234");
+
+      Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+
+      // when -> setup additional mocks for UserRepository
+      User returnUser = userService.checkPassword(inputUser);
+
+      // then
+      assertEquals(testUser.getId(), returnUser.getId());
+      assertEquals(testUser.getName(), returnUser.getName());
+      assertEquals(testUser.getUsername(), returnUser.getUsername());
+      assertEquals(UserStatus.ONLINE, returnUser.getStatus());
+  }
+
+  @Test
+  void loginUser_error() {
+      // given -> a first user has already been created
+      userService.createUser(testUser);
+      User inputUser = new User();
+      inputUser.setId(1L);
+      inputUser.setName("testName");
+      inputUser.setUsername("testUsername");
+      inputUser.setPassword("abcd");
+
+      Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+
+      // then error, because different password
+      assertThrows(ResponseStatusException.class, () -> userService.checkPassword(inputUser));
   }
 
 }
