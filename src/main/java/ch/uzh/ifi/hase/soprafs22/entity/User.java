@@ -37,16 +37,19 @@ public class User implements Serializable {
     @Column(nullable = false, unique = true)
     private String token;
 
+    @Column
     private Date creationDate = new Date();
 
-    // @Column(nullable = false)
+    @Column(nullable = false)
     private UserStatus status;
 
     @Column(nullable = false)
     private String password;
 
+    @Column
     private Date birthday;
 
+    @Column
     private Gender gender;
 
     public Long getId() {
