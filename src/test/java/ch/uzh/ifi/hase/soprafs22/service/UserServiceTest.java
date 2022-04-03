@@ -9,10 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,19 +55,6 @@ class UserServiceTest {
     assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
   }
 
-  @Test
-  void createUser_duplicateName_throwsException() {
-    // given -> a first user has already been created
-    userService.createUser(testUser);
-
-    // when -> setup additional mocks for UserRepository
-    Mockito.when(userRepository.findByName(Mockito.any())).thenReturn(testUser);
-    Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(null);
-
-    // then -> attempt to create second user with same user -> check that an error
-    // is thrown
-    assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
-  }
 
   @Test
   void createUser_duplicateInputs_throwsException() {
@@ -78,7 +62,6 @@ class UserServiceTest {
     userService.createUser(testUser);
 
     // when -> setup additional mocks for UserRepository
-    Mockito.when(userRepository.findByName(Mockito.any())).thenReturn(testUser);
     Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
 
     // then -> attempt to create second user with same user -> check that an error
@@ -98,7 +81,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
 
       // when -> setup additional mocks for UserRepository
-      User returnUser = userService.checkPassword(inputUser);
+      User returnUser = userService.checkPasswordAndUsername(inputUser);
 
       // then
       assertEquals(testUser.getId(), returnUser.getId());
@@ -120,7 +103,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
 
       // then error, because different password
-      assertThrows(ResponseStatusException.class, () -> userService.checkPassword(inputUser));
+      assertThrows(ResponseStatusException.class, () -> userService.checkPasswordAndUsername(inputUser));
   }
 
 }
