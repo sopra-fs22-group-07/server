@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +34,11 @@ public class UserController {
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserGetDTO> getAllUsers() {
+  public List<UserGetDTO> getAllUsers(@RequestHeader(value = "authorization", required = false) String token) {
+
+    // check if source of query has access token
+    userService.checkGeneralAccess(token);
+
     // fetch all users in the internal representation
     List<User> users = userService.getUsers();
     List<UserGetDTO> userGetDTOs = new ArrayList<>();
@@ -46,27 +51,30 @@ public class UserController {
   }
 
   @PostMapping("/users")
-  @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
+  public ResponseEntity<UserGetDTO> createUser(@RequestBody UserPostDTO userPostDTO) {
     // convert API user to internal representation
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
     // create user
     User createdUser = userService.createUser(userInput);
 
-    // convert internal representation of user back to API
-    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+    MultiValueMap<String, String> headers = new HttpHeaders();
+    headers.set("token", createdUser.getToken());
+
+    UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+
+    return new ResponseEntity<>(userGetDTO, headers, HttpStatus.CREATED);
   }
 
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     @ResponseBody
     public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
         // convert API user to internal representation convertUserPostDTOtoEntity
         User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
         // check username and password, throws UNAUTHORIZED if false
-        User returnUser = userService.checkPassword(userInput);
+        User returnUser = userService.checkPasswordAndUsername(userInput);
 
         MultiValueMap<String, String> httpHeaders = new HttpHeaders();
         httpHeaders.set("token", returnUser.getToken());
@@ -77,12 +85,42 @@ public class UserController {
         return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
     }
 
-    @PutMapping("/logout")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public void endSession(@RequestHeader(value = "authorization", required = false) String token,
-                           @PathVariable String userId) {
-        // logout, sets logged_in to false
-        userService.logoutUser(token);
-    }
+  @PutMapping("/users/logout/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public void logoutUser(@PathVariable(value = "id") long userId, @RequestBody UserPutDTO userPutDTO){
+
+    User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+    // make sure user has right ID
+    userInput.setId(userId);
+    userService.logoutUser(userInput); // this throws all errors
+
+  }
+
+  @GetMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDTO getUser(@RequestHeader(value = "authorization", required = false) String token,
+                            @PathVariable(value = "id") int userId) {
+
+    userService.checkGeneralAccess(token);
+    User user = userService.getUserById(userId);
+    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+  }
+
+  @PutMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public void updateUser(
+          @RequestHeader(value = "authorization", required = false) String token,
+          @PathVariable(value = "id") long userId,
+          @RequestBody UserPutDTO userPutDTO){
+
+    userService.checkSpecificAccess(token, userId);
+
+    User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+    // make sure user has right ID
+    userInput.setId(userId);
+    userService.updateUser(userInput); // this throws all errors
+  }
 }
