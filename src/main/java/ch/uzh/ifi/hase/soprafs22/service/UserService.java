@@ -55,7 +55,7 @@ public class UserService {
     return newUser;
   }
 
-    public void endSession(String token){
+    public void logoutUser(String token){
         User user = this.userRepository.findByToken(token);
 
         String baseErrorMessage = "user with token %s was not found";
