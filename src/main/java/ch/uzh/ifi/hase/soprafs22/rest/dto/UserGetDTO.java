@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import java.util.Date;
@@ -11,6 +12,7 @@ public class UserGetDTO {
   private String username;
   private UserStatus status;
   private Date birthday;
+  private Gender gender;
 
   public Long getId() {
     return id;
@@ -47,4 +49,8 @@ public class UserGetDTO {
   public Date getBirthday(){return birthday;}
 
   public void setBirthday(Date birthday){this.birthday = birthday;}
+
+  public Gender getGender(){return this.gender; }
+
+ public void setGender(Gender gender){this.gender = gender; }
 }

@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -97,11 +96,11 @@ public class User implements Serializable {
 
     public void setBirthday(Date birthday){this.birthday = birthday; }
 
-    public Gender getGender(){return this.gender; }
-
-    public void setBirthday(Gender gender){this.gender = gender; }
-
     public String getPassword(){return this.password; }
 
     public void setPassword(String password){this.password = password; }
+
+    public Gender getGender(){return this.gender; }
+
+    public void setGender(Gender gender){this.gender = gender; }
 }
