@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto;
 
+import java.util.Date;
+
 public class UserPostDTO {
 
   private String name;
@@ -7,6 +9,8 @@ public class UserPostDTO {
   private String username;
 
   private String password;
+
+  private Date birthday;
 
   public String getName() {
     return name;
@@ -31,4 +35,8 @@ public class UserPostDTO {
   public void setPassword(String password) {
         this.password = password;
     }
+
+  public Date getBirthday () {return birthday;}
+
+  public void setBirthday(Date birthday) {this.birthday = birthday;}
 }
