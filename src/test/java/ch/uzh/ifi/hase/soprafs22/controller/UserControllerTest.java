@@ -79,7 +79,7 @@ class UserControllerTest {
     user.setName("Test User");
     user.setUsername("testUsername");
     user.setToken("1");
-    user.setStatus(UserStatus.ONLINE);
+    user.setStatus(UserStatus.OFFLINE);
 
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setName("Test User");
