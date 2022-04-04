@@ -58,6 +58,7 @@ public class UserService {
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
 
+
     userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
     return userToBeLoggedOut;
   }
