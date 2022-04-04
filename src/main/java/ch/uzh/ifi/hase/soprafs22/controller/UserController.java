@@ -88,12 +88,18 @@ public class UserController {
   @PutMapping("/users/logout/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
-  public void logoutUser(@PathVariable(value = "id") long userId, @RequestBody UserPutDTO userPutDTO){
+  public void logoutUser(@RequestHeader(value = "authorization", required = false) String token,
+                         @PathVariable(value = "id") long userId
+                        ){
 
-    User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+    // check if caller is authorized
+    userService.checkSpecificAccess(token, userId); // throws 401
+
+    User userInput = new User();
     // make sure user has right ID
     userInput.setId(userId);
-    userService.logoutUser(userInput); // this throws all errors
+    userInput.setToken(token);
+    userService.logoutUser(userInput); // throws 404
 
   }
 

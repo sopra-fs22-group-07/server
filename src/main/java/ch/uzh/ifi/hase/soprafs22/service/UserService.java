@@ -42,7 +42,7 @@ public class UserService {
 
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setStatus(UserStatus.ONLINE);
 
     checkIfUserExists(newUser);
 
@@ -57,6 +57,7 @@ public class UserService {
 
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
+
 
     userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
     return userToBeLoggedOut;

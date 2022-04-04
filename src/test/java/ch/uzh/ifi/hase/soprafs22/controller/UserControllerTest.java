@@ -154,7 +154,7 @@ class UserControllerTest {
   }
 
   @Test
-  public void test_post_users_returns_409() throws Exception {
+  void test_post_users_returns_409() throws Exception {
     User user = new User();
     user.setUsername("John7");
     user.setPassword("hello");
@@ -176,7 +176,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_get_users_ID_returns_200() throws Exception {
+  void test_get_users_ID_returns_200() throws Exception {
     // given
     User user = new User();
     user.setId(1L);
@@ -207,7 +207,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_get_users_ID_returns_404() throws Exception {
+  void test_get_users_ID_returns_404() throws Exception {
     // given
     User user = new User();
     user.setId(1L);
@@ -225,7 +225,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_put_users_id_returns_204() throws Exception {
+  void test_put_users_id_returns_204() throws Exception {
     User userToBeUpdated = new User();
     userToBeUpdated.setPassword("password");
     userToBeUpdated.setUsername("usernameOld");
@@ -251,7 +251,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_put_users_id_returns_404() throws Exception {
+  void test_put_users_id_returns_404() throws Exception {
 
     // given
     User user = new User();
@@ -276,7 +276,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_put_users_id_returns_204_evenWithOldUsername() throws Exception {
+  void test_put_users_id_returns_204_evenWithOldUsername() throws Exception {
     User userToBeUpdated = new User();
     userToBeUpdated.setPassword("password");
     userToBeUpdated.setUsername("usernameOld");
@@ -300,7 +300,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_put_users_id_returns_401() throws Exception {
+  void test_put_users_id_returns_401() throws Exception {
 
     User user = new User();
     user.setId(1L);
@@ -322,7 +322,7 @@ class UserControllerTest {
   }
 
   @Test
-  public void test_put_users_id_returns_409() throws Exception {
+  void test_put_users_id_returns_409() throws Exception {
     User user = new User();
     user.setId(1L);
     user.setToken("1");
@@ -349,7 +349,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_post_users_login_returns_200() throws Exception {
+  void test_post_users_login_returns_200() throws Exception {
     User user = new User();
     user.setId(1L);
     user.setToken("1");
@@ -377,7 +377,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_post_users_login_returns_404() throws Exception {
+  void test_post_users_login_returns_404() throws Exception {
     User user = new User();
     user.setId(1L);
     user.setToken("1");
@@ -399,7 +399,7 @@ class UserControllerTest {
   }
 
   @Test
-  public void test_users_logout_id_returns_204() throws Exception {
+  void test_users_logout_id_returns_204() throws Exception {
     User user = new User();
     user.setId(1L);
     user.setToken("1");
@@ -421,7 +421,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_users_logout_id_returns_404() throws Exception {
+  void test_users_logout_id_returns_404() throws Exception {
     User user = new User();
     user.setId(1L);
     user.setToken("1");
@@ -443,7 +443,7 @@ class UserControllerTest {
 
 
   @Test
-  public void test_users_logout_id_returns_401() throws Exception {
+  void test_users_logout_id_returns_401() throws Exception {
     User user = new User();
     user.setId(1L);
     user.setToken("1");
