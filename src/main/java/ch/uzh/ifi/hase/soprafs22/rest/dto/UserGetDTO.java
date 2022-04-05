@@ -50,7 +50,7 @@ public class UserGetDTO {
 
   public void setBirthday(Date birthday){this.birthday = birthday;}
 
-  public Gender getGender(){return this.gender; }
+  public Gender getGender(){return this.gender; } //TODO: Change gender back from ENUM to String if necessary
 
  public void setGender(Gender gender){this.gender = gender; }
 }

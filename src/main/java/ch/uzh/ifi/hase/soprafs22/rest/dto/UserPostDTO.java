@@ -46,5 +46,15 @@ public class UserPostDTO {
 
   public Gender getGender(){return this.gender; }
 
-  public void setGender(Gender gender){this.gender = gender; }
+  public void setGender(String gender) {
+      if (gender.equals("MALE")) {
+          this.gender = Gender.MALE;
+      }
+      else if (gender.equals("FEMALE")) {
+          this.gender = Gender.FEMALE;
+      }
+      else {
+          this.gender = Gender.OTHER;
+      }
+  }
 }
