@@ -55,19 +55,13 @@ public class UserService {
     return newUser;
   }
 
-    public void logoutUser(String token){
-        User user = this.userRepository.findByToken(token);
+  public User logoutUser(User user) {
+    User userToBeLoggedOut = getUserById(user.getId());
 
-        String baseErrorMessage = "user with token %s was not found";
 
-        // check if user is not found
-        if (user == null ) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    String.format(baseErrorMessage, token));
-        }
-        user.setStatus(UserStatus.OFFLINE);
-        this.userRepository.save(user);
-    }
+    userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
+    return userToBeLoggedOut;
+  }
 
   /**
    * This is a helper method that will check the uniqueness criteria of the
@@ -75,22 +69,28 @@ public class UserService {
    * defined in the User entity. The method will do nothing if the input is unique
    * and throw an error otherwise.
    *
-   * @param userToBeCreated
-   * @throws org.springframework.web.server.ResponseStatusException
+   * @param userToBeCreated- User that shall be saved to database
+   * @throws org.springframework.web.server.ResponseStatusException: conflict
    * @see User
    */
   private void checkIfUserExists(User userToBeCreated) {
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
 
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the name", "are"));
-    } else if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
+    // ERROR 409: user already exists with Username
+    String baseErrorMessage = "The %s provided %s not unique.";
+    if (userByUsername != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+              String.format(baseErrorMessage, "username", "is"));
+    }
+  }
+
+  private void checkIfUserExistsForNewUsername(User user) {
+
+    User userByUsername = userRepository.findByUsername(user.getUsername());
+
+    if (userByUsername != null && !Objects.equals(userByUsername.getId(), user.getId())) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "Username is already taken");
     }
   }
 
@@ -104,7 +104,7 @@ public class UserService {
      * @throws org.springframework.web.server.ResponseStatusException
      * @see User
      */
-    public User checkPassword(User inputUser) {
+    public User checkPasswordAndUsername(User inputUser) {
         User userByUsername = userRepository.findByUsername(inputUser.getUsername());
         // test if user exists and correct password is given
         if (userByUsername == null || !Objects.equals(inputUser.getPassword(), userByUsername.getPassword())){
@@ -115,4 +115,39 @@ public class UserService {
         this.userRepository.save(userByUsername);
         return userByUsername;
     }
+
+  public void checkGeneralAccess(String token) {
+    User user = userRepository.findByToken(token);
+    if(user == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Log in or Register to access data! ");
+    }
+  }
+
+  public User getUserById(long userId) {
+    User user = this.userRepository.findById(userId);
+    if(user == null){
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user does not exit");
+    }
+    return user;
+  }
+
+  public void checkSpecificAccess(String token, long userId) {
+    User userByToken = userRepository.findByToken(token);
+    User userById = userRepository.findById(userId);
+    if(userByToken == null || userByToken != userById) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to update this user! ");
+    }
+  }
+
+  public User updateUser(User user) {
+
+    // user has right id since we set it in the user-controller
+    User userToBeUpdated = getUserById(user.getId()); // 404
+    checkIfUserExistsForNewUsername(user); // 409
+
+    // finally, update User in repository
+    userToBeUpdated.setUsername(user.getUsername());
+    userToBeUpdated.setBirthday(user.getBirthday());
+    return userToBeUpdated;
+  }
 }

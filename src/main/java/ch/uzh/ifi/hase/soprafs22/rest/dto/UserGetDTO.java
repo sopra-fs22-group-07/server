@@ -13,6 +13,7 @@ public class UserGetDTO {
   private UserStatus status;
   private Date birthday;
   private Gender gender;
+  private Date creationDate;
 
   public Long getId() {
     return id;
@@ -46,9 +47,22 @@ public class UserGetDTO {
     this.status = status;
   }
 
-  public Date getBirthday(){return birthday;}
+  public Date getCreationDate() {
+    return creationDate;
+  }
 
-  public void setBirthday(Date birthday){this.birthday = birthday;}
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
+
+  public Date getBirthday() {
+    return birthday;
+  }
+
+  public void setBirthday(Date birthday) {
+    this.birthday = birthday;
+  }
+
 
   public Gender getGender(){return this.gender; } //TODO: Change gender back from ENUM to String if necessary
 

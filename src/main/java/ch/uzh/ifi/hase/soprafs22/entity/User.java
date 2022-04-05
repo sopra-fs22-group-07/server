@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -36,6 +37,7 @@ public class User implements Serializable {
     @Column(nullable = false, unique = true)
     private String token;
 
+    @Column
     private Date creationDate = new Date();
 
     // @Column(nullable = false)
@@ -44,11 +46,11 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private Date birthday;
 
 
-    @Column(nullable = false)
+    @Column
     private Gender gender;
 
     public Long getId() {
@@ -98,6 +100,7 @@ public class User implements Serializable {
     public Date getBirthday(){return this.birthday; }
 
     public void setBirthday(Date birthday){this.birthday = birthday; }
+
 
     public String getPassword(){return this.password; }
 
