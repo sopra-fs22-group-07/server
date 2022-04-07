@@ -381,7 +381,7 @@ class UserControllerTest {
             .andExpect(jsonPath("$.id", is(user.getId().intValue())))
             .andExpect(jsonPath("$.creationDate", is(parseDate(user.getCreationDate()))))
             .andExpect(jsonPath("$.birthday", is(parseDate(user.getBirthday()))))
-            .andExpect(jsonPath("$.gender", is(user.getGender())));
+            .andExpect(jsonPath("$.gender", is(user.getGenderString())));
   }
 
 

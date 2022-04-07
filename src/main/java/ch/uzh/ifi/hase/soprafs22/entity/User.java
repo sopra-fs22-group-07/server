@@ -108,5 +108,22 @@ public class User implements Serializable {
 
     public Gender getGender(){return this.gender; }
 
+    /**
+     * Method for Testing the gender of the user in JSON, as the gender should be
+     * as string and not ENUM there
+      * @return User.gender as string
+     */
+    public String getGenderString(){
+        if (this.gender == Gender.MALE){
+            return "MALE";
+        }
+        else if(this.gender == Gender.FEMALE){
+            return "FEMALE";
+        }
+        else{
+            return "OTHER";
+        }
+    }
+
     public void setGender(Gender gender){this.gender = gender; }
 }
