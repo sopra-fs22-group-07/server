@@ -398,9 +398,11 @@ class UserControllerTest {
     user.setStatus(UserStatus.ONLINE);
     user.setBirthday(new Date(0));
 
-    UserPostDTO userPostDTO = new UserPostDTO();
-    userPostDTO.setUsername(user.getUsername());
-    userPostDTO.setPassword(user.getPassword() + "make password wrong");
+    UserPostDTO userPostDTO = new UserPostDTO();userPostDTO.setName("Test User");
+      userPostDTO.setUsername("testUsername");
+      userPostDTO.setPassword("wrongPassword");
+      userPostDTO.setGender("MALE");
+      userPostDTO.setBirthday(new Date());
 
     given(userService.checkPasswordAndUsername(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -421,6 +423,7 @@ class UserControllerTest {
     user.setBirthday(new Date(0));
 
     UserPutDTO userPutDTO = new UserPutDTO();
+
 
     given(userService.logoutUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NO_CONTENT));
 
