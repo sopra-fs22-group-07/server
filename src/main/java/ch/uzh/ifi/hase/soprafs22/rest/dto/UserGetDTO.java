@@ -64,7 +64,17 @@ public class UserGetDTO {
   }
 
 
-  public Gender getGender(){return this.gender; } //TODO: Change gender back from ENUM to String if necessary
+  public String getGender(){
+      if (this.gender == Gender.MALE){
+          return "MALE";
+      }
+      else if(this.gender == Gender.FEMALE){
+          return "FEMALE";
+      }
+      else{
+          return "OTHER";
+      }
+  }
 
  public void setGender(Gender gender){this.gender = gender; }
 }

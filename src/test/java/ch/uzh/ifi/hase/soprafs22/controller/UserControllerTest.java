@@ -363,10 +363,12 @@ class UserControllerTest {
     user.setPassword("password");
     user.setStatus(UserStatus.ONLINE);
     user.setBirthday(new Date(0));
+    user.setGender(Gender.OTHER);
 
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setUsername(user.getUsername());
     userPostDTO.setPassword(user.getPassword());
+    userPostDTO.setGender("OTHER");
 
     given(userService.checkPasswordAndUsername(Mockito.any())).willReturn(user);
 
@@ -378,7 +380,8 @@ class UserControllerTest {
             .andExpect(jsonPath("$.status", is(user.getStatus().toString())))
             .andExpect(jsonPath("$.id", is(user.getId().intValue())))
             .andExpect(jsonPath("$.creationDate", is(parseDate(user.getCreationDate()))))
-            .andExpect(jsonPath("$.birthday", is(parseDate(user.getBirthday()))));
+            .andExpect(jsonPath("$.birthday", is(parseDate(user.getBirthday()))))
+            .andExpect(jsonPath("$.gender", is(user.getGender())));
   }
 
 
