@@ -115,12 +115,15 @@ class UserControllerTest {
       user.setName("Test User");
       user.setUsername("testUsername");
       user.setToken("1");
-      user.setPassword("1234");
+      user.setPassword("password");
       user.setStatus(UserStatus.ONLINE);
 
       UserPostDTO userPostDTO = new UserPostDTO();
       userPostDTO.setName("Test User");
-      userPostDTO.setPassword("1234");
+      userPostDTO.setUsername("testUsername");
+      userPostDTO.setPassword("password");
+      userPostDTO.setGender("MALE");
+      userPostDTO.setBirthday(new Date());
 
 
       given(userService.checkPasswordAndUsername(Mockito.any())).willReturn(user);
