@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
@@ -79,11 +80,16 @@ class UserControllerTest {
     user.setName("Test User");
     user.setUsername("testUsername");
     user.setToken("1");
+    user.setGender(Gender.MALE);
+    user.setBirthday(new Date());
     user.setStatus(UserStatus.OFFLINE);
 
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setName("Test User");
     userPostDTO.setUsername("testUsername");
+    userPostDTO.setPassword("password");
+    userPostDTO.setGender("MALE");
+    userPostDTO.setBirthday(new Date());
 
     given(userService.createUser(Mockito.any())).willReturn(user);
 
