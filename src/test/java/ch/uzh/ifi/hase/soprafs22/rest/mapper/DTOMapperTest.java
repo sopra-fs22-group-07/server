@@ -6,6 +6,8 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -21,7 +23,8 @@ public class DTOMapperTest {
     userPostDTO.setName("name");
     userPostDTO.setUsername("username");
     userPostDTO.setPassword("password");
-
+    userPostDTO.setGender("MALE");
+    userPostDTO.setBirthday(new Date());
     // MAP -> Create user
     User user = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
