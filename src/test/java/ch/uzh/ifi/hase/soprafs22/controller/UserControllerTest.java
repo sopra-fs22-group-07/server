@@ -169,11 +169,14 @@ class UserControllerTest {
   void test_post_users_returns_409() throws Exception {
     User user = new User();
     user.setUsername("John7");
-    user.setPassword("hello");
+    user.setPassword("password");
 
     UserPostDTO userPostDTO = new UserPostDTO();
-    userPostDTO.setUsername(user.getUsername());
-    userPostDTO.setPassword("password");
+      userPostDTO.setName("Test User");
+      userPostDTO.setUsername("testUsername");
+      userPostDTO.setPassword("password");
+      userPostDTO.setGender("MALE");
+      userPostDTO.setBirthday(new Date());
 
     given(userService.createUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
