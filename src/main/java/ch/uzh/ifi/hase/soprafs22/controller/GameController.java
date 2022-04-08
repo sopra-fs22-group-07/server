@@ -1,16 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
-import ch.uzh.ifi.hase.soprafs22.entity.Card;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -42,9 +37,9 @@ public class GameController {
 
     // check if source of query has access token
     userService.checkSpecificAccess(token, id);
-    List<Card> cards = gameService.getCards();
+    List<BlackCard> cards = gameService.getCards();
     List<BlackCardGetDTO> blackCardGetDTOS= new ArrayList<>();
-    for (Card card : cards){
+    for (BlackCard card : cards){
       blackCardGetDTOS.add(DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO((BlackCard) card));
     }
 

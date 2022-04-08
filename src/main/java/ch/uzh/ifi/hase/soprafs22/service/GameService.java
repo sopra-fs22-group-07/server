@@ -1,18 +1,13 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
-import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
-import ch.uzh.ifi.hase.soprafs22.entity.Card;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -37,8 +32,8 @@ public class GameService {
   }
 
 
-  public List<Card> getCards() {
-    ArrayList<Card> cards = new ArrayList<>();
+  public List<BlackCard> getCards() {
+    ArrayList<BlackCard> cards = new ArrayList<>();
     cards.add(new BlackCard(1, "Card 1"));
     cards.add(new BlackCard(2, "Card 2"));
     cards.add(new BlackCard(3, "Card 3"));

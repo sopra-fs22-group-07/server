@@ -1,20 +1,34 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "CARD")
 public abstract class Card {
-  private long id;
+
+  public Card() {
+
+  }
+  public Card(long id, String text) {
+    this.id = id;
+    this.text = text;
+  }
+
+  @Id
+  @GeneratedValue
+  private Long id;
+
+  @Column(nullable = false)
   private String text;
 
-  Card(long id, String text){
-    this.id=id;
-    this.text=text;
-  }
-  Card(){}
 
-  public long getId() {
+
+
+  public Long getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(Long id) {
     this.id = id;
   }
 

@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Internal User Representation
@@ -27,6 +28,7 @@ public class User implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
+
 
     @Column(nullable = false, unique = true)
     private String username;
