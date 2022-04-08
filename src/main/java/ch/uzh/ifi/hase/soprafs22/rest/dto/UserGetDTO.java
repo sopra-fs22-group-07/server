@@ -63,17 +63,8 @@ public class UserGetDTO {
     this.birthday = birthday;
   }
 
-
-  public String getGender(){
-      if (this.gender == Gender.MALE){
-          return "MALE";
-      }
-      else if(this.gender == Gender.FEMALE){
-          return "FEMALE";
-      }
-      else{
-          return "OTHER";
-      }
+  public Gender getGender(){
+      return this.gender;
   }
 
  public void setGender(Gender gender){this.gender = gender; }

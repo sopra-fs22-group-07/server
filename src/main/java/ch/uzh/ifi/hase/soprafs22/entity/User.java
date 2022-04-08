@@ -114,15 +114,7 @@ public class User implements Serializable {
       * @return User.gender as string
      */
     public String getGenderString(){
-        if (this.gender == Gender.MALE){
-            return "MALE";
-        }
-        else if(this.gender == Gender.FEMALE){
-            return "FEMALE";
-        }
-        else{
-            return "OTHER";
-        }
+        return this.gender.toString();
     }
 
     public void setGender(Gender gender){this.gender = gender; }
