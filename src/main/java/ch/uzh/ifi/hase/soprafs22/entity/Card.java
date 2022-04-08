@@ -1,28 +1,36 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
+
+/**
+ * Internal Card Representation
+ * This class composes the internal representation of the card and defines how
+ * the card is stored in the database.
+ * Every variable will be mapped into a database field with the @Column
+ * annotation
+ * - nullable = false -> this cannot be left empty
+ * - unique = true -> this value must be unique across the database -> composes
+ * the primary key
+ */
 
 @Entity
 @Table(name = "CARD")
-public abstract class Card {
+public abstract class Card implements Serializable{
 
-  public Card() {
+  private static final long serialVersionUID = 1L;
 
-  }
-  public Card(long id, String text) {
-    this.id = id;
-    this.text = text;
-  }
+  // public Card(long id, String text) {
+  //   this.id = id;
+  //   this.text = text;
+  // }
 
   @Id
   @GeneratedValue
   private Long id;
 
-  @Column(nullable = false)
+  @Column
   private String text;
-
-
-
 
   public Long getId() {
     return id;

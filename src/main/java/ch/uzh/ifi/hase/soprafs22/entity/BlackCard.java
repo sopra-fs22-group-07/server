@@ -1,16 +1,16 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
-public class BlackCard extends Card{
-  public BlackCard(){
-    super();
-  }
-  public BlackCard(long id, String text) {
-    super(id, text);
-  }
-  public BlackCard(long id, String text, int nrOfBlanks) {
-    super(id,text);
-    this.nrOfBlanks = nrOfBlanks;
-  }
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.io.Serializable;
+
+
+@Entity
+@Table(name = "BLACKCARD")
+public class BlackCard extends Card implements Serializable {
+
+  @Column
   private int nrOfBlanks;
 
 }

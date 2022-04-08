@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +19,9 @@ import java.util.List;
  * - nullable = false -> this cannot be left empty
  * - unique = true -> this value must be unique across the database -> composes
  * the primary key
+ * - elementCollection: 1:n Relation
  */
+
 @Entity
 @Table(name = "USER")
 public class User implements Serializable {
@@ -51,9 +54,24 @@ public class User implements Serializable {
     @Column
     private Date birthday;
 
-
     @Column
     private Gender gender;
+
+    // to see how elementCollection works:
+
+    /*
+    @ElementCollection
+    @CollectionTable(name = "whiteCard", joinColumns = @JoinColumn(name = "id"))
+    @Column(name = "whiteCards")
+    private List<WhiteCard> whiteCards;
+     */
+
+    @OneToOne
+    private BlackCard blackCard;
+
+    @OneToMany
+    private ArrayList<WhiteCard> whiteCards;
+
 
     public Long getId() {
         return id;
@@ -103,7 +121,6 @@ public class User implements Serializable {
 
     public void setBirthday(Date birthday){this.birthday = birthday; }
 
-
     public String getPassword(){return this.password; }
 
     public void setPassword(String password){this.password = password; }
@@ -120,4 +137,9 @@ public class User implements Serializable {
     }
 
     public void setGender(Gender gender){this.gender = gender; }
+
+    public BlackCard getBlackCard(){return this.blackCard; }
+
+    public void setBlackCard(BlackCard blackCard){this.blackCard = blackCard; }
+
 }
