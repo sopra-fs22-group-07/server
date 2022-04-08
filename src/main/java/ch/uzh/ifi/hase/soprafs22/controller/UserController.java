@@ -121,12 +121,11 @@ public class UserController {
           @RequestHeader(value = "authorization", required = false) String token,
           @PathVariable(value = "id") long userId,
           @RequestBody UserPutDTO userPutDTO){
-
-    userService.checkSpecificAccess(token, userId);
+    userService.checkSpecificAccess(token, userId); //checks for 401
 
     User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
     // make sure user has right ID
     userInput.setId(userId);
-    userService.updateUser(userInput); // this throws all errors
+    userService.updateUser(userInput); // this throws errors 404 and 409
   }
 }
