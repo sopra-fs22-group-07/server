@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
@@ -79,11 +80,16 @@ class UserControllerTest {
     user.setName("Test User");
     user.setUsername("testUsername");
     user.setToken("1");
+    user.setGender(Gender.MALE);
+    user.setBirthday(new Date());
     user.setStatus(UserStatus.OFFLINE);
 
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setName("Test User");
     userPostDTO.setUsername("testUsername");
+    userPostDTO.setPassword("password");
+    userPostDTO.setGender("MALE");
+    userPostDTO.setBirthday(new Date());
 
     given(userService.createUser(Mockito.any())).willReturn(user);
 
@@ -109,12 +115,15 @@ class UserControllerTest {
       user.setName("Test User");
       user.setUsername("testUsername");
       user.setToken("1");
-      user.setPassword("1234");
+      user.setPassword("password");
       user.setStatus(UserStatus.ONLINE);
 
       UserPostDTO userPostDTO = new UserPostDTO();
       userPostDTO.setName("Test User");
-      userPostDTO.setPassword("1234");
+      userPostDTO.setUsername("testUsername");
+      userPostDTO.setPassword("password");
+      userPostDTO.setGender("MALE");
+      userPostDTO.setBirthday(new Date());
 
 
       given(userService.checkPasswordAndUsername(Mockito.any())).willReturn(user);
@@ -138,7 +147,10 @@ class UserControllerTest {
       // given
       UserPostDTO userPostDTO = new UserPostDTO();
       userPostDTO.setName("Test User");
-      userPostDTO.setPassword("1234");
+      userPostDTO.setUsername("testUsername");
+      userPostDTO.setPassword("password");
+      userPostDTO.setGender("MALE");
+      userPostDTO.setBirthday(new Date());
 
       given(userService.checkPasswordAndUsername(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -157,11 +169,14 @@ class UserControllerTest {
   void test_post_users_returns_409() throws Exception {
     User user = new User();
     user.setUsername("John7");
-    user.setPassword("hello");
+    user.setPassword("password");
 
     UserPostDTO userPostDTO = new UserPostDTO();
-    userPostDTO.setUsername(user.getUsername());
-    userPostDTO.setPassword("password");
+      userPostDTO.setName("Test User");
+      userPostDTO.setUsername("testUsername");
+      userPostDTO.setPassword("password");
+      userPostDTO.setGender("MALE");
+      userPostDTO.setBirthday(new Date());
 
     given(userService.createUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
@@ -357,10 +372,12 @@ class UserControllerTest {
     user.setPassword("password");
     user.setStatus(UserStatus.ONLINE);
     user.setBirthday(new Date(0));
+    user.setGender(Gender.OTHER);
 
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setUsername(user.getUsername());
     userPostDTO.setPassword(user.getPassword());
+    userPostDTO.setGender("OTHER");
 
     given(userService.checkPasswordAndUsername(Mockito.any())).willReturn(user);
 
@@ -372,7 +389,8 @@ class UserControllerTest {
             .andExpect(jsonPath("$.status", is(user.getStatus().toString())))
             .andExpect(jsonPath("$.id", is(user.getId().intValue())))
             .andExpect(jsonPath("$.creationDate", is(parseDate(user.getCreationDate()))))
-            .andExpect(jsonPath("$.birthday", is(parseDate(user.getBirthday()))));
+            .andExpect(jsonPath("$.birthday", is(parseDate(user.getBirthday()))))
+            .andExpect(jsonPath("$.gender", is(user.getGenderString())));
   }
 
 
@@ -386,9 +404,11 @@ class UserControllerTest {
     user.setStatus(UserStatus.ONLINE);
     user.setBirthday(new Date(0));
 
-    UserPostDTO userPostDTO = new UserPostDTO();
-    userPostDTO.setUsername(user.getUsername());
-    userPostDTO.setPassword(user.getPassword() + "make password wrong");
+    UserPostDTO userPostDTO = new UserPostDTO();userPostDTO.setName("Test User");
+      userPostDTO.setUsername("testUsername");
+      userPostDTO.setPassword("wrongPassword");
+      userPostDTO.setGender("MALE");
+      userPostDTO.setBirthday(new Date());
 
     given(userService.checkPasswordAndUsername(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -409,6 +429,7 @@ class UserControllerTest {
     user.setBirthday(new Date(0));
 
     UserPutDTO userPutDTO = new UserPutDTO();
+
 
     given(userService.logoutUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NO_CONTENT));
 
