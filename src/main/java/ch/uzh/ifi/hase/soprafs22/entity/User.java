@@ -39,7 +39,7 @@ public class User implements Serializable {
     @Column
     private Date creationDate = new Date();
 
-    @Column(nullable = false)
+    // @Column(nullable = false)
     private UserStatus status;
 
     @Column(nullable = false)
@@ -47,6 +47,7 @@ public class User implements Serializable {
 
     @Column
     private Date birthday;
+
 
     @Column
     private Gender gender;
@@ -99,11 +100,20 @@ public class User implements Serializable {
 
     public void setBirthday(Date birthday){this.birthday = birthday; }
 
-    public Gender getGender(){return this.gender; }
-
-    public void setGender(Gender gender){this.gender = gender; }
-
     public String getPassword(){return this.password; }
 
     public void setPassword(String password){this.password = password; }
+
+    public Gender getGender(){return this.gender; }
+
+    /**
+     * Method for Testing the gender of the user in JSON, as the gender should be
+     * as string and not ENUM there
+      * @return User.gender as string
+     */
+    public String getGenderString(){
+        return this.gender.toString();
+    }
+
+    public void setGender(Gender gender){this.gender = gender; }
 }
