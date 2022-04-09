@@ -21,11 +21,21 @@ public abstract class Card implements Serializable{
   private static final long serialVersionUID = 1L;
 
   @Id
+  // @GeneratedValue(strategy = GenerationType.IDENTITY)
   @GeneratedValue
   private Long id;
 
-  @Column
+  @Column(nullable = false, length = 255)
   private String text;
+
+  @Column(nullable = false)
+  private String packName;
+
+  @Column(nullable = false)
+  private int packID;
+
+  @Column(nullable = false)
+  private boolean officialTag;
 
   public Long getId() {
     return id;
@@ -41,5 +51,29 @@ public abstract class Card implements Serializable{
 
   public void setText(String text) {
     this.text = text;
+  }
+
+  public String getPackName() {
+    return packName;
+  }
+
+  public void setPackName(String packName) {
+    this.packName = packName;
+  }
+
+  public int getPackID() {
+    return packID;
+  }
+
+  public void setPackID(int packID) {
+    this.packID = packID;
+  }
+
+  public boolean isOfficialTag() {
+    return officialTag;
+  }
+
+  public void setOfficialTag(boolean officialTag) {
+    this.officialTag = officialTag;
   }
 }

@@ -20,7 +20,20 @@ import java.io.Serializable;
 @Table(name = "BLACKCARD")
 public class BlackCard extends Card implements Serializable {
 
-  @Column
+
+  // we need nullable=true for black cards
+  // otherwise it is impossible to add WHITE (!) cards to the repository.
+  // I have no idea where this is coming from, but it is not a problem for
+  // the black cards, as all have the nrOfBlanks set to some value.
+  @Column(nullable = true)
   private int nrOfBlanks;
+
+  public int getNrOfBlanks() {
+    return nrOfBlanks;
+  }
+
+  public void setNrOfBlanks(int nrOfBlanks) {
+    this.nrOfBlanks = nrOfBlanks;
+  }
 
 }
