@@ -5,7 +5,10 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Internal User Representation
@@ -16,7 +19,10 @@ import java.util.Date;
  * - nullable = false -> this cannot be left empty
  * - unique = true -> this value must be unique across the database -> composes
  * the primary key
+ * - OneToMany: 1:n Relation with other entities
+ * - OneToOne: 1:1 Relation with other entities
  */
+
 @Entity
 @Table(name = "USER")
 public class User implements Serializable {
@@ -26,6 +32,7 @@ public class User implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
+
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -39,7 +46,7 @@ public class User implements Serializable {
     @Column
     private Date creationDate = new Date();
 
-    @Column(nullable = false)
+    // @Column(nullable = false)
     private UserStatus status;
 
     @Column(nullable = false)
@@ -50,6 +57,21 @@ public class User implements Serializable {
 
     @Column
     private Gender gender;
+
+    // to see how elementCollection works:
+    /*
+    @ElementCollection
+    @CollectionTable(name = "whiteCard", joinColumns = @JoinColumn(name = "id"))
+    @Column(name = "whiteCards")
+    private List<WhiteCard> whiteCards;
+     */
+
+    @OneToOne
+    private BlackCard blackCard;
+
+    @OneToMany
+    private List<WhiteCard> whiteCards = new ArrayList<>();
+
 
     public Long getId() {
         return id;
@@ -99,11 +121,25 @@ public class User implements Serializable {
 
     public void setBirthday(Date birthday){this.birthday = birthday; }
 
-    public Gender getGender(){return this.gender; }
-
-    public void setGender(Gender gender){this.gender = gender; }
-
     public String getPassword(){return this.password; }
 
     public void setPassword(String password){this.password = password; }
+
+    public Gender getGender(){return this.gender; }
+
+    /**
+     * Method for Testing the gender of the user in JSON, as the gender should be
+     * as string and not ENUM there
+      * @return User.gender as string
+     */
+    public String getGenderString(){
+        return this.gender.toString();
+    }
+
+    public void setGender(Gender gender){this.gender = gender; }
+
+    public BlackCard getBlackCard(){return this.blackCard; }
+
+    public void setBlackCard(BlackCard blackCard){this.blackCard = blackCard; }
+
 }
