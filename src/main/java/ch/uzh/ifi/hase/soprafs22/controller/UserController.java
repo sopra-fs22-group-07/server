@@ -89,9 +89,7 @@ public class UserController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
   public void logoutUser(@RequestHeader(value = "authorization", required = false) String token,
-                         @PathVariable(value = "id") long userId
-                        ){
-
+                         @PathVariable(value = "id") long userId) {
     // check if caller is authorized
     userService.checkSpecificAccess(token, userId); // throws 401
 

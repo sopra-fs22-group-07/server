@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * User Service
@@ -150,4 +152,19 @@ public class UserService {
     userToBeUpdated.setBirthday(user.getBirthday());
     return userToBeUpdated;
   }
+
+  public BlackCard getBlackCardFromRandomUser(long id) {
+      long min = 1;
+      long max = userRepository.count(); // change to all user
+
+      // TODO: check if out of bound possible max+1? TEST!
+      long randomNum;
+      do {
+          randomNum = ThreadLocalRandom.current().nextLong(min, max + 1);
+      } while (randomNum == id);
+      User randomUser = getUserById(randomNum);
+
+      return randomUser.getBlackCard();
+
+    }
 }

@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Game Controller
@@ -59,5 +61,17 @@ public class GameController {
 
     return DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(userInputCard);
   }
+
+    @GetMapping("/games/{id}/blackCards")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public BlackCardGetDTO getBlackCardFromUser(@RequestHeader(value = "authorization", required = false) String token,
+                                      @PathVariable(value = "id") Long id) {
+
+        userService.checkSpecificAccess(token, id);
+        BlackCard bcRandomUser = userService.getBlackCardFromRandomUser(id);
+
+        return DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(bcRandomUser);
+    }
 
 }
