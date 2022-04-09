@@ -63,6 +63,7 @@ public class UserGetDTO {
     this.birthday = birthday;
   }
 
+
   public Gender getGender(){
       return this.gender;
   }
