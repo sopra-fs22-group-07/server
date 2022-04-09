@@ -29,22 +29,23 @@ public class GameController {
     this.userService = userService;
   }
 
-  @GetMapping("/games/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public List<BlackCardGetDTO> getBlackCard(@RequestHeader(value = "authorization", required = false) String token,
-                                      @PathVariable(value = "id") Long id) {
+  // TODO: uncomment
+  // @GetMapping("/games/{id}")
+  // @ResponseStatus(HttpStatus.OK)
+  // @ResponseBody
+  // public List<BlackCardGetDTO> getBlackCard(@RequestHeader(value = "authorization", required = false) String token,
+  //                                     @PathVariable(value = "id") Long id) {
 
-    // check if source of query has access token
-    userService.checkSpecificAccess(token, id);
-    List<BlackCard> cards = gameService.getCards();
-    List<BlackCardGetDTO> blackCardGetDTOS= new ArrayList<>();
-    for (BlackCard card : cards){
-      blackCardGetDTOS.add(DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(card));
-    }
+  //   // check if source of query has access token
+  //   userService.checkSpecificAccess(token, id);
+  //   List<BlackCard> cards = gameService.getCards();
+  //   List<BlackCardGetDTO> blackCardGetDTOS= new ArrayList<>();
+  //   for (BlackCard card : cards){
+  //     blackCardGetDTOS.add(DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(card));
+  //   }
 
-    return blackCardGetDTOS;
-  }
+  //   return blackCardGetDTOS;
+  // }
 
   @PostMapping("/games/{id}")
   @ResponseStatus(HttpStatus.CREATED)

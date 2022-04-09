@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import ch.uzh.ifi.hase.soprafs22.DataReader.DataReader;
+
 
 @RestController
 @SpringBootApplication
@@ -21,9 +21,8 @@ public class Application {
     System.out.println("Starting application...");
     SpringApplication.run(Application.class, args);
 
-    // TODO: import data when/before starting the app
+    // TODO: import data right after starting the app
     System.out.println("Importing data...");
-    DataReader.readCardData();
     
   }
 

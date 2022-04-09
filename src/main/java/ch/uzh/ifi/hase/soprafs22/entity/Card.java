@@ -20,18 +20,12 @@ public abstract class Card implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
-  public Card(String text, String packName, int packID, boolean officialTag) {
-    this.text = text;
-    this.packName = packName;
-    this.packID = packID;
-    this.officialTag = officialTag;
-  }
-
   @Id
+  // @GeneratedValue(strategy = GenerationType.IDENTITY)
   @GeneratedValue
   private Long id;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false, length = 255)
   private String text;
 
   @Column(nullable = false)

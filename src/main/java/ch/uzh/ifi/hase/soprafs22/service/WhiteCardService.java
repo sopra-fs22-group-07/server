@@ -28,11 +28,16 @@ public class WhiteCardService {
     @Autowired
     public WhiteCardService(@Qualifier("whiteCardRepository") WhiteCardRepository whiteCardRepository) {
         this.whiteCardRepository = whiteCardRepository;
+
+        // load the data
+        this.loadCardData();
     }
 
 
     // read the data from the data folder
     public void loadCardData() {
+
+        System.out.println("Loading white cards...");
 
         // parser to parse the file
         JSONParser parser = new JSONParser();
@@ -43,20 +48,20 @@ public class WhiteCardService {
 
             // cast the object to a JSONArray
             JSONArray jsonArray = (JSONArray) obj;
-            int nrSets = jsonArray.size();
+            int nrPacks = jsonArray.size();
 
-            // for each set in the array, extract set name, white cards, and official tag
-            for(int i = 0; i < nrSets; i++){
+            // for each pack in the array, extract pack name, white cards, and official tag
+            for(int i = 0; i < nrPacks; i++){
 
                 // get the set
-                JSONObject set = (JSONObject) jsonArray.get(i);
+                JSONObject pack = (JSONObject) jsonArray.get(i);
                 // get the set name
-                String setName = (String) set.get("name");
+                String packName = (String) pack.get("name");
                 // get the official tag
-                Boolean officialTag = (Boolean) set.get("official");
+                Boolean officialTag = (Boolean) pack.get("official");
 
                 // get the white cards
-                JSONArray whiteCards = (JSONArray) set.get("white");
+                JSONArray whiteCards = (JSONArray) pack.get("white");
                 int nrWhiteCards = whiteCards.size();
 
                 // for each white card, extract the text and add it to the database
@@ -69,15 +74,23 @@ public class WhiteCardService {
                     String text = (String) whiteCardJson.get("text");
 
                     // get the pack id
-                    int packID = (int) whiteCardJson.get("pack");
+                    Long packIdTemp = (Long) whiteCardJson.get("pack");
+                    int packID = packIdTemp.intValue();
 
                     // create card object
-                    WhiteCard whiteCard = new WhiteCard(text, setName, packID, officialTag);
+                    WhiteCard whiteCard = new WhiteCard();
+                    whiteCard.setText(text);
+                    whiteCard.setPackName(packName);
+                    whiteCard.setPackID(packID);
+                    whiteCard.setOfficialTag(officialTag);
 
                     // add the card to the database
                     this.whiteCardRepository.save(whiteCard);
+                    this.whiteCardRepository.flush();
                 }
             }
+
+        System.out.println("White cards loaded.");
 
         } catch (Exception e) {
             e.printStackTrace();
