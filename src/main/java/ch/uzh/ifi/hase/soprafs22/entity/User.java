@@ -142,4 +142,6 @@ public class User implements Serializable {
 
     public void setBlackCard(BlackCard blackCard){this.blackCard = blackCard; }
 
+    public List<WhiteCard> getWhiteCard(){return this.whiteCards; }
+
 }

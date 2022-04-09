@@ -1,6 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto;
 
-public class BlackCardPostDTO {
+public class CardPostDTO {
   private long id;
 
   public long getId() {
