@@ -21,7 +21,7 @@ import java.io.Serializable;
 public class BlackCard extends Card implements Serializable {
 
 
-  // FIXME, TODO: for some reason we need nullable=true for black cards
+  // we need nullable=true for black cards
   // otherwise it is impossible to add WHITE (!) cards to the repository.
   // I have no idea where this is coming from, but it is not a problem for
   // the black cards, as all have the nrOfBlanks set to some value.

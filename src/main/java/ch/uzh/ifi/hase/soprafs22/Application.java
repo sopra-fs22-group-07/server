@@ -16,14 +16,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class Application {
 
   public static void main(String[] args) {
-
     // boot the app
     System.out.println("Starting application...");
     SpringApplication.run(Application.class, args);
-
-    // TODO: import data right after starting the app
-    System.out.println("Importing data...");
-    
   }
 
   @GetMapping(value = "/", produces = MediaType.TEXT_PLAIN_VALUE)
