@@ -39,6 +39,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // dependency needed to read json files (for data import of the cards)
+    // https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
+    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+
+
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
