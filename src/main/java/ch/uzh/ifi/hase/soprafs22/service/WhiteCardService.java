@@ -93,7 +93,7 @@ public class WhiteCardService {
         System.out.println("White cards loaded.");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error: Could not load data.");
         }
     }
     
