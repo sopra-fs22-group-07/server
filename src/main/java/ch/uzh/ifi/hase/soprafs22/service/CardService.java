@@ -44,7 +44,8 @@ public class CardService {
 
         try{
 
-            Object obj = parser.parse(new FileReader("data/cah-cards-full.json"));
+            String path = "src/main/resources/cah-cards-full.json";
+            Object obj = parser.parse(new FileReader(path));
 
             // cast the object to a JSONArray
             JSONArray jsonArray = (JSONArray) obj;
