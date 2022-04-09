@@ -108,7 +108,7 @@ public class UserController {
   @ResponseBody
   public UserGetDTO getUser(@RequestHeader(value = "authorization", required = false) String token,
                             @PathVariable(value = "id") int userId) {
-
+    System.out.println("TOKEN HERE IS : " + token);
     userService.checkGeneralAccess(token);
     User user = userService.getUserById(userId);
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);

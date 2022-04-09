@@ -118,6 +118,7 @@ public class UserService {
 
   public void checkGeneralAccess(String token) {
     User user = userRepository.findByToken(token);
+    System.out.println("THE TOKEN IS: "+token);
     if(user == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Log in or Register to access data! ");
     }
