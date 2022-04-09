@@ -31,7 +31,7 @@ public class Game {
   private BlackCard blackCard;
 
   @OneToMany
-  private ArrayList<WhiteCard> whiteCards;
+  private List<WhiteCard> whiteCards = new ArrayList<>();
 
   public void enqueueWhiteCard(Play play){
     whiteCards.add(play.getCard());

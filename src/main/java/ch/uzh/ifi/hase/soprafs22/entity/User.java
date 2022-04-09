@@ -70,7 +70,7 @@ public class User implements Serializable {
     private BlackCard blackCard;
 
     @OneToMany
-    private ArrayList<WhiteCard> whiteCards;
+    private List<WhiteCard> whiteCards = new ArrayList<>();
 
 
     public Long getId() {
