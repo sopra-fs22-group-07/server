@@ -19,4 +19,8 @@ import java.io.Serializable;
 @Table(name = "WHITECARD")
 public class WhiteCard extends Card implements Serializable {
 
+    public WhiteCard(String text, String packName, int packID, boolean officialTag) {
+        super(text, packName, packID, officialTag);
+    }
+
 }
