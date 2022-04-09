@@ -1,12 +1,10 @@
 [
   {
     "_class": "ch.uzh.ifi.hase.soprafs22.entity.WhiteCard",
-    "text": "Penis",
-    "id": 1
+    "text": "Penis"
   },
   {
     "_class": "ch.uzh.ifi.hase.soprafs22.entity.WhiteCard",
-    "text": "Vagina",
-    "id": 2
+    "text": "Vagina"
   }
 ]

@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * User Controller
+ * Game Controller
  * This class is responsible for handling all REST request that are related to
- * the user.
+ * the game.
  * The controller will receive the request and delegate the execution to the
- * UserService and finally return the result.
+ * GameService and finally return the result.
  */
 @RestController
 public class GameController {
@@ -40,7 +40,7 @@ public class GameController {
     List<BlackCard> cards = gameService.getCards();
     List<BlackCardGetDTO> blackCardGetDTOS= new ArrayList<>();
     for (BlackCard card : cards){
-      blackCardGetDTOS.add(DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO((BlackCard) card));
+      blackCardGetDTOS.add(DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(card));
     }
 
     return blackCardGetDTOS;
@@ -54,7 +54,7 @@ public class GameController {
                                     @RequestBody BlackCardPostDTO blackCardPostDTO) {
     System.out.println(blackCardPostDTO);
     userService.checkSpecificAccess(token, id);
-    // TODO: 08.04.2022 Properly safe Card
+
     BlackCard userInputCard = DTOMapper.INSTANCE.convertGamePostDTOToEntity(blackCardPostDTO);
 
     return DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(userInputCard);

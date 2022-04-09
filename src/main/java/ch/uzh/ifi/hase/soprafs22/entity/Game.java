@@ -14,6 +14,7 @@ import java.util.List;
  * - nullable = false -> this cannot be left empty
  * - unique = true -> this value must be unique across the database -> composes
  * the primary key
+ * - OneToMany: 1:n Relation with other entities
  */
 
 @Entity

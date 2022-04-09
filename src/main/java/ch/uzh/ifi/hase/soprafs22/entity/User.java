@@ -19,7 +19,8 @@ import java.util.List;
  * - nullable = false -> this cannot be left empty
  * - unique = true -> this value must be unique across the database -> composes
  * the primary key
- * - elementCollection: 1:n Relation
+ * - OneToMany: 1:n Relation with other entities
+ * - OneToOne: 1:1 Relation with other entities
  */
 
 @Entity
@@ -58,7 +59,6 @@ public class User implements Serializable {
     private Gender gender;
 
     // to see how elementCollection works:
-
     /*
     @ElementCollection
     @CollectionTable(name = "whiteCard", joinColumns = @JoinColumn(name = "id"))

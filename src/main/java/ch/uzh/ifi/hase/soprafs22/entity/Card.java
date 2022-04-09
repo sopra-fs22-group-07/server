@@ -20,11 +20,6 @@ public abstract class Card implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
-  // public Card(long id, String text) {
-  //   this.id = id;
-  //   this.text = text;
-  // }
-
   @Id
   @GeneratedValue
   private Long id;
