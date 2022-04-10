@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.Play;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,4 +39,11 @@ public class GameService {
     cards.add(bc3);
     return cards;
   }
+
+    public Play getRandomPlay(Long gameId) {
+
+      //TODO
+
+      return play;
+    }
 }

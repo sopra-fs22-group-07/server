@@ -6,14 +6,19 @@ package ch.uzh.ifi.hase.soprafs22.entity;
 
 public class Play {
 
+  private Long id;
   private WhiteCard whiteCard;
   private User user;
 
   public WhiteCard getCard(){
-    return  whiteCard;
+    return  this.whiteCard;
   }
 
   public long getUserId(){
     return user.getId();
   }
+
+  public long getPlayId(){
+        return this.id;
+    }
 }

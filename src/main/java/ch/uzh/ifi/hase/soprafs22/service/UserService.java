@@ -136,7 +136,7 @@ public class UserService {
 
   public void checkSpecificAccess(String token, long userId) {
     User userByToken = userRepository.findByToken(token);
-    User userById = userRepository.findById(userId);
+    User userById = getUserById(userId);
     if(userByToken == null || userByToken != userById) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to update this user! ");
     }
