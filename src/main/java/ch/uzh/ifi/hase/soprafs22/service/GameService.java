@@ -43,7 +43,7 @@ public class GameService {
     public Play getRandomPlay(Long gameId) {
 
       //TODO
-
+        Play play = new Play();
       return play;
     }
 }
