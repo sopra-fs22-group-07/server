@@ -139,19 +139,21 @@ public class UserService {
     User userByToken = userRepository.findByToken(token);
     User userById = getUserById(userId);
     if(userByToken == null || userByToken != userById) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to update this user! ");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to Access this user! ");
     }
   }
 
   public User updateUser(User user) {
-
     // user has right id since we set it in the user-controller
     User userToBeUpdated = getUserById(user.getId()); // 404
     checkIfUserExistsForNewUsername(user); // 409
 
     // finally, update User in repository
-    userToBeUpdated.setUsername(user.getUsername());
-    userToBeUpdated.setBirthday(user.getBirthday());
+    //check if the username is not just spaces
+    if(!user.getUsername().equals("")){
+        userToBeUpdated.setUsername(user.getUsername());
+    }
+    userToBeUpdated.setGender(user.getGender());
     return userToBeUpdated;
   }
 

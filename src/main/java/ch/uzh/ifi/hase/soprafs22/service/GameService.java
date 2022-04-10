@@ -1,9 +1,9 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.entity.*;
-import ch.uzh.ifi.hase.soprafs22.repository.CardRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.PlayRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.WhiteCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -28,16 +28,17 @@ public class GameService {
 
     private final PlayRepository playRepository;
 
-    private final CardRepository cardRepository;
+    private final WhiteCardRepository whiteCardRepository;
+
     private Random rand = new Random();
 
     @Autowired
     public GameService(@Qualifier("gameRepository") GameRepository gameRepository,
                        @Qualifier("playRepository") PlayRepository playRepository,
-                       @Qualifier("cardRepository") CardRepository cardRepository) {
+                       @Qualifier("WhiteCardRepository") WhiteCardRepository whiteCardRepository) {
         this.gameRepository = gameRepository;
         this.playRepository = playRepository;
-        this.cardRepository = cardRepository;
+        this.whiteCardRepository = whiteCardRepository;
     }
 
   public List<BlackCard> getCards() {
@@ -114,7 +115,7 @@ public class GameService {
         Game game = gameRepository.findById(gameId);
         // instance of new play
         Play play = new Play();
-        WhiteCard card = (WhiteCard) cardRepository.findById(cardId);
+        WhiteCard card = whiteCardRepository.findById(cardId);
         // set card and id
         play.setCard(card);
         play.setUserId(userId);

@@ -67,31 +67,33 @@ public class UserController {
     return new ResponseEntity<>(userGetDTO, headers, HttpStatus.CREATED);
   }
 
-  @PostMapping("/users/login")
-  @ResponseBody
-  public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
-      // convert API user to internal representation convertUserPostDTOtoEntity
-      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+    @PostMapping("/users/login")
+    @ResponseBody
+    public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
+        // convert API user to internal representation convertUserPostDTOtoEntity
+        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
-      // check username and password, throws UNAUTHORIZED if false
-      User returnUser = userService.checkPasswordAndUsername(userInput);
+        // check username and password, throws UNAUTHORIZED if false
+        User returnUser = userService.checkPasswordAndUsername(userInput);
 
-      MultiValueMap<String, String> httpHeaders = new HttpHeaders();
-      httpHeaders.set("token", returnUser.getToken());
+        MultiValueMap<String, String> httpHeaders = new HttpHeaders();
+        httpHeaders.set("token", returnUser.getToken());
 
-      UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
+        UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
 
-      // convert internal representation of user back to API
-      return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
+        // convert internal representation of user back to API
+        return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
     }
 
   @PutMapping("/users/logout/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
   public void logoutUser(@RequestHeader(value = "authorization", required = false) String token,
-                         @PathVariable(value = "id") long userId) {
+                         @PathVariable(value = "id") long userId
+                        ){
+
     // check if caller is authorized
-    userService.checkSpecificAccess(token, userId); // throws 401, 404
+    userService.checkSpecificAccess(token, userId); // throws 401
 
     User userInput = new User();
     // make sure user has right ID
@@ -106,7 +108,6 @@ public class UserController {
   @ResponseBody
   public UserGetDTO getUser(@RequestHeader(value = "authorization", required = false) String token,
                             @PathVariable(value = "id") int userId) {
-
     userService.checkGeneralAccess(token);
     User user = userService.getUserById(userId);
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
@@ -119,12 +120,11 @@ public class UserController {
           @RequestHeader(value = "authorization", required = false) String token,
           @PathVariable(value = "id") long userId,
           @RequestBody UserPutDTO userPutDTO){
-
-    userService.checkSpecificAccess(token, userId); // throws 401, 404
+    userService.checkSpecificAccess(token, userId); //checks for 401
 
     User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
     // make sure user has right ID
     userInput.setId(userId);
-    userService.updateUser(userInput); // this throws all errors
+    userService.updateUser(userInput); // this throws errors 404 and 409
   }
 }

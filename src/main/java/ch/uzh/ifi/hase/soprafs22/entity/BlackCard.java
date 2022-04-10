@@ -25,15 +25,15 @@ public class BlackCard extends Card implements Serializable {
   // otherwise it is impossible to add WHITE (!) cards to the repository.
   // I have no idea where this is coming from, but it is not a problem for
   // the black cards, as all have the nrOfBlanks set to some value.
-  @Column(nullable = true)
-  private int nrOfBlanks;
+  // @Column(nullable = true)
+  // private int nrOfBlanks;
 
-  public int getNrOfBlanks() {
-    return nrOfBlanks;
-  }
+  // public int getNrOfBlanks() {
+  //   return nrOfBlanks;
+  // }
 
-  public void setNrOfBlanks(int nrOfBlanks) {
-    this.nrOfBlanks = nrOfBlanks;
-  }
+  // public void setNrOfBlanks(int nrOfBlanks) {
+  //   this.nrOfBlanks = nrOfBlanks;
+  // }
 
 }
