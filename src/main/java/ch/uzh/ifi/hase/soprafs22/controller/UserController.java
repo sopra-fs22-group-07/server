@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UsernameGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpHeaders;
@@ -128,5 +129,23 @@ public class UserController {
     // make sure user has right ID
     userInput.setId(userId);
     userService.updateUser(userInput); // this throws all errors
+  }
+
+  @PostMapping("/users/usernames")
+  @ResponseBody
+  public ResponseEntity<UsernameGetDTO> checkUserNameAvailability(
+          // @RequestHeader(value = "authorization", required = false) String token,
+          @RequestBody UserPostDTO userPostDTO){
+
+    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+
+    // get the availability of the username
+    boolean isAvailable = userService.isAvailable(userInput);
+
+    // create and return ResponseEntity
+    UsernameGetDTO responseBody = new UsernameGetDTO();
+    responseBody.setAvailable(isAvailable);
+    responseBody.setUsername(userInput.getUsername());
+    return new ResponseEntity<>(responseBody, null, HttpStatus.OK);
   }
 }

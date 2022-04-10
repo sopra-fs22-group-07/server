@@ -150,4 +150,9 @@ public class UserService {
     userToBeUpdated.setBirthday(user.getBirthday());
     return userToBeUpdated;
   }
+
+  public boolean isAvailable(User userInput) {
+    User user = userRepository.findByUsername(userInput.getUsername());
+    return user == null;
+  }
 }
