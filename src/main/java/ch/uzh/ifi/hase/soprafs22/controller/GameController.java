@@ -112,6 +112,9 @@ public class GameController {
         return gameService.getRandomPlay(gameId);
     }
 
+    /**
+     * set Like to WhiteCard
+     */
     @PutMapping("/users/{userID}/games/{gameId}/vote")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
@@ -128,6 +131,9 @@ public class GameController {
 
     }
 
+    /**
+     * create Play of a player
+     */
     @PostMapping("/users/{userID}/games/{gameId}/cards/{cardId}")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody

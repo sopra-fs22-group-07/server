@@ -27,7 +27,7 @@ public class CardService {
     private final CardRepository CardRepository;
 
     @Autowired
-    public CardService(@Qualifier("CardRepository") CardRepository CardRepository) {
+    public CardService(@Qualifier("cardRepository") CardRepository CardRepository) {
         this.CardRepository = CardRepository;
 
         // load the data

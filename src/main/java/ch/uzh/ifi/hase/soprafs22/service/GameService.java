@@ -64,6 +64,11 @@ public class GameService {
     return cards;
   }
 
+    /**
+     *  Get a random Play (white card and user) from a game
+     * @param gameId id of game to search
+     * @return a random play
+     */
     public Play getRandomPlay(Long gameId) {
         Game game = getGameById(gameId);
 
@@ -78,14 +83,20 @@ public class GameService {
         return randomPlay;
     }
 
-    private Game getGameById(Long gameId) {
-        Game game = gameRepository.findId(gameId);
+    private Game getGameById(long gameId) {
+        Game game = gameRepository.findById(gameId);
         if(game == null){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user does not exit");
         }
         return game;
     }
 
+    /**
+     * Create a Game
+     * @param userInputCard Black card of the Game
+     * @param userId user, which creates the game
+     * @return the created game
+     */
     public Game createGame(BlackCard userInputCard, long userId) {
       // create new game with certain blackCArd
       Game game = new Game();
@@ -95,8 +106,14 @@ public class GameService {
       return game;
     }
 
+    /**
+     * Create a Play (whiteCard and the userId from the played)
+     * @param userId id of user, which creates play
+     * @param gameId id of game, for which play gets created
+     * @param cardId id of card, ehich gets added to the play
+     */
     public void createPlay(long userId,long gameId, long cardId){
-        Game game = gameRepository.findId(gameId);
+        Game game = gameRepository.findById(gameId);
         // instance of new play
         Play play = new Play();
         WhiteCard card = (WhiteCard) cardRepository.findById(cardId);

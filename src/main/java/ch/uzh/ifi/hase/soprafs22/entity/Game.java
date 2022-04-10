@@ -23,8 +23,8 @@ import java.util.List;
 public class Game implements Serializable {
 
   public Game() {
-      this.time = LocalDate.now();
-  }
+        time = LocalDate.now();
+    }
 
   @Id
   @GeneratedValue
@@ -41,6 +41,10 @@ public class Game implements Serializable {
 
   @OneToMany
   private List<Play> plays = new ArrayList<>();
+
+  public void setId(long id){this.id=id;}
+
+  public Long getId(){return this.id;}
 
   public void setUserId(long userId){
       this.userId=userId;
