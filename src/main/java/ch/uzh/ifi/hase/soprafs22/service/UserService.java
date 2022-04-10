@@ -18,10 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.LongStream;
+
 
 /**
  * User Service
@@ -168,7 +166,11 @@ public class UserService {
       long randomNum;
       BlackCard card;
       do {
-          randomNum = ThreadLocalRandom.current().nextLong(min, max + 1);
+          randomNum = new SecureRandom()
+                          .longs(min, max + 1)
+                          .findFirst()
+                          .getAsLong();
+          // randomNum = ThreadLocalRandom.current().nextLong(min, max + 1);
           User randomUser = getUserById(randomNum);
           card = randomUser.getBlackCard();
       } while (randomNum == id || card == null);
