@@ -14,7 +14,8 @@ import org.json.simple.parser.JSONParser;
 
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
-import ch.uzh.ifi.hase.soprafs22.repository.CardRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.WhiteCardRepository;
 
 
 @Service
@@ -24,11 +25,13 @@ public class CardService {
 
     private final Logger log = LoggerFactory.getLogger(CardService.class);
 
-    private final CardRepository CardRepository;
+    private final BlackCardRepository blackCardRepository;
+    private final WhiteCardRepository whiteCardRepository;
 
     @Autowired
-    public CardService(@Qualifier("CardRepository") CardRepository CardRepository) {
-        this.CardRepository = CardRepository;
+    public CardService(@Qualifier("BlackCardRepository") BlackCardRepository BlackCardRepository, @Qualifier("WhiteCardRepository") WhiteCardRepository WhiteCardRepository) {
+        this.blackCardRepository = BlackCardRepository;
+        this.whiteCardRepository = WhiteCardRepository;
 
         // load the data
         this.loadCardData();
@@ -87,7 +90,7 @@ public class CardService {
 
                     // some cards have very long texts, so we only allow a maximum of 256 characters
                     // otherwise the database will throw an error
-                    if (text.length() <= 255) {
+                    if ( (text.length() <= 255) && (nrOfBlanks == 1) ) {
 
                         // create card object
                         BlackCard blackCard = new BlackCard();
@@ -95,11 +98,10 @@ public class CardService {
                         blackCard.setPackName(packName);
                         blackCard.setPackID(packID);
                         blackCard.setOfficialTag(officialTag);
-                        blackCard.setNrOfBlanks(nrOfBlanks);
 
                         // add the card to the database
-                        this.CardRepository.save(blackCard);
-                        this.CardRepository.flush();
+                        this.blackCardRepository.save(blackCard);
+                        this.blackCardRepository.flush();
                     } 
                 }
 
@@ -132,8 +134,8 @@ public class CardService {
                     whiteCard.setOfficialTag(officialTag);
 
                     // add the card to the database
-                    this.CardRepository.save(whiteCard);
-                    this.CardRepository.flush();
+                    this.whiteCardRepository.save(whiteCard);
+                    this.whiteCardRepository.flush();
                 }
 
             }
