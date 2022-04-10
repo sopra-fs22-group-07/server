@@ -118,7 +118,6 @@ public class UserService {
 
   public void checkGeneralAccess(String token) {
     User user = userRepository.findByToken(token);
-    System.out.println("THE TOKEN IS: "+token);
     if(user == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Log in or Register to access data! ");
     }
@@ -146,7 +145,10 @@ public class UserService {
     checkIfUserExistsForNewUsername(user); // 409
 
     // finally, update User in repository
-    userToBeUpdated.setUsername(user.getUsername());
+    //check if the username is not just spaces
+    if(!user.getUsername().equals("")){
+        userToBeUpdated.setUsername(user.getUsername());
+    }
     userToBeUpdated.setGender(user.getGender());
     return userToBeUpdated;
   }
