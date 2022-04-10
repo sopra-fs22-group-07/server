@@ -1,11 +1,19 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
-import ch.uzh.ifi.hase.soprafs22.entity.Play;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.CardRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.PlayRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Game Service
@@ -17,6 +25,22 @@ import java.util.*;
 @Service
 @Transactional
 public class GameService {
+
+    private final GameRepository gameRepository;
+
+    private final PlayRepository playRepository;
+
+    private final CardRepository cardRepository;
+    private Random rand = new Random();
+
+    @Autowired
+    public GameService(@Qualifier("gameRepository") GameRepository gameRepository,
+                       @Qualifier("playRepository") PlayRepository playRepository,
+                       @Qualifier("cardRepository") CardRepository cardRepository) {
+        this.gameRepository = gameRepository;
+        this.playRepository = playRepository;
+        this.cardRepository = cardRepository;
+    }
 
   public List<BlackCard> getCards() {
     /*
@@ -41,9 +65,52 @@ public class GameService {
   }
 
     public Play getRandomPlay(Long gameId) {
+        Game game = getGameById(gameId);
 
-      //TODO
+        List<Play> plays = game.getPlays();
+
+        Play randomPlay = plays.get(rand.nextInt(plays.size()));
+
+        if (randomPlay==null){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "there are no cards left to be voted on");
+
+        }
+        return randomPlay;
+    }
+
+    private Game getGameById(Long gameId) {
+        Game game = gameRepository.findId(gameId);
+        if(game == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user does not exit");
+        }
+        return game;
+    }
+
+    public Game createGame(BlackCard userInputCard, long userId) {
+      // create new game with certain blackCArd
+      Game game = new Game();
+      game.setBlackCard(userInputCard);
+      game.setUserId(userId);
+      gameRepository.saveAndFlush(game);
+      return game;
+    }
+
+    public void createPlay(long userId,long gameId, long cardId){
+        Game game = gameRepository.findId(gameId);
+        // instance of new play
         Play play = new Play();
-      return play;
+        WhiteCard card = (WhiteCard) cardRepository.findById(cardId);
+        // set card and id
+        play.setCard(card);
+        play.setUserId(userId);
+        game.enqueuePlay(play);
+        // save and flush
+        gameRepository.saveAndFlush(game);
+        playRepository.saveAndFlush(play);
+    }
+
+    public void setPlayLike(Long gameId) {
+        //TODO
+
     }
 }

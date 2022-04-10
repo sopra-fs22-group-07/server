@@ -1,9 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
-import ch.uzh.ifi.hase.soprafs22.entity.Play;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
@@ -33,11 +30,11 @@ public class GameController {
     this.userService = userService;
   }
 
-  @GetMapping("/games/{id}")
+  @GetMapping("users/{userId}/games")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<CardGetDTO> getBlackCard(@RequestHeader(value = "authorization", required = false) String token,
-                                      @PathVariable(value = "id") Long id) {
+                                      @PathVariable(value = "userId") Long id) {
 
     // check if source of query has access token
     userService.checkSpecificAccess(token, id); // throws 401, 404
@@ -50,27 +47,30 @@ public class GameController {
     return blackCardGetDTOS;
   }
 
-  @PostMapping("/games/{id}")
+  @PostMapping("users/{userId}/games")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public CardGetDTO createGame(@RequestHeader(value = "authorization", required = false) String token,
-                                    @PathVariable(value = "id") Long id,
+  public void createGame(@RequestHeader(value = "authorization", required = false) String token,
+                                    @PathVariable(value = "userId") Long id,
                                     @RequestBody CardPostDTO blackCardPostDTO) {
-    System.out.println(blackCardPostDTO);
+
     userService.checkSpecificAccess(token, id); // throws 401, 404
 
     BlackCard userInputCard = DTOMapper.INSTANCE.convertGamePostDTOToEntity(blackCardPostDTO);
 
     //TODO: check if time is up
 
-    return DTOMapper.INSTANCE.convertEntityToCardGetDTO(userInputCard);
+    // if time is up, create game with game service
+    Game game = gameService.createGame(userInputCard, id);
+    // ad game to user
+    userService.addGame(id, game);
   }
 
-    @GetMapping("/games/{id}/blackCards")
+    @GetMapping("users/{userId}/games/blackCards")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public CardGetDTO getBlackCardFromUser(@RequestHeader(value = "authorization", required = false) String token,
-                                      @PathVariable(value = "id") Long id) {
+                                      @PathVariable(value = "userId") Long id) {
 
         userService.checkSpecificAccess(token, id);
         BlackCard bcRandomUser = userService.getBlackCardFromRandomUser(id);
@@ -78,11 +78,11 @@ public class GameController {
         return DTOMapper.INSTANCE.convertEntityToCardGetDTO(bcRandomUser);
     }
 
-    @GetMapping("/games/{id}/cards")
+    @GetMapping("users/{userId}/games/{gameId}/cards")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public List<CardGetDTO> getCards(@RequestHeader(value = "authorization", required = false) String token,
-                                                @PathVariable(value = "id") Long id) {
+                                                @PathVariable(value = "userId") Long id) {
       // check token
       userService.checkSpecificAccess(token, id); // throws 401, 404
       List <WhiteCard> cards = userService.getWhiteCards(id);
@@ -97,10 +97,10 @@ public class GameController {
     }
 
     /**
-     * get own black card (possibly from other days), a white card to vote on
+     * get a Play with a white card to vote on
      * and the userId from the user that played that white card
      */
-    @GetMapping("/games/{userID}/{gameId}/vote")
+    @GetMapping("/users/{userID}/games/{gameId}/vote")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public Play getPlay(@RequestHeader(value = "authorization", required = false) String token,
@@ -108,9 +108,37 @@ public class GameController {
 
         userService.checkSpecificAccess(token, id); // throws 401, 404
 
-        // search for Play with this playId
-        Play play = gameService.getRandomPlay(gameId);
+        // search for random Play with this gameId
+        return gameService.getRandomPlay(gameId);
+    }
 
-        return play;
+    @PutMapping("/users/{userID}/games/{gameId}/vote")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public void voteCard(@RequestHeader(value = "authorization", required = false) String token,
+                        @PathVariable(value = "gameId") Long gameId, @PathVariable(value = "userId") Long id
+                        ) {
+
+        userService.checkSpecificAccess(token, id); // throws 401, 404
+
+        // mark card as liked
+        //TODO
+        gameService.setPlayLike(gameId);
+
+
+    }
+
+    @PostMapping("/users/{userID}/games/{gameId}/cards/{cardId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public void createPlay(@RequestHeader(value = "authorization", required = false) String token,
+                         @PathVariable(value = "gameId") Long gameId,
+                         @PathVariable(value = "userId") Long id, @PathVariable(value = "cardId") Long cardId){
+
+        userService.checkSpecificAccess(token, id); // throws 401, 404
+
+        gameService.createPlay(id, gameId, cardId);
+
+
     }
 }

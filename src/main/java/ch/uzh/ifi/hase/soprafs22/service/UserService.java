@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -160,16 +161,27 @@ public class UserService {
 
       // TODO: check if out of bound possible max+1? TEST!
       long randomNum;
+      BlackCard card;
       do {
           randomNum = ThreadLocalRandom.current().nextLong(min, max + 1);
-      } while (randomNum == id);
-      User randomUser = getUserById(randomNum);
+          User randomUser = getUserById(randomNum);
+          card = randomUser.getBlackCard();
+      } while (randomNum == id || card == null);
 
-      return randomUser.getBlackCard();
+      return card;
 
     }
 
     public List<WhiteCard> getWhiteCards(Long id) {
-        return getUserById(id).getWhiteCard();
+        return getUserById(id).getWhiteCards();
+    }
+
+    public void addGame(Long userId, Game game) {
+        // get user
+        User user = getUserById(userId);
+        user.addGame(game);
+        // saves the given entity but data is only persisted in the database once
+        // flush() is called
+        userRepository.saveAndFlush(user);
     }
 }
