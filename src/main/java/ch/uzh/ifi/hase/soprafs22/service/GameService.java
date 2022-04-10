@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -30,7 +31,7 @@ public class GameService {
 
     private final WhiteCardRepository whiteCardRepository;
 
-    private Random rand = new Random();
+    private SecureRandom rand = new SecureRandom();
 
     @Autowired
     public GameService(@Qualifier("gameRepository") GameRepository gameRepository,

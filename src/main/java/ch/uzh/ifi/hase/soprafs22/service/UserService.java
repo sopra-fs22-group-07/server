@@ -15,10 +15,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.LongStream;
 
 /**
  * User Service
@@ -172,7 +175,7 @@ public class UserService {
 
       return card;
 
-    }
+  }
 
     public List<WhiteCard> getWhiteCards(Long id) {
         return getUserById(id).getWhiteCards();
