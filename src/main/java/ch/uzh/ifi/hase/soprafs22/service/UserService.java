@@ -152,4 +152,9 @@ public class UserService {
     userToBeUpdated.setGender(user.getGender());
     return userToBeUpdated;
   }
+
+  public boolean isAvailable(User userInput) {
+    User user = userRepository.findByUsername(userInput.getUsername());
+    return user == null;
+  }
 }
