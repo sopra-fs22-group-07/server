@@ -158,6 +158,11 @@ public class UserService {
     return userToBeUpdated;
   }
 
+  public boolean isAvailable(User userInput) {
+    User user = userRepository.findByUsername(userInput.getUsername());
+    return user == null;
+  }
+
   public BlackCard getBlackCardFromRandomUser(long id) {
       long min = 1;
       long max = userRepository.count(); // change to all user
