@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,18 @@ import java.util.List;
 
 @Entity
 @Table(name = "GAME")
-public class Game {
+public class Game implements Serializable {
+
+  public Game() {
+        time = LocalDate.now();
+    }
 
   @Id
   @GeneratedValue
   private Long id;
+
+  @Column
+  private Long userId;
 
   @Column
   private LocalDate time;
@@ -32,13 +40,33 @@ public class Game {
   private BlackCard blackCard;
 
   @OneToMany
-  private List<WhiteCard> whiteCards = new ArrayList<>();
+  private List<Play> plays = new ArrayList<>();
 
-  public void enqueueWhiteCard(Play play){
-    whiteCards.add(play.getCard());
+  public void setId(long id){this.id=id;}
+
+  public Long getId(){return this.id;}
+
+  public void setUserId(long userId){
+      this.userId=userId;
+  }
+
+  public Long getUserId(){
+      return this.userId;
+  }
+
+  public void setBlackCard(BlackCard card){
+        this.blackCard=card;
   }
 
   public BlackCard getBlackCard(){
-    return this.blackCard;
+        return this.blackCard;
   }
+
+  public void enqueuePlay(Play play){
+    plays.add(play);
+  }
+
+    public List<Play> getPlays() {
+      return this.plays;
+    }
 }

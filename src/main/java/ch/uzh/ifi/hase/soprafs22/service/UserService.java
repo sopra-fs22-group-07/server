@@ -1,7 +1,10 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
 
 /**
  * User Service
@@ -133,21 +138,57 @@ public class UserService {
 
   public void checkSpecificAccess(String token, long userId) {
     User userByToken = userRepository.findByToken(token);
-    User userById = userRepository.findById(userId);
+    User userById = getUserById(userId);
     if(userByToken == null || userByToken != userById) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to update this user! ");
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to Access this user! ");
     }
   }
 
   public User updateUser(User user) {
-
     // user has right id since we set it in the user-controller
     User userToBeUpdated = getUserById(user.getId()); // 404
     checkIfUserExistsForNewUsername(user); // 409
 
     // finally, update User in repository
-    userToBeUpdated.setUsername(user.getUsername());
-    userToBeUpdated.setBirthday(user.getBirthday());
+    //check if the username is not just spaces
+    if(!user.getUsername().equals("")){
+        userToBeUpdated.setUsername(user.getUsername());
+    }
+    userToBeUpdated.setGender(user.getGender());
     return userToBeUpdated;
   }
+
+  public BlackCard getBlackCardFromRandomUser(long id) {
+      long min = 1;
+      long max = userRepository.count(); // change to all user
+
+      // TODO: check if out of bound possible max+1? TEST!
+      long randomNum;
+      BlackCard card;
+      do {
+          randomNum = new SecureRandom()
+                          .longs(min, max + 1)
+                          .findFirst()
+                          .getAsLong();
+          // randomNum = ThreadLocalRandom.current().nextLong(min, max + 1);
+          User randomUser = getUserById(randomNum);
+          card = randomUser.getBlackCard();
+      } while (randomNum == id || card == null);
+
+      return card;
+
+  }
+
+    public List<WhiteCard> getWhiteCards(Long id) {
+        return getUserById(id).getWhiteCards();
+    }
+
+    public void addGame(Long userId, Game game) {
+        // get user
+        User user = getUserById(userId);
+        user.addGame(game);
+        // saves the given entity but data is only persisted in the database once
+        // flush() is called
+        userRepository.saveAndFlush(user);
+    }
 }

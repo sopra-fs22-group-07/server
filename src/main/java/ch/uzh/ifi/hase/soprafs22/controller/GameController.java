@@ -1,6 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.GameService;
@@ -29,35 +29,123 @@ public class GameController {
     this.userService = userService;
   }
 
-  @GetMapping("/games/{id}")
+  @GetMapping("users/{userId}/games")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<BlackCardGetDTO> getBlackCard(@RequestHeader(value = "authorization", required = false) String token,
-                                      @PathVariable(value = "id") Long id) {
+  public List<CardGetDTO> getBlackCard(@RequestHeader(value = "authorization", required = false) String token,
+                                      @PathVariable(value = "userId") Long id) {
 
     // check if source of query has access token
-    userService.checkSpecificAccess(token, id);
+    userService.checkSpecificAccess(token, id); // throws 401, 404
     List<BlackCard> cards = gameService.getCards();
-    List<BlackCardGetDTO> blackCardGetDTOS= new ArrayList<>();
+    List<CardGetDTO> blackCardGetDTOS= new ArrayList<>();
     for (BlackCard card : cards){
-      blackCardGetDTOS.add(DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(card));
+      blackCardGetDTOS.add(DTOMapper.INSTANCE.convertEntityToCardGetDTO(card));
     }
 
     return blackCardGetDTOS;
   }
 
-  @PostMapping("/games/{id}")
+  @PostMapping("users/{userId}/games")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public BlackCardGetDTO createGame(@RequestHeader(value = "authorization", required = false) String token,
-                                    @PathVariable(value = "id") Long id,
-                                    @RequestBody BlackCardPostDTO blackCardPostDTO) {
-    System.out.println(blackCardPostDTO);
-    userService.checkSpecificAccess(token, id);
+  public void createGame(@RequestHeader(value = "authorization", required = false) String token,
+                                    @PathVariable(value = "userId") Long id,
+                                    @RequestBody CardPostDTO blackCardPostDTO) {
+
+    userService.checkSpecificAccess(token, id); // throws 401, 404
 
     BlackCard userInputCard = DTOMapper.INSTANCE.convertGamePostDTOToEntity(blackCardPostDTO);
 
-    return DTOMapper.INSTANCE.convertEntityToBlackCardGetDTO(userInputCard);
+    //TODO: check if time is up
+
+    // if time is up, create game with game service
+    Game game = gameService.createGame(userInputCard, id);
+    // ad game to user
+    userService.addGame(id, game);
   }
 
+    @GetMapping("users/{userId}/games/blackCards")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public CardGetDTO getBlackCardFromUser(@RequestHeader(value = "authorization", required = false) String token,
+                                      @PathVariable(value = "userId") Long id) {
+
+        userService.checkSpecificAccess(token, id);
+        BlackCard bcRandomUser = userService.getBlackCardFromRandomUser(id);
+
+        return DTOMapper.INSTANCE.convertEntityToCardGetDTO(bcRandomUser);
+    }
+
+    /**
+    * User gets his white Cards
+     */
+    @GetMapping("users/{userId}/games/whiteCards")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public List<CardGetDTO> getWhiteCardsFromUser(@RequestHeader(value = "authorization", required = false) String token,
+                                                @PathVariable(value = "userId") Long id) {
+      // check token
+      userService.checkSpecificAccess(token, id); // throws 401, 404
+      List <WhiteCard> cards = userService.getWhiteCards(id);
+
+      List<CardGetDTO> cardGetDTO= new ArrayList<>();
+      for (WhiteCard card : cards){
+          cardGetDTO.add(DTOMapper.INSTANCE.convertEntityToCardGetDTO(card));
+      }
+
+      return cardGetDTO;
+
+    }
+
+    /**
+     * get the Game with all plays
+     */
+    @GetMapping("/users/{userId}/games/{gameId}/vote")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public GameGetDTO getGame(@RequestHeader(value = "authorization", required = false) String token,
+                        @PathVariable(value = "gameId") Long gameId, @PathVariable(value = "userId") Long id) {
+
+        userService.checkSpecificAccess(token, id); // throws 401, 404
+
+        // search for random Play with this gameId
+        Game game = gameService.getGame(gameId);
+        return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
+    }
+
+    /**
+     * set Like to WhiteCard
+     */
+    @PutMapping("/users/{userId}/games/{gameId}/vote")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public void voteCard(@RequestHeader(value = "authorization", required = false) String token,
+                        @PathVariable(value = "gameId") Long gameId, @PathVariable(value = "userId") Long id
+                        ) {
+
+        userService.checkSpecificAccess(token, id); // throws 401, 404
+        //TODO
+        // delete Play
+        // make connection between user
+
+    }
+
+    /**
+     * create Play of a player
+     */
+    @PostMapping("/users/{userId}/whiteCards/{cardId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public void createPlay(@RequestHeader(value = "authorization", required = false) String token,
+                            @PathVariable(value = "userId") Long id,
+                            @PathVariable(value = "cardId") Long cardId,
+                            @RequestBody Long gameId){
+
+        userService.checkSpecificAccess(token, id); // throws 401, 404
+
+        gameService.createPlay(id, gameId, cardId);
+
+
+    }
 }

@@ -72,6 +72,9 @@ public class User implements Serializable {
     @OneToMany
     private List<WhiteCard> whiteCards = new ArrayList<>();
 
+    @OneToMany
+    private List<Game> games = new ArrayList<>();
+
 
     public Long getId() {
         return id;
@@ -141,5 +144,12 @@ public class User implements Serializable {
     public BlackCard getBlackCard(){return this.blackCard; }
 
     public void setBlackCard(BlackCard blackCard){this.blackCard = blackCard; }
+
+    public List<WhiteCard> getWhiteCards(){return this.whiteCards; }
+
+    public void addGame(Game game){
+        this.games.add(game);
+    }
+
 
 }

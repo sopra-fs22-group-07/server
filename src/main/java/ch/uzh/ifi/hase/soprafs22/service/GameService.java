@@ -1,9 +1,17 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.PlayRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.WhiteCardRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -16,6 +24,23 @@ import java.util.*;
 @Service
 @Transactional
 public class GameService {
+
+    private final GameRepository gameRepository;
+
+    private final PlayRepository playRepository;
+
+    private final WhiteCardRepository whiteCardRepository;
+
+    private SecureRandom rand = new SecureRandom();
+
+    @Autowired
+    public GameService(@Qualifier("gameRepository") GameRepository gameRepository,
+                       @Qualifier("playRepository") PlayRepository playRepository,
+                       @Qualifier("WhiteCardRepository") WhiteCardRepository whiteCardRepository) {
+        this.gameRepository = gameRepository;
+        this.playRepository = playRepository;
+        this.whiteCardRepository = whiteCardRepository;
+    }
 
   public List<BlackCard> getCards() {
     /*
@@ -38,4 +63,63 @@ public class GameService {
     cards.add(bc3);
     return cards;
   }
+
+    /**
+     *  Get game with this id
+     * @param gameId id of game to search
+     * @return a random play
+     */
+    public Game getGame(Long gameId) {
+        Game game = getGameById(gameId);
+
+        if (game.getPlays().isEmpty()){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "there are no cards left to be voted on");
+        }
+
+        return game;
+    }
+
+    private Game getGameById(long gameId) {
+        Game game = gameRepository.findById(gameId);
+        if(game == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user does not exit");
+        }
+        return game;
+    }
+
+    /**
+     * Create a Game
+     * @param userInputCard Black card of the Game
+     * @param userId user, which creates the game
+     * @return the created game
+     */
+    public Game createGame(BlackCard userInputCard, long userId) {
+      // create new game with certain blackCArd
+      Game game = new Game();
+      game.setBlackCard(userInputCard);
+      game.setUserId(userId);
+      gameRepository.saveAndFlush(game);
+      return game;
+    }
+
+    /**
+     * Create a Play (whiteCard and the userId from the played)
+     * @param userId id of user, which creates play
+     * @param gameId id of game, for which play gets created
+     * @param cardId id of card, ehich gets added to the play
+     */
+    public void createPlay(long userId,long gameId, long cardId){
+        Game game = gameRepository.findById(gameId);
+        // instance of new play
+        Play play = new Play();
+        WhiteCard card = whiteCardRepository.findById(cardId);
+        // set card and id
+        play.setCard(card);
+        play.setUserId(userId);
+        game.enqueuePlay(play);
+        // save and flush
+        gameRepository.saveAndFlush(game);
+        playRepository.saveAndFlush(play);
+    }
+
 }
