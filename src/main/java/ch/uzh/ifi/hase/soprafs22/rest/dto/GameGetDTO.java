@@ -20,10 +20,10 @@ public class GameGetDTO {
         this.id = id;
     }
 
-    public List<Play> getAllPlays(){
+    public List<Play> getPlays(){
         return  this.plays;
     }
-    public void setAllPlays(List<Play> plays){
+    public void setPlays(List<Play> plays){
         this.plays = plays;
     }
 
