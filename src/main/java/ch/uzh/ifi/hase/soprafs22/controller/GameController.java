@@ -127,10 +127,12 @@ public class GameController {
                         ) {
 
         userService.checkSpecificAccess(token, id); // throws 401, 404
-
-        // mark card as liked
         //TODO
-        gameService.setPlayLike(gameId);
+        // delete Play
+        // make connection between user
+        //
+
+        //gameService.setPlayLike(gameId);
 
 
     }
