@@ -66,9 +66,6 @@ public class User implements Serializable {
     private List<WhiteCard> whiteCards;
      */
 
-    @OneToOne
-    private BlackCard blackCard;
-
     @OneToMany
     private List<WhiteCard> whiteCards = new ArrayList<>();
 
@@ -140,10 +137,6 @@ public class User implements Serializable {
     }
 
     public void setGender(Gender gender){this.gender = gender; }
-
-    public BlackCard getBlackCard(){return this.blackCard; }
-
-    public void setBlackCard(BlackCard blackCard){this.blackCard = blackCard; }
 
     public List<WhiteCard> getWhiteCards(){return this.whiteCards; }
 
