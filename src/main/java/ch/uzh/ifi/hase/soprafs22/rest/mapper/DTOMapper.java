@@ -1,9 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.rest.mapper;
 
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
-import ch.uzh.ifi.hase.soprafs22.entity.Card;
-import ch.uzh.ifi.hase.soprafs22.entity.Play;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -53,5 +50,5 @@ public interface DTOMapper {
 
   @Mapping(source = "userId", target = "userId")
   @Mapping(source = "whiteCard", target = "whiteCard")
-  PlayGetDTO convertEntityToPlayGetDTO(Play play);
+  GameGetDTO convertEntityToGameGetDTO(Game game);
 }

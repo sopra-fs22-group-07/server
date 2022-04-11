@@ -1,12 +1,14 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto;
 
-import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
+import ch.uzh.ifi.hase.soprafs22.entity.Play;
 
-public class PlayGetDTO {
+import java.util.List;
+
+public class GameGetDTO {
 
     private long id;
 
-    private WhiteCard whiteCard;
+    private List<Play>  plays;
 
     private Long userId;
 
@@ -18,11 +20,11 @@ public class PlayGetDTO {
         this.id = id;
     }
 
-    public WhiteCard getCard(){
-        return  this.whiteCard;
+    public List<Play> getCard(){
+        return  this.plays;
     }
-    public void setCard(WhiteCard card){
-        this.whiteCard = card;
+    public void setCard(List<Play> plays){
+        this.plays = plays;
     }
 
     public Long getUserId(){return userId;}

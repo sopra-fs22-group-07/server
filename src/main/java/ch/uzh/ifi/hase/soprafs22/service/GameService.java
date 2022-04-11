@@ -69,18 +69,18 @@ public class GameService {
      * @param gameId id of game to search
      * @return a random play
      */
-    public Play getRandomPlay(Long gameId) {
+    public Game getGame(Long gameId) {
         Game game = getGameById(gameId);
 
-        List<Play> plays = game.getPlays();
-
-        Play randomPlay = plays.get(rand.nextInt(plays.size()));
-
-        if (randomPlay==null){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "there are no cards left to be voted on");
-
+        if (game==null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "game with gameId was not found");
         }
-        return randomPlay;
+
+        if (game.getPlays().isEmpty()){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "there are no cards left to be voted on");
+        }
+
+        return game;
     }
 
     private Game getGameById(long gameId) {
@@ -126,8 +126,4 @@ public class GameService {
         playRepository.saveAndFlush(play);
     }
 
-    public void setPlayLike(Long gameId) {
-        //TODO
-
-    }
 }

@@ -1,7 +1,5 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
-import ch.uzh.ifi.hase.soprafs22.constant.Like;
-
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -23,9 +21,6 @@ public class Play implements Serializable {
     @Column
     private Long userId;
 
-    @Column
-    private Like liked = Like.NONE;
-
   public WhiteCard getCard(){
     return  this.whiteCard;
   }
@@ -45,8 +40,4 @@ public class Play implements Serializable {
   public long getPlayId(){
         return this.id;
     }
-
-  public void setLiked(Like like){
-      this.liked = like;
-  }
 }

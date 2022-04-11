@@ -81,7 +81,7 @@ public class GameController {
     /**
     * User gets his white Cards
      */
-    @GetMapping("users/{userId}/games/cards")
+    @GetMapping("users/{userId}/games/whiteCards")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public List<CardGetDTO> getWhiteCardsFromUser(@RequestHeader(value = "authorization", required = false) String token,
@@ -100,20 +100,19 @@ public class GameController {
     }
 
     /**
-     * get a Play with a white card to vote on
-     * and the userId from the user that played that white card
+     * get the Game with all plays
      */
     @GetMapping("/users/{userId}/games/{gameId}/vote")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public PlayGetDTO getPlay(@RequestHeader(value = "authorization", required = false) String token,
+    public GameGetDTO getGame(@RequestHeader(value = "authorization", required = false) String token,
                         @PathVariable(value = "gameId") Long gameId, @PathVariable(value = "userId") Long id) {
 
         userService.checkSpecificAccess(token, id); // throws 401, 404
 
         // search for random Play with this gameId
-        Play play = gameService.getRandomPlay(gameId);
-        return DTOMapper.INSTANCE.convertEntityToPlayGetDTO(play);
+        Game game = gameService.getGame(gameId);
+        return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
     }
 
     /**
@@ -130,22 +129,19 @@ public class GameController {
         //TODO
         // delete Play
         // make connection between user
-        //
-
-        //gameService.setPlayLike(gameId);
-
 
     }
 
     /**
      * create Play of a player
      */
-    @PostMapping("/users/{userId}/games/{gameId}/cards/{cardId}")
+    @PostMapping("/users/{userId}/whiteCards/{cardId}")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public void createPlay(@RequestHeader(value = "authorization", required = false) String token,
-                         @PathVariable(value = "gameId") Long gameId,
-                         @PathVariable(value = "userId") Long id, @PathVariable(value = "cardId") Long cardId){
+                            @PathVariable(value = "userId") Long id,
+                            @PathVariable(value = "cardId") Long cardId,
+                            @RequestBody Long gameId){
 
         userService.checkSpecificAccess(token, id); // throws 401, 404
 
