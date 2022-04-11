@@ -65,16 +65,12 @@ public class GameService {
   }
 
     /**
-     *  Get a random Play (white card and user) from a game
+     *  Get game with this id
      * @param gameId id of game to search
      * @return a random play
      */
     public Game getGame(Long gameId) {
         Game game = getGameById(gameId);
-
-        if (game==null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "game with gameId was not found");
-        }
 
         if (game.getPlays().isEmpty()){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "there are no cards left to be voted on");
