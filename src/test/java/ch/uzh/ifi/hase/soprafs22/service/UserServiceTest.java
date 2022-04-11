@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -33,6 +34,7 @@ class UserServiceTest {
     testUser.setName("testName");
     testUser.setUsername("testUsername");
     testUser.setPassword("1234");
+    testUser.setGender(Gender.OTHER);
 
     // when -> any object is being save in the userRepository -> return the dummy
     // testUser
@@ -127,5 +129,45 @@ class UserServiceTest {
 
     assertFalse(userService.isAvailable(inputUser));
   }
+  
+    @Test
+    void updateUser_success(){
+      userService.createUser(testUser);
+      User putUser = new User();
+      putUser.setId(1L);
+      putUser.setUsername("newUsername");
+      putUser.setGender(Gender.MALE);
+
+      Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+
+      User updatedUser = userService.updateUser(putUser);
+
+      assertEquals("newUsername", updatedUser.getUsername());
+      assertEquals(Gender.MALE, updatedUser.getGender());
+  }
+
+    @Test
+    void updateUser_Conflict(){ //Test what happens when user tries to change username to a name that already is taken
+        //Second user, that has the newUsername, that testUser wants
+        User conflictUser = new User();
+        conflictUser.setId(1L);
+        conflictUser.setName("conflictName");
+        conflictUser.setUsername("newUsername");
+        conflictUser.setPassword("1234");
+        conflictUser.setGender(Gender.OTHER);
+
+
+        userService.createUser(testUser);
+        Mockito.when(userRepository.save(Mockito.any())).thenReturn(conflictUser);
+
+        User putUser = new User();
+        putUser.setId(1L);
+        putUser.setUsername("newUsername");
+        putUser.setGender(Gender.MALE);
+
+        Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(putUser));
+    }
 
 }
