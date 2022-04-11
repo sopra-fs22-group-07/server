@@ -78,10 +78,13 @@ public class GameController {
         return DTOMapper.INSTANCE.convertEntityToCardGetDTO(bcRandomUser);
     }
 
-    @GetMapping("users/{userId}/games/{gameId}/cards")
+    /**
+    * User gets his white Cards
+     */
+    @GetMapping("users/{userId}/games/cards")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public List<CardGetDTO> getCards(@RequestHeader(value = "authorization", required = false) String token,
+    public List<CardGetDTO> getWhiteCardsFromUser(@RequestHeader(value = "authorization", required = false) String token,
                                                 @PathVariable(value = "userId") Long id) {
       // check token
       userService.checkSpecificAccess(token, id); // throws 401, 404
@@ -100,22 +103,23 @@ public class GameController {
      * get a Play with a white card to vote on
      * and the userId from the user that played that white card
      */
-    @GetMapping("/users/{userID}/games/{gameId}/vote")
-    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/users/{userId}/games/{gameId}/vote")
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Play getPlay(@RequestHeader(value = "authorization", required = false) String token,
+    public PlayGetDTO getPlay(@RequestHeader(value = "authorization", required = false) String token,
                         @PathVariable(value = "gameId") Long gameId, @PathVariable(value = "userId") Long id) {
 
         userService.checkSpecificAccess(token, id); // throws 401, 404
 
         // search for random Play with this gameId
-        return gameService.getRandomPlay(gameId);
+        Play play = gameService.getRandomPlay(gameId);
+        return DTOMapper.INSTANCE.convertEntityToPlayGetDTO(play);
     }
 
     /**
      * set Like to WhiteCard
      */
-    @PutMapping("/users/{userID}/games/{gameId}/vote")
+    @PutMapping("/users/{userId}/games/{gameId}/vote")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public void voteCard(@RequestHeader(value = "authorization", required = false) String token,
@@ -134,7 +138,7 @@ public class GameController {
     /**
      * create Play of a player
      */
-    @PostMapping("/users/{userID}/games/{gameId}/cards/{cardId}")
+    @PostMapping("/users/{userId}/games/{gameId}/cards/{cardId}")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public void createPlay(@RequestHeader(value = "authorization", required = false) String token,
