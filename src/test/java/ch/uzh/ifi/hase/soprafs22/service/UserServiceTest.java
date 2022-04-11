@@ -106,4 +106,26 @@ class UserServiceTest {
       assertThrows(ResponseStatusException.class, () -> userService.checkPasswordAndUsername(inputUser));
   }
 
+  @Test
+  void username_available_success() {
+    userService.createUser(testUser);
+    User inputUser = new User();
+    inputUser.setUsername("Available Username");
+
+    Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(null);
+
+    assertTrue(userService.isAvailable(inputUser));
+  }
+
+  @Test
+  void username_available_failure() {
+    userService.createUser(testUser);
+    User inputUser = new User();
+    inputUser.setUsername(testUser.getUsername());
+
+    Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+
+    assertFalse(userService.isAvailable(inputUser));
+  }
+
 }

@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UsernameGetDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -482,6 +483,42 @@ class UserControllerTest {
                     .content(asJsonString(userPutDTO))
                     .header("authorization", "wrong token"))
             .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void test_check_username_username_is_available() throws Exception {
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    userPostDTO.setUsername("available");
+
+    given(userService.isAvailable(Mockito.any())).willReturn(true);
+
+    System.out.println(asJsonString(userPostDTO));
+
+    mockMvc.perform(post("/users/usernames")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(asJsonString(userPostDTO)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available", is(true)))
+            .andExpect(jsonPath("$.username", is(userPostDTO.getUsername())));
+  }
+
+  @Test
+  void test_check_username_username_is_not_available() throws Exception {
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    userPostDTO.setUsername("taken");
+
+    given(userService.isAvailable(Mockito.any())).willReturn(false);
+
+    System.out.println(asJsonString(userPostDTO));
+
+    mockMvc.perform(post("/users/usernames")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(asJsonString(userPostDTO)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available", is(false)))
+            .andExpect(jsonPath("$.username", is(userPostDTO.getUsername())));
   }
 
 
