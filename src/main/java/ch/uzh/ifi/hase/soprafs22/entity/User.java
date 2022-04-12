@@ -5,10 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Internal User Representation
@@ -32,7 +29,6 @@ public class User implements Serializable {
     @Id
     @GeneratedValue
     private Long id;
-
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -58,20 +54,23 @@ public class User implements Serializable {
     @Column
     private Gender gender;
 
-    // to see how elementCollection works:
-    /*
+    @OneToOne
+    private Game activeGame;
+
+    @OneToMany
+    private List<Game> pastGames = new ArrayList<>();
+
+    @OneToOne
+    private UserCards userCards;
+
     @ElementCollection
-    @CollectionTable(name = "whiteCard", joinColumns = @JoinColumn(name = "id"))
-    @Column(name = "whiteCards")
-    private List<WhiteCard> whiteCards;
-     */
+    private Set<Long> likedByUsers = new TreeSet<>();
 
-    @OneToMany
-    private List<WhiteCard> whiteCards = new ArrayList<>();
+    @ElementCollection
+    private Set<Long> matches = new TreeSet<>();
 
-    @OneToMany
-    private List<Game> games = new ArrayList<>();
 
+    // GETTERS AND SETTERS
 
     public Long getId() {
         return id;
@@ -138,11 +137,66 @@ public class User implements Serializable {
 
     public void setGender(Gender gender){this.gender = gender; }
 
-    public List<WhiteCard> getWhiteCards(){return this.whiteCards; }
-
     public void addGame(Game game){
-        this.games.add(game);
+        this.pastGames.add(game);
     }
 
+    // move active game to past games
+    public void flushGameToPastGames(){
+        Game game = this.getActiveGame();
+        this.setActiveGame(null);
+        this.addGame(game);
+    }
 
+    public Game getActiveGame() {
+        return activeGame;
+    }
+
+    public void setActiveGame(Game activeGame) {
+        this.activeGame = activeGame;
+    }
+
+    public List<Game> getPastGames() {
+        return pastGames;
+    }
+
+    public void deletePastGame(Game game) {
+        this.pastGames.remove(game);
+    }
+
+    public UserCards getUserCards() {
+        return userCards;
+    }
+
+    public void setUserCards(UserCards userCards) {
+        this.userCards = userCards;
+    }
+
+    public Set<Long> getMatches() {
+        return matches;
+    }
+
+    public void addMatch(Long matchId) {
+        this.matches.add(matchId);
+    }
+
+    public void removeMatch(long matchId) {
+        this.matches.remove(matchId);
+    }
+
+    public Set<Long> getLikedByUsers() {
+        return likedByUsers;
+    }
+
+    public void addLikeFromUser(Long userId){
+        this.likedByUsers.add(userId);
+    }
+
+    public void removeLikeFromUser(User user){
+        this.likedByUsers.remove(user.getId());
+    }
+
+    public boolean isLikedByUser(User user) {
+        return this.likedByUsers.contains(user.getId());
+    }
 }

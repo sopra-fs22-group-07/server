@@ -1,9 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,10 +24,6 @@ import java.util.List;
 @Table(name = "GAME")
 public class Game implements Serializable {
 
-  public Game() {
-        time = LocalDate.now();
-    }
-
   @Id
   @GeneratedValue
   private Long id;
@@ -34,13 +32,20 @@ public class Game implements Serializable {
   private Long userId;
 
   @Column
-  private LocalDate time;
+  private GameStatus gameStatus;
+
+  @Column
+  private Date creationTime = new Date();
 
   @OneToOne
   private BlackCard blackCard;
 
   @OneToMany
   private List<Play> plays = new ArrayList<>();
+
+
+
+  // Getters and Setters
 
   public void setId(long id){this.id=id;}
 
@@ -66,7 +71,34 @@ public class Game implements Serializable {
     plays.add(play);
   }
 
-    public List<Play> getPlays() {
+  public List<Play> getPlays() {
       return this.plays;
     }
+
+  public Date getCreationTime() {
+    return creationTime;
+  }
+
+  public void setCreationTime(Date creationTime) {
+    this.creationTime = creationTime;
+  }
+
+  public void deletePlaysFrom(Long userId) {
+    // safety net - assuming user has succeeded in inserting multiple plays into this game, we delete them all
+    List<Play> toBeRemoved= new ArrayList<>();
+    for(Play play : this.plays) {
+      if(play.getUserId() == userId){
+        toBeRemoved.add(play);
+      }
+    }
+    this.plays.removeAll(toBeRemoved);
+  }
+
+  public GameStatus getGameStatus() {
+    return gameStatus;
+  }
+
+  public void setGameStatus(GameStatus gameStatus) {
+    this.gameStatus = gameStatus;
+  }
 }

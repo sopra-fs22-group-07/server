@@ -7,13 +7,9 @@ import java.util.Date;
 public class UserPostDTO {
 
   private String name;
-
   private String username;
-
   private String password;
-
   private Date birthday;
-
   private Gender gender;
 
   public String getName() {

@@ -1,10 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UsernameGetDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpHeaders;
@@ -112,6 +109,18 @@ public class UserController {
     userService.checkGeneralAccess(token);
     User user = userService.getUserById(userId);
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+  }
+
+  // Just additional, not really to be implemented by the Client, returns much more details about the user
+  @GetMapping("/users/{id}/details")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDetailsDTO getUserInDetail(@RequestHeader(value = "authorization", required = false) String token,
+                                           @PathVariable(value = "id") int userId) {
+
+    userService.checkSpecificAccess(token, userId);
+    User user = userService.getUserById(userId);
+    return DTOMapper.INSTANCE.convertEntityToUserGetDetailsDTO(user);
   }
 
   @PutMapping("/users/{id}")
