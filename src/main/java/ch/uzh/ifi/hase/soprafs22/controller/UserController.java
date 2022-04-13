@@ -138,21 +138,19 @@ public class UserController {
     userService.updateUser(userInput); // this throws errors 404 and 409
   }
 
-  @PostMapping("/users/usernames")
+  @GetMapping("/users/usernames")
   @ResponseBody
   public ResponseEntity<UsernameGetDTO> checkUserNameAvailability(
-          // @RequestHeader(value = "authorization", required = false) String token,
-          @RequestBody UserPostDTO userPostDTO){
+          @RequestParam String username){
 
-    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
     // get the availability of the username
-    boolean isAvailable = userService.isAvailable(userInput);
+    boolean isAvailable = userService.isAvailable(username);
 
     // create and return ResponseEntity
     UsernameGetDTO responseBody = new UsernameGetDTO();
     responseBody.setAvailable(isAvailable);
-    responseBody.setUsername(userInput.getUsername());
+    responseBody.setUsername(username);
     return new ResponseEntity<>(responseBody, null, HttpStatus.OK);
   }
 }

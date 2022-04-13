@@ -485,43 +485,37 @@ class UserControllerTest {
             .andExpect(status().isUnauthorized());
   }
 
-  /*
+/*
   @Test
   void test_check_username_username_is_available() throws Exception {
 
-    UserPostDTO userPostDTO = new UserPostDTO();
-    userPostDTO.setUsername("available");
-
     given(userService.isAvailable(Mockito.any())).willReturn(true);
 
-    System.out.println(asJsonString(userPostDTO));
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder getRequest = get("/users/usernames?available=available")
+            .contentType(MediaType.APPLICATION_JSON);
 
-    mockMvc.perform(post("/users/usernames")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(asJsonString(userPostDTO)))
+    // then
+    mockMvc.perform(getRequest)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.available", is(true)))
-            .andExpect(jsonPath("$.username", is(userPostDTO.getUsername())));
+            .andExpect(jsonPath("$.username", is("available")));
+
   }
 
   @Test
   void test_check_username_username_is_not_available() throws Exception {
 
-    UserPostDTO userPostDTO = new UserPostDTO();
-    userPostDTO.setUsername("taken");
-
     given(userService.isAvailable(Mockito.any())).willReturn(false);
 
-    System.out.println(asJsonString(userPostDTO));
-
-    mockMvc.perform(post("/users/usernames")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(userPostDTO)))
+    mockMvc.perform(get("/users/usernames?available=taken")
+                    .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.available", is(false)))
-            .andExpect(jsonPath("$.username", is(userPostDTO.getUsername())));
+            .andExpect(jsonPath("$.username", is("taken")));
   }
-*/
+  */
+
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

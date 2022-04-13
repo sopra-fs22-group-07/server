@@ -166,8 +166,9 @@ public class UserService {
     return userToBeUpdated;
   }
 
-  public boolean isAvailable(User userInput) {
-    User user = userRepository.findByUsername(userInput.getUsername());
+  public boolean isAvailable(String userInput) {
+
+    User user = userRepository.findByUsername(userInput);
     return user == null;
   }
 

@@ -110,24 +110,24 @@ class UserServiceTest {
 
   @Test
   void username_available_success() {
+    String username = "Available Username";
+
     userService.createUser(testUser);
     User inputUser = new User();
     inputUser.setUsername("Available Username");
 
     Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(null);
 
-    assertTrue(userService.isAvailable(inputUser));
+    assertTrue(userService.isAvailable(username));
   }
 
   @Test
   void username_available_failure() {
-    userService.createUser(testUser);
-    User inputUser = new User();
-    inputUser.setUsername(testUser.getUsername());
+    String username = testUser.getUsername();
 
     Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
 
-    assertFalse(userService.isAvailable(inputUser));
+    assertFalse(userService.isAvailable(username));
   }
   
     @Test
