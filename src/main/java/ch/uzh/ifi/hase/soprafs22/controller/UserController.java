@@ -146,4 +146,14 @@ public class UserController {
     responseBody.setUsername(userInput.getUsername());
     return new ResponseEntity<>(responseBody, null, HttpStatus.OK);
   }
+
+  @DeleteMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteUser(
+          @RequestHeader(value = "authorization", required = false) String token,
+          @PathVariable(value = "id") long userId){
+
+      userService.checkSpecificAccess(token, userId); // throws 401 if Access isn't allowed
+      userService.deleteUser(userId); //Throws 404 if user with userId doesn't exist
+  }
 }
