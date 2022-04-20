@@ -18,11 +18,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
 
@@ -123,9 +123,26 @@ class GameServiceTest {
     @Test
     void getGameById_success() {
         // then
-        // Mockito.when(gameRepository.findById(Mockito.any())).thenReturn(testGame);
+        Mockito.when(gameRepository.findByGameId(1L)).thenReturn(testGame);
 
-        // Game game = gameService.getGameById(1L);
+        Game game = gameService.getGameById(1L);
+        // test if game is equal to testGame (expected, actual)
+        assertEquals(testGame.getId(), game.getId());
+        assertEquals(testGame.getCreationTime(), game.getCreationTime());
+        assertEquals(testGame.getGameStatus(), game.getGameStatus());
+        assertEquals(testGame.getBlackCard(), game.getBlackCard());
+
+    }
+
+    @Test
+    void getGameById_fail() {
+        // then
+        Mockito.when(gameRepository.findByGameId(2L)).thenReturn(null);
+        // expect exception
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            gameService.getGameById(2L);
+        });
+        assertEquals("404 NOT_FOUND \"game does not exist\"", exception.getMessage());
 
     }
 
