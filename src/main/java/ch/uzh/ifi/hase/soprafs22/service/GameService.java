@@ -76,7 +76,7 @@ public class GameService {
       Game game;
       if(!pastGames.isEmpty()) {
         // game = getGameById(0);
-        return pastGames.remove(0);
+        return pastGames.get(0);
       } else game = activeGame;
         return game;
     }
