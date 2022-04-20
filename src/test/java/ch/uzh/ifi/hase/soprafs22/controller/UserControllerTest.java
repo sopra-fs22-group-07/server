@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UsernameGetDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -483,6 +484,37 @@ class UserControllerTest {
                     .header("authorization", "wrong token"))
             .andExpect(status().isUnauthorized());
   }
+
+/*
+  @Test
+  void test_check_username_username_is_available() throws Exception {
+
+    given(userService.isAvailable(Mockito.any())).willReturn(true);
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder getRequest = get("/users/usernames?available=available")
+            .contentType(MediaType.APPLICATION_JSON);
+
+    // then
+    mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available", is(true)))
+            .andExpect(jsonPath("$.username", is("available")));
+
+  }
+
+  @Test
+  void test_check_username_username_is_not_available() throws Exception {
+
+    given(userService.isAvailable(Mockito.any())).willReturn(false);
+
+    mockMvc.perform(get("/users/usernames?available=taken")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available", is(false)))
+            .andExpect(jsonPath("$.username", is("taken")));
+  }
+  */
 
 
   /**
