@@ -42,7 +42,7 @@ class GameServiceTest {
 
     private User testUser;
 
-    private Game activeGame;
+    private Game testGame;
 
     private BlackCard blackCard;
 
@@ -59,17 +59,18 @@ class GameServiceTest {
         testUser.setGender(Gender.OTHER);
 
         // given active Game
-        activeGame = new Game();
+        testGame = new Game();
         blackCard = new BlackCard();
-        activeGame.setId(1L);
-        activeGame.setUserId(1L);
-        activeGame.setBlackCard(blackCard);
-        activeGame.setCreationTime(new Date());
-        activeGame.setGameStatus(GameStatus.ACTIVE);
+        testGame.setId(1L);
+        testGame.setUserId(1L);
+        testGame.setBlackCard(blackCard);
+        testGame.setCreationTime(new Date());
+        testGame.setGameStatus(GameStatus.ACTIVE);
 
         // when -> any object is being save in the userRepository -> return the dummy
         // testUser
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
+        Mockito.when(gameRepository.save(Mockito.any())).thenReturn(testGame);
     }
 
 
@@ -103,11 +104,11 @@ class GameServiceTest {
 
         List<Game> pastGame = new ArrayList<>();
 
-        Game  game = gameService.getGame(activeGame, pastGame);
-        assertEquals(activeGame.getId(), game.getId());
-        assertEquals(activeGame.getCreationTime(), game.getCreationTime());
-        assertEquals(activeGame.getGameStatus(), game.getGameStatus());
-        assertEquals(activeGame.getBlackCard(), game.getBlackCard());
+        Game  game = gameService.getGame(testGame, pastGame);
+        assertEquals(testGame.getId(), game.getId());
+        assertEquals(testGame.getCreationTime(), game.getCreationTime());
+        assertEquals(testGame.getGameStatus(), game.getGameStatus());
+        assertEquals(testGame.getBlackCard(), game.getBlackCard());
     }
 
     @Test
@@ -124,7 +125,7 @@ class GameServiceTest {
 
         pastGames.add(pastGame);
 
-        Game  game = gameService.getGame(activeGame, pastGames);
+        Game  game = gameService.getGame(testGame, pastGames);
         assertEquals(pastGame.getId(), game.getId());
         assertEquals(pastGame.getCreationTime(), game.getCreationTime());
         assertEquals(pastGame.getGameStatus(), game.getGameStatus());
