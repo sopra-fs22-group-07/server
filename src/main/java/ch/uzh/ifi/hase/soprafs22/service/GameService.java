@@ -73,11 +73,7 @@ public class GameService {
      * @return the oldest Game
      */
     public Game getGame(Game activeGame, List<Game> pastGames) {
-      Game game;
-      if(!pastGames.isEmpty()) {
-        game = pastGames.get(0);
-      } else game = activeGame;
-        return game;
+        return pastGames.isEmpty() ? activeGame : pastGames.get(0);
     }
 
   /**
