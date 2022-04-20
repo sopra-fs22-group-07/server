@@ -5,20 +5,17 @@ import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
-import ch.uzh.ifi.hase.soprafs22.repository.UserCardsRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.SecureRandom;
 import java.util.*;
 
 
@@ -35,17 +32,16 @@ public class UserService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
   private final UserRepository userRepository;
-  private final UserCardsRepository userCardsRepository;
+  private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
-  private final SecureRandom rand = new SecureRandom();
 
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
-                     @Qualifier("userCardsRepository") UserCardsRepository userCardsRepository,
+                     @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
                      @Qualifier("MatchRepository") MatchRepository matchRepository) {
     this.userRepository = userRepository;
-    this.userCardsRepository = userCardsRepository;
+    this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
   }
 
@@ -172,57 +168,13 @@ public class UserService {
     return user == null;
   }
 
-  // see https://stackoverflow.com/a/52409343/17532411
-  public Game getGameFromRandomUser(long userId) {
-
-    int totalRecords = (int) userRepository.count();
-    int pageIndex = rand.nextInt(totalRecords);
-    PageRequest pageRequest = PageRequest.of(pageIndex, 1);
-    Page<User> somePage = userRepository.findAll(pageRequest);
-    // todo Create Criterion for this function (first argument - only find the users with an activeGame != null)
-    User user;
-    // if we have found users
-    if ( somePage.getTotalElements() > 0){
-      user = somePage.getContent().get(0);
-      updateActiveGameIfNecessary(user);
-      Game game =  user.getActiveGame();
-      // if user has active game and the user is not who called the function
-      if(user.getId() != userId && game != null){
-        // get time difference in milliseconds
-        return game;
-      }
-      else {
-        // TODO: 12.04.2022 Infinite Recursion elimination (if no active games exist - solved with Criterion above)
-        return getGameFromRandomUser(userId);
-      }
-    }
-    return null;
-  }
-
   /**
    * Get White Cards from user
    * @param userId: userId from user
    * @return List of White Cards
-   * @throws ResponseStatusException - 403 if user hasn't created an active game yet
    */
     public List<WhiteCard> getWhiteCards(Long userId) {
-      // get white cards
-      UserCards currentCards = getUserById(userId).getUserCards();
-      // check if currentCards are null
-      if (currentCards == null) {
-        String err = "you must first pick a black card. Call: \n GET /users/" + userId + "/games \n to get black cards to choose" +
-                "from and \n POST /users/" + userId + "/games \n with one of the cardId's in the body to select one.";
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, err);
-      }
-      // get white cards and check if they are null, or empty
-      List<WhiteCard> whiteCards = currentCards.getWhiteCards();
-      if (whiteCards == null || whiteCards.isEmpty()) {
-        String err = "you must first pick a black card. Call: \n GET /users/" + userId + "/games \n to get black cards to choose" +
-                "from and \n POST /users/" + userId + "/games \n with one of the cardId's in the body to select one.";
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, err);
-      }
-
-      return whiteCards;
+      return getUserById(userId).getUserWhiteCards();
     }
 
   /**
@@ -257,12 +209,9 @@ public class UserService {
   public void assignWhiteCards(Long userId, List<WhiteCard> whiteCards) {
     // get the User
     User user = getUserById(userId);
-    UserCards userCards = user.getUserCards();
-    userCards.setWhiteCards(whiteCards);
-    userCardsRepository.saveAndFlush(userCards);
-
-    user.setUserCards(userCards);
+    user.setUserWhiteCards(whiteCards);
     userRepository.saveAndFlush(user);
+
   }
 
   /**
@@ -338,20 +287,18 @@ public class UserService {
   public List<BlackCard> getCurrentBlackCards(Long userId) {
     User user = getUserById(userId);
     // get current black cards
-    UserCards currentCards = user.getUserCards();
-    // return empty list if user has no current black cards (last two conditions are a safety net)
-    if (currentCards == null || currentCards.getBlackCards() == null || currentCards.getBlackCards().isEmpty()) {
+    UserBlackCards userBlackCards = user.getUserBlackCards();
+    if (userBlackCards == null || userBlackCards.getBlackCards() == null || userBlackCards.getBlackCards().isEmpty()) {
       return Collections.emptyList();
     }
-    // return current black cards if they're younger than one day, else return empty list
-    long diffTime = new Date().getTime() - currentCards.getDate().getTime();
+    long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
     if(diffTime > Time.ONE_DAY) {
-      user.setUserCards(null);
+      // update black cards
+      user.setUserBlackCards(null);
       userRepository.saveAndFlush(user);
       return Collections.emptyList();
-    } else {
-      return currentCards.getBlackCards();
     }
+    return userBlackCards.getBlackCards();
   }
 
   /**
@@ -363,14 +310,14 @@ public class UserService {
   public void assignBlackCardsToUser(Long userId, List<BlackCard> cards) {
     User user = getUserById(userId);
     // make sure that user has no current black cards
-    assert (user.getUserCards() == null);
+    assert (user.getUserBlackCards() == null);
 
     // Create new instance of currentCards
-    UserCards currentCards = new UserCards();
-    currentCards.setBlackCards(cards);
-    userCardsRepository.saveAndFlush(currentCards);
+    UserBlackCards userBlackCards = new UserBlackCards();
+    userBlackCards.setBlackCards(cards);
+    userBlackCardsRepository.saveAndFlush(userBlackCards);
 
-    user.setUserCards(currentCards);
+    user.setUserBlackCards(userBlackCards);
     // save
     userRepository.saveAndFlush(user);
   }
@@ -385,15 +332,15 @@ public class UserService {
     // get user
     User user = getUserById(userId);
     // get current cards of user
-    UserCards currentCards = user.getUserCards();
+    UserBlackCards usersBlackCards = user.getUserBlackCards();
     // case user hasn't been assigned black cards yet
-    if (currentCards == null || currentCards.getBlackCards().isEmpty()) {
+    if (usersBlackCards == null || usersBlackCards.getBlackCards().isEmpty()) {
       String err = "caller hasn't fetched black cards to vote on. Call GET /users/"
               + userId + "/games to get black cards to select from";
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, err);
     }
     // case the card is not in the available cards for this user
-    else if (!currentCards.getBlackCards().contains(blackCard)) {
+    else if (!usersBlackCards.getBlackCards().contains(blackCard)) {
       String err = "you cannot select this card. Call GET /users/"
               + userId + "/games to get black cards to select from";
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, err);
@@ -458,7 +405,7 @@ public class UserService {
    */
   public boolean isWhiteCardBelongingToUser(WhiteCard card, Long userId) {
     User user = getUserById(userId);
-    List<WhiteCard> userWhiteCards = user.getUserCards().getWhiteCards();
+    List<WhiteCard> userWhiteCards = user.getUserWhiteCards();
     return !userWhiteCards.isEmpty() && userWhiteCards.contains(card);
   }
 
@@ -485,9 +432,7 @@ public class UserService {
    */
   public void deleteWhiteCard(Long userId, WhiteCard whiteCard) {
     User user = getUserById(userId);
-    UserCards userCards = user.getUserCards();
-    userCards.removeWhiteCard(whiteCard);
-    userCardsRepository.saveAndFlush(userCards);
+    user.removeWhiteCard(whiteCard);
     userRepository.saveAndFlush(user);
   }
 

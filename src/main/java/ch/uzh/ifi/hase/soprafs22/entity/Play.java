@@ -21,6 +21,9 @@ public class Play implements Serializable {
     @Column
     private Long userId;
 
+    @Column
+    private Long gameId;
+
   public WhiteCard getCard(){
     return  this.whiteCard;
   }
@@ -40,4 +43,12 @@ public class Play implements Serializable {
   public long getPlayId(){
         return this.id;
     }
+
+  public Long getGameId() {
+    return gameId;
+  }
+
+  public void setGameId(Long gameId) {
+    this.gameId = gameId;
+  }
 }

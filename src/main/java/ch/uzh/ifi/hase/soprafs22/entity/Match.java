@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This is the Match Entity
+ * This is the Match Entity, it saves two users into it, and has a unique ID. It receives and returns a Pair of users.
  */
 @Entity
 @Table(name = "Match")

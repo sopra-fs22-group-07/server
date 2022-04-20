@@ -34,7 +34,7 @@ public class GameService {
     private final WhiteCardRepository whiteCardRepository;
     private final BlackCardRepository blackCardRepository;
 
-    private final SecureRandom rand = new SecureRandom();
+    private static final SecureRandom rand = new SecureRandom();
 
     @Autowired
     public GameService(@Qualifier("gameRepository") GameRepository gameRepository,
@@ -136,6 +136,9 @@ public class GameService {
    * @param play: Play which gets added into the Game
    */
     public void putPlayInGame(Game game, Play play) {
+
+      // set gameId in play here for joining game and play repos
+      play.setGameId(game.getId());
       game.enqueuePlay(play);
       // save and flush
       // we only saveAndFlush the play here (after it is checked)
@@ -163,7 +166,7 @@ public class GameService {
   }
 
   // extract some duplicate code (from getNRandomCards) : https://stackoverflow.com/a/52409343/17532411
-  private PageRequest getPageRequest(int totalRecords, int numOfCards){
+  public static PageRequest getPageRequest(int totalRecords, int numOfCards){
     int totalPages =
             (totalRecords % numOfCards == 0)
                     ? (totalRecords / numOfCards)
@@ -212,5 +215,30 @@ public class GameService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "white card with cardId " + cardId + " does not exit");
     }
     return card;
+  }
+
+  /**
+   * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
+   * already has played on
+   * @param userId: userId of the caller
+   * @return Game: a random Game.
+   */
+  public Game getGameFromRandomUser(Long userId) {
+    // count the possible games
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
+    // limit page size to 100
+    int pageSize = (numOfGames < 100) ? numOfGames.intValue() : 100;
+    int pageIndex = rand.nextInt(pageSize);
+    // only get one game
+    PageRequest pageRequest = PageRequest.of(pageIndex, 1);
+
+    // get the page with the game
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId);
+
+    // return the game if there is any, else return null
+    if (somePage.getTotalElements() > 0) {
+      return somePage.getContent().get(0);
+    }
+     return null;
   }
 }

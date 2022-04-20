@@ -60,8 +60,11 @@ public class User implements Serializable {
     @OneToMany
     private List<Game> pastGames = new ArrayList<>();
 
+    @OneToMany
+    private List<WhiteCard> userWhiteCards = new ArrayList<>();
+
     @OneToOne
-    private UserCards userCards;
+    private UserBlackCards userBlackCards;
 
     @ElementCollection
     private Set<Long> likedByUsers = new TreeSet<>();
@@ -164,14 +167,6 @@ public class User implements Serializable {
         this.pastGames.remove(game);
     }
 
-    public UserCards getUserCards() {
-        return userCards;
-    }
-
-    public void setUserCards(UserCards userCards) {
-        this.userCards = userCards;
-    }
-
     public Set<Long> getMatches() {
         return matches;
     }
@@ -198,5 +193,25 @@ public class User implements Serializable {
 
     public boolean isLikedByUser(User user) {
         return this.likedByUsers.contains(user.getId());
+    }
+
+    public List<WhiteCard> getUserWhiteCards() {
+        return userWhiteCards;
+    }
+
+    public void setUserWhiteCards(List<WhiteCard> usersWhiteCards) {
+        this.userWhiteCards = usersWhiteCards;
+    }
+
+    public void removeWhiteCard(WhiteCard whiteCard) {
+        this.userWhiteCards.remove(whiteCard);
+    }
+
+    public UserBlackCards getUserBlackCards() {
+        return userBlackCards;
+    }
+
+    public void setUserBlackCards(UserBlackCards userBlackCards) {
+        this.userBlackCards = userBlackCards;
     }
 }

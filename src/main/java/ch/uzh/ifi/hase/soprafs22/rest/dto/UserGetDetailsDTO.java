@@ -3,7 +3,8 @@ package ch.uzh.ifi.hase.soprafs22.rest.dto;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
-import ch.uzh.ifi.hase.soprafs22.entity.UserCards;
+import ch.uzh.ifi.hase.soprafs22.entity.UserBlackCards;
+import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
 
 import java.util.*;
 
@@ -18,7 +19,8 @@ public class UserGetDetailsDTO {
   private Date creationDate;
   private Game activeGame;
   private List<Game> pastGames;
-  private UserCards userCards;
+  private UserBlackCards userBlackCards;
+  private List<WhiteCard> userWhiteCards;
   private Set<Long> likedByUsers;
   private Set<Long> matchIds;
 
@@ -93,14 +95,6 @@ public class UserGetDetailsDTO {
     this.pastGames = pastGames;
   }
 
-  public UserCards getUserCards() {
-    return userCards;
-  }
-
-  public void setUserCards(UserCards userCards) {
-    this.userCards = userCards;
-  }
-
   public Set<Long> getLikedByUsers() {
     return likedByUsers;
   }
@@ -115,5 +109,21 @@ public class UserGetDetailsDTO {
 
   public void setMatchIds(Set<Long> matchIds) {
     this.matchIds = matchIds;
+  }
+
+  public UserBlackCards getUserBlackCards() {
+    return userBlackCards;
+  }
+
+  public void setUserBlackCards(UserBlackCards userBlackCards) {
+    this.userBlackCards = userBlackCards;
+  }
+
+  public List<WhiteCard> getUserWhiteCards() {
+    return userWhiteCards;
+  }
+
+  public void setUserWhiteCards(List<WhiteCard> userWhiteCards) {
+    this.userWhiteCards = userWhiteCards;
   }
 }

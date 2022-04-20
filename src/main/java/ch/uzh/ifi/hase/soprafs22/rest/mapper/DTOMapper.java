@@ -45,7 +45,8 @@ public interface DTOMapper {
   @Mapping(source = "creationDate", target = "creationDate")
   @Mapping(source = "activeGame", target = "activeGame")
   @Mapping(source = "pastGames", target = "pastGames")
-  @Mapping(source = "userCards", target = "userCards")
+  @Mapping(source = "userBlackCards", target = "userBlackCards")
+  @Mapping(source = "userWhiteCards", target = "userWhiteCards")
   @Mapping(source = "likedByUsers", target = "likedByUsers")
   @Mapping(source = "matches", target = "matchIds")
   UserGetDetailsDTO convertEntityToUserGetDetailsDTO(User user);

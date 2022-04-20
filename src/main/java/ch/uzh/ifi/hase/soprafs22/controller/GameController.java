@@ -25,6 +25,9 @@ public class GameController {
 
   private final GameService gameService;
   private final UserService userService;
+  private static final int NUM_OF_WHITE_CARDS_PER_DAY = 12;
+  private static final int NUM_OF_BLACK_CARDS_TO_CHOOSE_FROM = 8;
+
 
   GameController(GameService gameService, UserService userService) {
     this.gameService = gameService;
@@ -41,7 +44,6 @@ public class GameController {
     userService.checkSpecificAccess(token, id); // throws 401, 404
 
     // first, check and update if active game is older than 24 hours.
-    userService.updateActiveGameIfNecessary(id);
 
     List<BlackCard> cards;
 
@@ -50,7 +52,7 @@ public class GameController {
     cards = userService.getCurrentBlackCards(id);
     // if user has no current black cards, we get 8 new ones and assign them to the user for the next 24 hours
     if (cards.isEmpty()){
-      cards = gameService.getNRandomBlackCards(8);
+      cards = gameService.getNRandomBlackCards(NUM_OF_BLACK_CARDS_TO_CHOOSE_FROM);
       userService.assignBlackCardsToUser(id, cards);
     }
 
@@ -91,7 +93,9 @@ public class GameController {
       userService.addGame(id, game);
 
       // get and assign white card to the user for the next 24 hours
-      List<WhiteCard> whiteCards = gameService.getNRandomWhiteCards(12);
+      // the white cards are decoupled from any time, but we only assign and create them here, so the user could potentially play
+      // white cards after his own game expired.
+      List<WhiteCard> whiteCards = gameService.getNRandomWhiteCards(NUM_OF_WHITE_CARDS_PER_DAY);
       userService.assignWhiteCards(id, whiteCards);
     }
   }
@@ -104,9 +108,8 @@ public class GameController {
 
         userService.checkSpecificAccess(token, id);
 
-      // TODO: 12.04.2022 Make sure that you don't get game from same user in same (his) 24 hours (especially for small user bases)
       // Get 'random' game
-      Game game = userService.getGameFromRandomUser(id);
+      Game game = gameService.getGameFromRandomUser(id);
 
       // return it
       CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();
@@ -174,6 +177,7 @@ public class GameController {
       // extract data from PutDTO
       long otherUserId = gameVotePutDTO.getUserId();
       boolean userLikesOtherUser = gameVotePutDTO.isLike();
+      // TODO: 20.04.2022 Assert that this value was actually passed - maybe with javax.validation?
 
       // the relationship from the call is: user likes otherUser (user is the caller of the URI)
       // get both users
@@ -227,7 +231,7 @@ public class GameController {
       Game inputGame = DTOMapper.INSTANCE.convertGameIDPostDTOToEntity(gameIDPostDTO);
       Game game = gameService.getGameById(inputGame.getId());
 
-      // make sure that the game does not to the caller himself, you shall not give a white card to your own game.
+      // make sure that the game does not belong to the caller himself, you shall not give a white card to your own game.
       if(userService.isGameBelongingToUser(game, userService.getUserById(id))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Wrong use of API call: gameId must belong to userId");
@@ -242,7 +246,7 @@ public class GameController {
       }
       // create a play
       Play play = gameService.createPlay(id, cardId);
-      // only assign the play to the game if user has not already voted on the game (he won't lose his white card if he has)
+      // only assign the play to the game if user has not already played on that game (he won't lose his white card if he has)
       if(!userService.hasUserAlreadyPlayInGame(game, play)){
         gameService.putPlayInGame(game, play);
         userService.deleteWhiteCard(id, whiteCard);
