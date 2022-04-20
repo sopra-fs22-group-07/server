@@ -104,8 +104,7 @@ public class GameService {
       game.setGameStatus(GameStatus.ACTIVE);
 
       // save the game
-      gameRepository.saveAndFlush(game);
-      return game;
+      return gameRepository.saveAndFlush(game);
     }
 
     /**

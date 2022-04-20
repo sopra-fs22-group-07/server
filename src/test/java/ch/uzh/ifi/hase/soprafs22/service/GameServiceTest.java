@@ -19,10 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -50,14 +47,6 @@ class GameServiceTest {
     public void setup() {
         MockitoAnnotations.openMocks(this);
 
-        // given User
-        testUser = new User();
-        testUser.setId(1L);
-        testUser.setName("testName");
-        testUser.setUsername("testUsername");
-        testUser.setPassword("1234");
-        testUser.setGender(Gender.OTHER);
-
         // given active Game
         testGame = new Game();
         blackCard = new BlackCard();
@@ -67,10 +56,8 @@ class GameServiceTest {
         testGame.setCreationTime(new Date());
         testGame.setGameStatus(GameStatus.ACTIVE);
 
-        // when -> any object is being save in the userRepository -> return the dummy
-        // testUser
-        Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
-        Mockito.when(gameRepository.save(Mockito.any())).thenReturn(testGame);
+        // when -> any object is being save in the gameRepository -> return the dummy
+        Mockito.when(gameRepository.saveAndFlush(Mockito.any())).thenReturn(testGame);
     }
 
 
@@ -125,7 +112,7 @@ class GameServiceTest {
 
         pastGames.add(pastGame);
 
-        Game  game = gameService.getGame(testGame, pastGames);
+        Game game = gameService.getGame(testGame, pastGames);
         assertEquals(pastGame.getId(), game.getId());
         assertEquals(pastGame.getCreationTime(), game.getCreationTime());
         assertEquals(pastGame.getGameStatus(), game.getGameStatus());
@@ -134,12 +121,23 @@ class GameServiceTest {
 
 
     @Test
-    void getGameById() {
+    void getGameById_success() {
+        // then
+        // Mockito.when(gameRepository.findById(Mockito.any())).thenReturn(testGame);
+
+        // Game game = gameService.getGameById(1L);
+
     }
 
     @Test
-    void createGame() {
+    void createGame_success() {
+        Game game = gameService.createGame(blackCard, 1L);
 
+        // test if game is equal to testGame (expected, actual)
+        assertEquals(testGame.getId(), game.getId());
+        assertEquals(testGame.getCreationTime(), game.getCreationTime());
+        assertEquals(testGame.getGameStatus(), game.getGameStatus());
+        assertEquals(testGame.getBlackCard(), game.getBlackCard());
     }
 
     @Test
