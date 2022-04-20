@@ -1,7 +1,10 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
+import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
@@ -17,10 +20,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class GameServiceTest {
 
@@ -37,11 +42,15 @@ class GameServiceTest {
 
     private User testUser;
 
+    private Game activeGame;
+
+    private BlackCard blackCard;
+
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
 
-        // given
+        // given User
         testUser = new User();
         testUser.setId(1L);
         testUser.setName("testName");
@@ -49,14 +58,23 @@ class GameServiceTest {
         testUser.setPassword("1234");
         testUser.setGender(Gender.OTHER);
 
+        // given active Game
+        activeGame = new Game();
+        blackCard = new BlackCard();
+        activeGame.setId(1L);
+        activeGame.setUserId(1L);
+        activeGame.setBlackCard(blackCard);
+        activeGame.setCreationTime(new Date());
+        activeGame.setGameStatus(GameStatus.ACTIVE);
+
         // when -> any object is being save in the userRepository -> return the dummy
         // testUser
-        // Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
+        Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
     }
 
 
     @Test
-    void getNRandomBlackCards() {
+    void getNRandomBlackCards_success() {
         final int totalCards = 50;
         final int requestedCards = 12;
         // create some cards
@@ -81,8 +99,38 @@ class GameServiceTest {
     }
 
     @Test
-    void getGame() {
+    void getGame_returnActiveGame_success() {
+
+        List<Game> pastGame = new ArrayList<>();
+
+        Game  game = gameService.getGame(activeGame, pastGame);
+        assertEquals(activeGame.getId(), game.getId());
+        assertEquals(activeGame.getCreationTime(), game.getCreationTime());
+        assertEquals(activeGame.getGameStatus(), game.getGameStatus());
+        assertEquals(activeGame.getBlackCard(), game.getBlackCard());
     }
+
+    @Test
+    void getGame_returnPastGame_success() {
+        List<Game> pastGames = new ArrayList<>();
+
+        Game pastGame = new Game();
+        blackCard = new BlackCard();
+        pastGame.setId(2L);
+        pastGame.setUserId(2L);
+        pastGame.setBlackCard(blackCard);
+        pastGame.setCreationTime(new Date());
+        pastGame.setGameStatus(GameStatus.INACTIVE);
+
+        pastGames.add(pastGame);
+
+        Game  game = gameService.getGame(activeGame, pastGames);
+        assertEquals(pastGame.getId(), game.getId());
+        assertEquals(pastGame.getCreationTime(), game.getCreationTime());
+        assertEquals(pastGame.getGameStatus(), game.getGameStatus());
+        assertEquals(pastGame.getBlackCard(), game.getBlackCard());
+    }
+
 
     @Test
     void getGameById() {
