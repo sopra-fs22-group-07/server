@@ -208,7 +208,21 @@ class GameServiceTest {
     }
 
     @Test
-    void deletePlay() {
+    void deletePlay_success() {
+        Play deletePlay = new Play();
+        WhiteCard deleteWhiteCard = new WhiteCard();
+        deleteWhiteCard.setId(3L);
+        deleteWhiteCard.setText("unfunny stuff");
+        deletePlay.setCard(deleteWhiteCard);
+        deletePlay.setUserId(3L);
+
+        testGame.enqueuePlay(deletePlay);
+
+        // then
+        gameService.deletePlay(testGame,3L);
+
+        // test if play is in List of plays in game
+        assertEquals(false, testGame.getPlays().contains(deletePlay));
     }
 
     @Test
