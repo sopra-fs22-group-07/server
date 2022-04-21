@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -43,7 +44,7 @@ class GameServiceTest {
 
     private Game testGame;
 
-    private BlackCard blackCard;
+    private BlackCard testBlackCard;
 
     private WhiteCard testWhiteCard;
 
@@ -55,10 +56,12 @@ class GameServiceTest {
 
         // given active Game
         testGame = new Game();
-        blackCard = new BlackCard();
+        testBlackCard = new BlackCard();
+        testBlackCard.setText("gap");
+        testBlackCard.setId(1L);
         testGame.setId(1L);
         testGame.setUserId(1L);
-        testGame.setBlackCard(blackCard);
+        testGame.setBlackCard(testBlackCard);
         testGame.setCreationTime(new Date());
         testGame.setGameStatus(GameStatus.ACTIVE);
 
@@ -120,10 +123,10 @@ class GameServiceTest {
         List<Game> pastGames = new ArrayList<>();
 
         Game pastGame = new Game();
-        blackCard = new BlackCard();
+        BlackCard bc = new BlackCard();
         pastGame.setId(2L);
         pastGame.setUserId(2L);
-        pastGame.setBlackCard(blackCard);
+        pastGame.setBlackCard(bc);
         pastGame.setCreationTime(new Date());
         pastGame.setGameStatus(GameStatus.INACTIVE);
 
@@ -148,7 +151,6 @@ class GameServiceTest {
         assertEquals(testGame.getCreationTime(), game.getCreationTime());
         assertEquals(testGame.getGameStatus(), game.getGameStatus());
         assertEquals(testGame.getBlackCard(), game.getBlackCard());
-
     }
 
     @Test
@@ -160,12 +162,11 @@ class GameServiceTest {
             gameService.getGameById(2L);
         });
         assertEquals("404 NOT_FOUND \"game does not exist\"", exception.getMessage());
-
     }
 
     @Test
     void createGame_success() {
-        Game game = gameService.createGame(blackCard, 1L);
+        Game game = gameService.createGame(testBlackCard, 1L);
 
         // test if game is equal to testGame (expected, actual)
         assertEquals(testGame.getId(), game.getId());
@@ -226,10 +227,50 @@ class GameServiceTest {
     }
 
     @Test
-    void getBlackCardById() {
+    void getBlackCardById_success() {
+        // then
+        Mockito.when(blackCardRepository.findById(1L)).thenReturn(testBlackCard);
+
+        BlackCard bc = gameService.getBlackCardById(1L);
+        // test if game is equal to testGame (expected, actual)
+        assertEquals(testBlackCard.getId(), bc.getId());
+        assertEquals(testBlackCard.getText(), bc.getText());
     }
 
     @Test
-    void getWhiteCardById() {
+    void getBlackCardById_fail() {
+        // then
+        Mockito.when(blackCardRepository.findById(2L)).thenReturn(null);
+        // expect exception
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            gameService.getBlackCardById(2L);
+        });
+        assertEquals("404 NOT_FOUND \"black card with cardId 2 does not exit\"", exception.getMessage());
+    }
+
+    @Test
+    void getWhiteCardById_success() {
+        // then
+        Mockito.when(whiteCardRepository.findById(1L)).thenReturn(testWhiteCard);
+
+        WhiteCard wc = gameService.getWhiteCardById(1L);
+        // test if game is equal to testGame (expected, actual)
+        assertEquals(testWhiteCard.getId(), wc.getId());
+        assertEquals(testWhiteCard.getText(), wc.getText());
+    }
+
+    @Test
+    void getWhiteCardById_fail() {
+        // then
+        Mockito.when(whiteCardRepository.findById(2L)).thenReturn(null);
+        // expect exception
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            gameService.getWhiteCardById(2L);
+        });
+        assertEquals("404 NOT_FOUND \"white card with cardId 2 does not exit\"", exception.getMessage());
+    }
+
+    @Test
+    void getGameFromRandomUser_success() {
     }
 }
