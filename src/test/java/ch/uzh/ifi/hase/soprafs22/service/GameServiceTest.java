@@ -280,7 +280,8 @@ class GameServiceTest {
 
         // then
         Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L)).thenReturn(101L);
-        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class), eq(1L))).thenReturn(somePage);
+        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class),
+                eq(1L))).thenReturn(somePage);
 
         // test
         Game game = gameService.getGameFromRandomUser(1L);
