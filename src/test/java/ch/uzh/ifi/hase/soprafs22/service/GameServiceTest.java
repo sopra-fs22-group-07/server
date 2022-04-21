@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs22.constant.Gender;
-import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +12,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -27,8 +24,7 @@ class GameServiceTest {
 
     @Mock
     private GameRepository gameRepository;
-    @Mock
-    private UserRepository userRepository;
+
     @Mock
     private BlackCardRepository blackCardRepository;
 
@@ -40,8 +36,6 @@ class GameServiceTest {
 
     @InjectMocks
     private GameService gameService;
-
-    private User testUser;
 
     private Game testGame;
 
@@ -66,7 +60,7 @@ class GameServiceTest {
         testGame.setCreationTime(new Date());
         testGame.setGameStatus(GameStatus.ACTIVE);
 
-        // when -> any object is being save in the gameRepository -> return the dummy
+        // when -> any object is being safe in the gameRepository -> return the dummy
         Mockito.when(gameRepository.saveAndFlush(Mockito.any())).thenReturn(testGame);
 
         // given testPlay, without gameId (gets tested by putPlayInGame_success)
@@ -77,7 +71,7 @@ class GameServiceTest {
         testPlay.setCard(testWhiteCard);
         testPlay.setUserId(1L);
 
-        // when -> any object is being save in the gameRepository -> return the dummy
+        // when -> any object is being safe in the gameRepository -> return the dummy
         Mockito.when(playRepository.saveAndFlush(Mockito.any())).thenReturn(testPlay);
     }
 
