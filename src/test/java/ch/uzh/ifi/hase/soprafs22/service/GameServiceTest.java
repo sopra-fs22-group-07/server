@@ -3,12 +3,8 @@ package ch.uzh.ifi.hase.soprafs22.service;
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
-import ch.uzh.ifi.hase.soprafs22.entity.Game;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
-import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -23,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GameServiceTest {
 
@@ -33,15 +30,24 @@ class GameServiceTest {
     @Mock
     private BlackCardRepository blackCardRepository;
 
+    @Mock
+    private WhiteCardRepository whiteCardRepository;
+
+    @Mock
+    private PlayRepository playRepository;
+
     @InjectMocks
     private GameService gameService;
-
 
     private User testUser;
 
     private Game testGame;
 
     private BlackCard blackCard;
+
+    private WhiteCard testWhiteCard;
+
+    private Play testPlay;
 
     @BeforeEach
     public void setup() {
@@ -58,6 +64,17 @@ class GameServiceTest {
 
         // when -> any object is being save in the gameRepository -> return the dummy
         Mockito.when(gameRepository.saveAndFlush(Mockito.any())).thenReturn(testGame);
+
+        // given testPlay, without gameId (gets tested by putPlayInGame_success)
+        testPlay = new Play();
+        testWhiteCard = new WhiteCard();
+        testWhiteCard.setId(1L);
+        testWhiteCard.setText("funny stuff");
+        testPlay.setCard(testWhiteCard);
+        testPlay.setUserId(1L);
+
+        // when -> any object is being save in the gameRepository -> return the dummy
+        Mockito.when(playRepository.saveAndFlush(Mockito.any())).thenReturn(testPlay);
     }
 
 
@@ -158,11 +175,32 @@ class GameServiceTest {
     }
 
     @Test
-    void createPlay() {
+    void createPlay_success() {
+        // given
+        WhiteCard testWhiteCard = new WhiteCard();
+        testWhiteCard.setId(1L);
+        testWhiteCard.setText("funny stuff");
+
+        Long userId = 2L;
+
+        // then
+        Mockito.when(whiteCardRepository.findById(1L)).thenReturn(testWhiteCard);
+
+        // test
+        Play play = gameService.createPlay(userId, 1L);
+
+        // test if game is equal to testGame (expected, actual)
+        assertEquals(play.getCard(), testWhiteCard);
+        assertEquals(play.getUserId(), userId);
     }
 
     @Test
-    void putPlayInGame() {
+    void putPlayInGame_success() {
+        gameService.putPlayInGame(testGame, testPlay);
+        // test if gameId is correctly set
+        assertEquals(testPlay.getGameId(), testGame.getId());
+        // test if play is in List of plays in game
+        assertEquals(true, testGame.getPlays().contains(testPlay));
     }
 
     @Test
