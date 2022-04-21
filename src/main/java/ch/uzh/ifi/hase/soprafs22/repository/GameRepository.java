@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository("gameRepository")
 public interface GameRepository extends JpaRepository<Game, Long> {
-    Game findByGameId(long id);
+    Game findById(long id);
 
     @Query("select g from Game g where g.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
             "and g.userId <> :userId " +

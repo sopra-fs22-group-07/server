@@ -175,7 +175,7 @@ class GameServiceTest {
     @Test
     void getGameById_success() {
         // then
-        Mockito.when(gameRepository.findByGameId(1L)).thenReturn(testGame);
+        Mockito.when(gameRepository.findById(1L)).thenReturn(testGame);
 
         Game game = gameService.getGameById(1L);
         // test if game is equal to testGame (expected, actual)
@@ -188,7 +188,7 @@ class GameServiceTest {
     @Test
     void getGameById_fail() {
         // then
-        Mockito.when(gameRepository.findByGameId(2L)).thenReturn(null);
+        Mockito.when(gameRepository.findById(2L)).thenReturn(null);
         // expect exception
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
                 gameService.getGameById(2L));
