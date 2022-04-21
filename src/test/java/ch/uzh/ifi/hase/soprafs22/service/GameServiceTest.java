@@ -21,6 +21,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 
 class GameServiceTest {
 
@@ -83,6 +84,7 @@ class GameServiceTest {
 
     @Test
     void getNRandomBlackCards_success() {
+        //TODO
         final int totalCards = 50;
         final int requestedCards = 12;
         // create some cards
@@ -272,5 +274,20 @@ class GameServiceTest {
 
     @Test
     void getGameFromRandomUser_success() {
+        List<Game> games = new ArrayList<>();
+        games.add(testGame);
+        Page<Game> somePage = new PageImpl<>(games);
+
+        // then
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L)).thenReturn(101L);
+        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class), eq(1L))).thenReturn(somePage);
+
+        // test
+        Game game = gameService.getGameFromRandomUser(1L);
+        // test if game is equal to testGame
+        assertEquals(testGame.getId(), game.getId());
+        assertEquals(testGame.getCreationTime(), game.getCreationTime());
+        assertEquals(testGame.getGameStatus(), game.getGameStatus());
+        assertEquals(testGame.getBlackCard(), game.getBlackCard());
     }
 }
