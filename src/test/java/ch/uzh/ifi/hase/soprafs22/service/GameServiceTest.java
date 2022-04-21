@@ -84,28 +84,64 @@ class GameServiceTest {
 
     @Test
     void getNRandomBlackCards_success() {
-        //TODO
-        final int totalCards = 50;
-        final int requestedCards = 12;
-        // create some cards
-
         List<BlackCard> cards = new ArrayList<>();
-        for (long i = 0; i < totalCards; i++) {
-            BlackCard blackCard = new BlackCard();
-            blackCard.setText("Test text" + i);
-            blackCard.setId(i);
-            cards.add(blackCard);
-        }
-        Mockito.when(blackCardRepository.count()).thenReturn((long) totalCards);
-        // don't take a random page, just the first one.
-        PageRequest pr = PageRequest.of(1, requestedCards);
-        List<BlackCard> expected = cards.subList(0, requestedCards);
-        Page<BlackCard> page = new PageImpl<>(expected);
-        System.out.println(page);
-        Mockito.when(blackCardRepository.findAll(pr)).thenReturn(page);
+        cards.add(testBlackCard);
+        Page<BlackCard> somePage = new PageImpl<>(cards);
 
-        List<BlackCard> actual = gameService.getNRandomBlackCards(requestedCards);
-        assertEquals(new HashSet<>(expected), new HashSet<>(actual));
+        // then
+        Mockito.when(blackCardRepository.count()).thenReturn(1L);
+        Mockito.when(blackCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
+
+
+        List<BlackCard> randomCards = gameService.getNRandomBlackCards(1);
+        assertTrue(randomCards.contains(testBlackCard));
+
+    }
+
+    @Test
+    void getNRandomBlackCards_noCards() {
+        List<BlackCard> cards = new ArrayList<>();
+        Page<BlackCard> somePage = new PageImpl<>(cards);
+
+        // then
+        Mockito.when(blackCardRepository.count()).thenReturn(1L);
+        Mockito.when(blackCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
+
+
+        List<BlackCard> randomCards = gameService.getNRandomBlackCards(1);
+        assertTrue(randomCards.isEmpty());
+
+    }
+
+    @Test
+    void getNRandomWhiteCards_success() {
+        List<WhiteCard> cards = new ArrayList<>();
+        cards.add(testWhiteCard);
+        Page<WhiteCard> somePage = new PageImpl<>(cards);
+
+        // then
+        Mockito.when(whiteCardRepository.count()).thenReturn(1L);
+        Mockito.when(whiteCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
+
+
+        List<WhiteCard> randomCards = gameService.getNRandomWhiteCards(1);
+        assertTrue(randomCards.contains(testWhiteCard));
+
+    }
+
+    @Test
+    void getNRandomWhiteCards_noCards() {
+        List<WhiteCard> cards = new ArrayList<>();
+        Page<WhiteCard> somePage = new PageImpl<>(cards);
+
+        // then
+        Mockito.when(whiteCardRepository.count()).thenReturn(1L);
+        Mockito.when(whiteCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
+
+
+        List<WhiteCard> randomCards = gameService.getNRandomWhiteCards(1);
+        assertTrue(randomCards.isEmpty());
+
     }
 
     @Test
@@ -160,9 +196,8 @@ class GameServiceTest {
         // then
         Mockito.when(gameRepository.findByGameId(2L)).thenReturn(null);
         // expect exception
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            gameService.getGameById(2L);
-        });
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                gameService.getGameById(2L));
         assertEquals("404 NOT_FOUND \"game does not exist\"", exception.getMessage());
     }
 
@@ -203,11 +238,7 @@ class GameServiceTest {
         // test if gameId is correctly set
         assertEquals(testPlay.getGameId(), testGame.getId());
         // test if play is in List of plays in game
-        assertEquals(true, testGame.getPlays().contains(testPlay));
-    }
-
-    @Test
-    void getNRandomWhiteCards() {
+        assertTrue(testGame.getPlays().contains(testPlay));
     }
 
     @Test
@@ -225,7 +256,7 @@ class GameServiceTest {
         gameService.deletePlay(testGame,3L);
 
         // test if play is in List of plays in game
-        assertEquals(false, testGame.getPlays().contains(deletePlay));
+        assertFalse(testGame.getPlays().contains(deletePlay));
     }
 
     @Test
