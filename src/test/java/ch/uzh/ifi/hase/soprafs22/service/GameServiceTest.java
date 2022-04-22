@@ -272,7 +272,7 @@ class GameServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             gameService.getBlackCardById(2L);
         });
-        assertEquals("404 NOT_FOUND \"black card with cardId 2 does not exit\"", exception.getMessage());
+        assertEquals("404 NOT_FOUND \"black card with cardId 2 does not exist\"", exception.getMessage());
     }
 
     @Test
@@ -294,7 +294,7 @@ class GameServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             gameService.getWhiteCardById(2L);
         });
-        assertEquals("404 NOT_FOUND \"white card with cardId 2 does not exit\"", exception.getMessage());
+        assertEquals("404 NOT_FOUND \"white card with cardId 2 does not exist\"", exception.getMessage());
     }
 
     @Test
