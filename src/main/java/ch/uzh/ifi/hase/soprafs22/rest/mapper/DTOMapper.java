@@ -1,7 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.rest.mapper;
 
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -38,15 +37,41 @@ public interface DTOMapper {
   UserGetDTO convertEntityToUserGetDTO(User user);
 
   @Mapping(source = "id", target = "id")
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "username", target = "username")
+  @Mapping(source = "status", target = "status")
+  @Mapping(source = "birthday", target = "birthday")
+  @Mapping(source = "gender", target = "gender")
+  @Mapping(source = "creationDate", target = "creationDate")
+  @Mapping(source = "activeGame", target = "activeGame")
+  @Mapping(source = "pastGames", target = "pastGames")
+  @Mapping(source = "userBlackCards", target = "userBlackCards")
+  @Mapping(source = "userWhiteCards", target = "userWhiteCards")
+  @Mapping(source = "likedByUsers", target = "likedByUsers")
+  @Mapping(source = "matches", target = "matchIds")
+  UserGetDetailsDTO convertEntityToUserGetDetailsDTO(User user);
+
+  @Mapping(source = "id", target = "id")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "birthday", target = "birthday")
   User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
   @Mapping(source = "id", target = "id")
   @Mapping(source = "text", target = "text")
-  BlackCardGetDTO convertEntityToBlackCardGetDTO(BlackCard blackCard);
+  CardGetDTO convertEntityToCardGetDTO(Card card);
 
   @Mapping(source = "id", target = "id")
-  BlackCard convertGamePostDTOToEntity(BlackCardPostDTO blackCardPostDTO);
+  BlackCard convertGamePostDTOToEntity(CardPostDTO cardPostDTO);
+
+  @Mapping(source = "id", target = "gameId")
+  @Mapping(source = "userId", target = "userId")
+  @Mapping(source = "plays", target = "plays")
+  @Mapping(source = "blackCard", target = "blackCard")
+  @Mapping(source = "gameStatus", target = "gameStatus")
+  @Mapping(source = "creationTime", target = "creationDate")
+  GameGetDTO convertEntityToGameGetDTO(Game game);
+
+  @Mapping(source = "gameId", target = "id")
+  Game convertGameIDPostDTOToEntity(GameIDPostDTO gameIDPostDTO);
 
 }

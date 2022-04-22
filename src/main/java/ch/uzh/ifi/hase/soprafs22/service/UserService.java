@@ -1,7 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+
 
 /**
  * User Service
@@ -28,12 +31,18 @@ import java.util.UUID;
 public class UserService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
-
   private final UserRepository userRepository;
+  private final UserBlackCardsRepository userBlackCardsRepository;
+  private final MatchRepository matchRepository;
+
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+  public UserService(@Qualifier("userRepository") UserRepository userRepository,
+                     @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
+                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
     this.userRepository = userRepository;
+    this.userBlackCardsRepository = userBlackCardsRepository;
+    this.matchRepository = matchRepository;
   }
 
   public List<User> getUsers() {
@@ -133,7 +142,7 @@ public class UserService {
 
   public void checkSpecificAccess(String token, long userId) {
     User userByToken = userRepository.findByToken(token);
-    User userById = userRepository.findById(userId);
+    User userById = getUserById(userId);
     if(userByToken == null || userByToken != userById) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to Access this user! ");
     }
@@ -153,12 +162,301 @@ public class UserService {
     return userToBeUpdated;
   }
 
-  public boolean isAvailable(User userInput) {
-    User user = userRepository.findByUsername(userInput.getUsername());
+  public boolean isAvailable(String userInput) {
+
+    User user = userRepository.findByUsername(userInput);
     return user == null;
   }
 
-  public void deleteUser(long userId){
-      userRepository.deleteById(userId);
+  /**
+   * Get White Cards from user
+   * @param userId: userId from user
+   * @return List of White Cards
+   */
+    public List<WhiteCard> getWhiteCards(Long userId) {
+      return getUserById(userId).getUserWhiteCards();
+    }
+
+  /**
+   * Add Game to User
+   * @param userId: user to whom the game shall be added to
+   * @param game: Game to be added
+   */
+    public void addGame(Long userId, Game game) {
+        // get user
+        User user = getUserById(userId);
+        user.setActiveGame(game);
+        // saves the given entity but data is only persisted in the database once
+        // flush() is called
+        userRepository.saveAndFlush(user);
+    }
+
+  /**
+   * @param userId: userId
+   * @return True if user has no active games, False otherwise
+   */
+  public Boolean userHasNoActiveGame(Long userId) {
+    User user = getUserById(userId);
+    return user.getActiveGame() == null;
   }
+
+  /**
+   * add a List of White Cards to user with userId
+   * current white cards get overwritten, not added
+   * @param userId: userId
+   * @param whiteCards: list of white cards
+   */
+  public void assignWhiteCards(Long userId, List<WhiteCard> whiteCards) {
+    // get the User
+    User user = getUserById(userId);
+    user.setUserWhiteCards(whiteCards);
+    userRepository.saveAndFlush(user);
+
+  }
+
+  /**
+   * Create a Match between two users. Also, it removes any likes from each others
+   * @param user: User
+   * @param otherUser: User
+   * @return: created Match
+   */
+  public Match createMatch(User user, User otherUser) {
+
+      // first, delete likes
+    user.removeLikeFromUser(otherUser);
+    otherUser.removeLikeFromUser(user);
+
+    // then create a new match between users
+    Match match = new Match();
+    // Yes, it would be absolutely possible to do without the Pair class...
+    Pair<User, User> pair = new Pair<>(user, otherUser);
+    match.setUserPair(pair);
+    matchRepository.saveAndFlush(match);
+
+    return match;
+  }
+
+  /**
+   * Deletes any game from User that is not active (which would be stupid to do)
+   * @param user: User from whom the game shall be deleted from
+   * @param game: Game which shall be deleted
+   */
+  public void deleteGameIfEmpty(User user, Game game) {
+    // if game is not active and has no more plays, we can delete it.
+    if(game.getPlays().isEmpty() && game.getGameStatus() != GameStatus.ACTIVE) {
+      user.deletePastGame(game);
+    }
+    userRepository.saveAndFlush(user);
+  }
+
+  /**
+   * Move Active Game to Past Games IF the time is up
+   * @param userId: userId from User
+   */
+  public void updateActiveGameIfNecessary(Long userId) {
+      updateActiveGameIfNecessary(getUserById(userId));
+  }
+
+  /**
+   * Move Active Game to Past Games IF the time is up
+   * @param user: User from whom the active games shall be updated
+   */
+  private void updateActiveGameIfNecessary(User user) {
+    Game activeGame = user.getActiveGame();
+    // case there is no active game, just return
+    if (activeGame == null) return;
+
+    // calculate how old the active game is
+    long diffTime = new Date().getTime() - activeGame.getCreationTime().getTime();
+    // case the game is older than one Day, put it to the past games
+    if(diffTime > Time.ONE_DAY) {
+      // update the user who was a candidate for black cards
+      activeGame.setGameStatus(GameStatus.INACTIVE);
+      user.flushGameToPastGames();
+      // TODO: 12.04.2022 SaveAndFlush GameRepository here? (IDE doesn't complain until now)
+      userRepository.saveAndFlush(user);
+    }
+    // case the active game is not older than 24 hours, just return
+  }
+
+  /**
+   * Get the current black cards of a user: automatically delete old black cards that are older than some time period
+   * @param userId: userId from the user from whom we want to get the current black cards
+   * @return: a list of black cards - can be empty
+   */
+  public List<BlackCard> getCurrentBlackCards(Long userId) {
+    User user = getUserById(userId);
+    // get current black cards
+    UserBlackCards userBlackCards = user.getUserBlackCards();
+    if (userBlackCards == null || userBlackCards.getBlackCards() == null || userBlackCards.getBlackCards().isEmpty()) {
+      return Collections.emptyList();
+    }
+    long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
+    if(diffTime > Time.ONE_DAY) {
+      // update black cards
+      user.setUserBlackCards(null);
+      userRepository.saveAndFlush(user);
+      return Collections.emptyList();
+    }
+    return userBlackCards.getBlackCards();
+  }
+
+  /**
+   * Given a List of Black Cards, we want the user to hold these black cards for some time period.
+   * Precondition: user.getCards() is null
+   * @param userId: userId from user to whom the black cards shall be assigned
+   * @param cards: List of black Cards
+   */
+  public void assignBlackCardsToUser(Long userId, List<BlackCard> cards) {
+    User user = getUserById(userId);
+    // make sure that user has no current black cards
+    assert (user.getUserBlackCards() == null);
+
+    // Create new instance of currentCards
+    UserBlackCards userBlackCards = new UserBlackCards();
+    userBlackCards.setBlackCards(cards);
+    userBlackCardsRepository.saveAndFlush(userBlackCards);
+
+    user.setUserBlackCards(userBlackCards);
+    // save
+    userRepository.saveAndFlush(user);
+  }
+
+  /**
+   * Checks if Black Card has been assigned to User before calling this method.
+   * @param userId: userId from User
+   * @param blackCard: Black Card
+   * @throws ResponseStatusException - 403 if black card is not valid for this user
+   */
+  public void checkBlackCard(Long userId, BlackCard blackCard) {
+    // get user
+    User user = getUserById(userId);
+    // get current cards of user
+    UserBlackCards usersBlackCards = user.getUserBlackCards();
+    // case user hasn't been assigned black cards yet
+    if (usersBlackCards == null || usersBlackCards.getBlackCards().isEmpty()) {
+      String err = "caller hasn't fetched black cards to vote on. Call GET /users/"
+              + userId + "/games to get black cards to select from";
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, err);
+    }
+    // case the card is not in the available cards for this user
+    else if (!usersBlackCards.getBlackCards().contains(blackCard)) {
+      String err = "you cannot select this card. Call GET /users/"
+              + userId + "/games to get black cards to select from";
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, err);
+    }
+  }
+
+  /**
+   * Save a Match in the users tables
+   * @param match: Match between two users
+   */
+  public void setMatch(Match match) {
+    // Get Users
+    Pair<User, User> userPair = match.getUserPair();
+    User user1 = userPair.getObj1();
+    User user2 = userPair.getObj2();
+
+    // Add Match to both users
+    user1.addMatch(match.getMatchId());
+    user2.addMatch(match.getMatchId());
+
+    // Save and Flush
+    userRepository.save(user1);
+    userRepository.save(user2);
+    userRepository.flush();
+  }
+
+  /**
+   * @param user User 1
+   * @param otherUser User 2
+   * @return boolean: true if User 2 has liked User 1, false otherwise
+   */
+  public boolean otherUserLikesUser(User user, User otherUser) {
+      return user.isLikedByUser(otherUser);
+  }
+
+  /**
+   * User likes another user, the other user saves that user likes him.
+   * @param user: User
+   * @param otherUser User
+   */
+  public void setUserLikesOtherUser(User user, User otherUser) {
+    // add like
+    otherUser.addLikeFromUser(user.getId());
+    userRepository.saveAndFlush(otherUser);
+  }
+
+  /**
+   * Determines if a game belongs to a user.
+   * @param game: Game
+   * @param user: user
+   * @return boolean, true if game belongs to user
+   */
+  public boolean isGameBelongingToUser(Game game, User user) {
+    return Objects.equals(game.getUserId(), user.getId());
+  }
+
+  /**
+   * Determines if a White Card belongs to a user
+   * @param card: White Card
+   * @param userId: userId from User
+   * @return boolean, True if white card belongs to user (for some time period)
+   */
+  public boolean isWhiteCardBelongingToUser(WhiteCard card, Long userId) {
+    User user = getUserById(userId);
+    List<WhiteCard> userWhiteCards = user.getUserWhiteCards();
+    return !userWhiteCards.isEmpty() && userWhiteCards.contains(card);
+  }
+
+  /**
+   * Determines if a Game has already a Play from the user who played the Game
+   * @param game: Game
+   * @param play: Play
+   * @return boolean: true if user has already a play in the game
+   */
+  public boolean hasUserAlreadyPlayInGame(Game game, Play play) {
+    long userId = play.getUserId();
+    for(Play p : game.getPlays()) {
+      if (p.getUserId() == userId){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Delete a White Card from the current Cards of a Player
+   * @param userId: userId
+   * @param whiteCard: White Card
+   */
+  public void deleteWhiteCard(Long userId, WhiteCard whiteCard) {
+    User user = getUserById(userId);
+    user.removeWhiteCard(whiteCard);
+    userRepository.saveAndFlush(user);
+  }
+
+  /**
+   * Determine if a Match between two users already exists
+   * @param user: User 1
+   * @param otherUser: User 2
+   * @return boolean: true if a Match already exists, false otherwise.
+   */
+  public boolean doesMatchExist(User user, User otherUser) {
+    // it is enough to iterate through the matches of one user
+    for(long matchId: user.getMatches()){
+      Match match = matchRepository.findByMatchId(matchId);
+      // get users from match
+      Pair<User, User> userPair = match.getUserPair();
+      // compare users with users from match
+      if (userPair.getObj1() == user && userPair.getObj2() == otherUser) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+    public void deleteUser(long userId){
+        userRepository.deleteById(userId);
+    }
 }
