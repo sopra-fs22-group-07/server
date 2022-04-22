@@ -456,6 +456,10 @@ public class UserService {
     return false;
   }
 
+    /**
+     * Deletes a User from Repo By the USer id
+     * @param userId
+     */
     public void deleteUser(long userId){
         userRepository.deleteById(userId);
     }
