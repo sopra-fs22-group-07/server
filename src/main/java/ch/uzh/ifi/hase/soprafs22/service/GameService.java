@@ -207,7 +207,7 @@ public class GameService {
   public WhiteCard getWhiteCardById(long cardId) {
     WhiteCard card = whiteCardRepository.findById(cardId);
     if(card == null){
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "white card with cardId " + cardId + " does not exit");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "white card with cardId " + cardId + " does not exist");
     }
     return card;
   }
