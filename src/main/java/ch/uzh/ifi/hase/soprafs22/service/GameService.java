@@ -193,7 +193,7 @@ public class GameService {
   public BlackCard getBlackCardById(long cardId) {
     BlackCard card = blackCardRepository.findById(cardId);
     if(card == null){
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "black card with cardId " + cardId + " does not exit");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "black card with cardId " + cardId + " does not exist");
     }
     return card;
   }
