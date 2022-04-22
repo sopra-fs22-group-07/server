@@ -43,8 +43,6 @@ public class Game implements Serializable {
   @OneToMany
   private List<Play> plays = new ArrayList<>();
 
-
-
   // Getters and Setters
 
   public void setId(long id){this.id=id;}

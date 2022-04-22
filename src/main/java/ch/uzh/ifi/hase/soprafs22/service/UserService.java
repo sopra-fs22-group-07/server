@@ -110,7 +110,7 @@ public class UserService {
      * and throw an error otherwise.
      *
      * @param inputUser user as input
-     * @throws org.springframework.web.server.ResponseStatusException: 401
+     * @throws org.springframework.web.server.ResponseStatusException
      * @see User
      */
     public User checkPasswordAndUsername(User inputUser) {
@@ -455,4 +455,12 @@ public class UserService {
     }
     return false;
   }
+
+    /**
+     * Deletes a User from Repo By the USer id
+     * @param userId
+     */
+    public void deleteUser(long userId){
+        userRepository.deleteById(userId);
+    }
 }

@@ -85,7 +85,7 @@ public class GameService {
     public Game getGameById(long gameId) {
         Game game = gameRepository.findById(gameId);
         if(game == null){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "game does not exit");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "game does not exist");
         }
         return game;
     }
@@ -104,8 +104,7 @@ public class GameService {
       game.setGameStatus(GameStatus.ACTIVE);
 
       // save the game
-      gameRepository.saveAndFlush(game);
-      return game;
+      return gameRepository.saveAndFlush(game);
     }
 
     /**
