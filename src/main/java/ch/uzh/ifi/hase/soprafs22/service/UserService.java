@@ -159,10 +159,6 @@ public class UserService {
   }
 
   public void deleteUser(long userId){
-      User userToDelete = this.userRepository.findById(userId);
-      if(userToDelete == null){
-          throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user does not exit"); //Throws 404 if user with userId doesn't exist
-      }
       userRepository.deleteById(userId);
   }
 }
