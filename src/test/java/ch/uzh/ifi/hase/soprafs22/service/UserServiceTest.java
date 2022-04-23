@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
+import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +26,10 @@ class UserServiceTest {
   private UserRepository userRepository;
 
   @Mock
-  private MatchRepository matchRepository;
+  private UserBlackCardsRepository userBlackCardsRepository;
+
+    @Mock
+    private MatchRepository matchRepository;
 
   @InjectMocks
   private UserService userService;
@@ -54,7 +59,7 @@ class UserServiceTest {
     testUser.setPassword("1234");
     testUser.setGender(Gender.OTHER);
 
-    //user for matching etcother
+    //other user for matching etc
     otherUser = new User();
     otherUser.setId(1L);
     otherUser.setName("otherUser");
@@ -74,6 +79,9 @@ class UserServiceTest {
     testBlackCard = new BlackCard();
     testBlackCard.setText("GapText");
     testBlackCard.setId(1L);
+
+
+
     testGame.setId(1L);
     testGame.setUserId(1L);
     testGame.setBlackCard(testBlackCard);
@@ -370,6 +378,140 @@ class UserServiceTest {
         userService.deleteGameIfEmpty(testUser, nonEmptyGame);
         //Should now not return empty list for past games
         assertNotEquals(Collections.emptyList(), testUser.getPastGames());
+    }
+
+    @Test
+    void updateActiveGameIfNecessary_oldGame() {
+      testGame.setCreationTime(new Date(0,0,0));
+      testUser.setActiveGame(testGame);
+      long id = testUser.getId();
+
+      Mockito.when(userRepository.findById(id)).thenReturn(testUser);
+
+      userService.updateActiveGameIfNecessary(testUser.getId());
+      assertEquals(null, testUser.getActiveGame());
+
+    }
+
+    @Test
+    void updateActiveGameIfNecessary_newGame() {
+        testUser.setActiveGame(testGame);
+
+        long id = testUser.getId();
+
+        Mockito.when(userRepository.findById(id)).thenReturn(testUser);
+
+        userService.updateActiveGameIfNecessary(testUser.getId());
+        assertEquals(testGame, testUser.getActiveGame());
+
+    }
+
+
+
+    @Test
+    void setMatch(){
+      Match testMatch =  userService.createMatch(testUser, otherUser);
+      testMatch.setMatchId(2L);
+
+      //both users should now have the testmatch
+      userService.setMatch(testMatch);
+
+      //checking if both users have the match with the given id
+      assertTrue(testUser.getMatches().contains(testMatch.getMatchId()));
+        assertTrue(otherUser.getMatches().contains(testMatch.getMatchId()));
+    }
+
+    @Test
+    void otherUserLikesUser_true(){
+      //set the otheruser to like testUser
+      userService.setUserLikesOtherUser(otherUser, testUser);
+      assertTrue(userService.otherUserLikesUser(testUser, otherUser));
+    }
+
+    @Test
+    void otherUserLikesUser_false(){
+        //testUser by default isnt liked by other user
+        assertFalse(userService.otherUserLikesUser(testUser, otherUser));
+    }
+
+
+    @Test
+    void isGameBelongingToUSer_true(){
+      //by default we set testgame to belong to user
+        testGame.setUserId(1L);
+      assertTrue(userService.isGameBelongingToUser(testGame, testUser));
+    }
+
+    @Test
+    void isGameBelongingToUSer_false(){
+        //we set the testgame to belong to other user by changing the userId of the testgame
+        testGame.setUserId(2L);
+        assertFalse(userService.isGameBelongingToUser(testGame, testUser));
+    }
+
+    @Test
+    void isWhiteCardBelongingToUser_true(){
+      //assign the white cards to the user
+      testUser.setUserWhiteCards(testWhiteCards);
+      long id = testUser.getId();
+
+      Mockito.when(userRepository.findById(id)).thenReturn(testUser);
+      assertTrue(userService.isWhiteCardBelongingToUser(testWhiteCard, testUser.getId()));
+    }
+
+    @Test
+    void isWhiteCardBelongingToUser_false(){
+        //assign the white cards to the otherUser
+        otherUser.setUserWhiteCards(testWhiteCards);
+        long id = testUser.getId();
+
+        Mockito.when(userRepository.findById(id)).thenReturn(testUser);
+        assertFalse(userService.isWhiteCardBelongingToUser(testWhiteCard, testUser.getId()));
+    }
+
+    @Test
+    void deleteWhiteCard(){
+      //Create a second white card to delete
+        WhiteCard deleteCard = new WhiteCard();
+        deleteCard.setId(1L);
+        deleteCard.setText("CardText");
+        testWhiteCards.add(deleteCard); //Add the card to delete to the whitecards for the user
+        testUser.setUserWhiteCards(testWhiteCards);
+
+        long id = testUser.getId();
+        Mockito.when(userRepository.findById(id)).thenReturn(testUser);
+
+        userService.deleteWhiteCard(testUser.getId(), deleteCard);
+
+        assertTrue(userService.isWhiteCardBelongingToUser(testWhiteCard, testUser.getId()));//should still be there
+        assertFalse(userService.isWhiteCardBelongingToUser(deleteCard, testUser.getId())); //should be deleted now
+    }
+
+    @Test
+    void doesMatchExist_true(){
+        Match testMatch =  userService.createMatch(testUser, otherUser);
+        testMatch.setMatchId(2L);
+
+        Mockito.when(matchRepository.findByMatchId(2L)).thenReturn(testMatch);
+        //both users should now have the testmatch, so it should exist
+        userService.setMatch(testMatch);
+        assertTrue(userService.doesMatchExist(testUser, otherUser));
+    }
+
+    @Test
+    void doesMatchExist_false(){
+        // given
+        User testUser2 = new User();
+        testUser2.setId(3L);
+        testUser2.setName("testName");
+        testUser2.setUsername("testUsername3");
+        testUser2.setPassword("1234");
+        testUser2.setGender(Gender.OTHER);
+
+        Match testMatch = userService.createMatch(otherUser, testUser2);
+
+        Mockito.when(matchRepository.findByMatchId(2L)).thenReturn(testMatch);
+        assertFalse(userService.doesMatchExist(testUser, otherUser));
     }
 
 }
