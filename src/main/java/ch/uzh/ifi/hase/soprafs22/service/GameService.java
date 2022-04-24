@@ -221,6 +221,11 @@ public class GameService {
   public Game getGameFromRandomUser(Long userId) {
     // count the possible games
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
+
+    if(numOfGames==0){
+        return null;
+    }
+
     // limit page size to 100
     int pageSize = (numOfGames < 100) ? numOfGames.intValue() : 100;
     int pageIndex = rand.nextInt(pageSize);
