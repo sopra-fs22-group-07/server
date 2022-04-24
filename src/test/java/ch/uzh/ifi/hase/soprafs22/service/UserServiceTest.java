@@ -13,9 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,6 +39,8 @@ class UserServiceTest {
   private WhiteCard testWhiteCard;
   private List<WhiteCard> testWhiteCards;
   private BlackCard testBlackCard;
+  private BlackCard otherBlackCard;
+  private UserBlackCards userBlackCards;
   private Game testGame;
 
   @BeforeEach
@@ -72,12 +74,17 @@ class UserServiceTest {
     testBlackCard = new BlackCard();
     testBlackCard.setText("GapText");
     testBlackCard.setId(1L);
+    otherBlackCard = new BlackCard();
+    otherBlackCard.setId(33L);
+    otherBlackCard.setText("some Text");
 
     testGame.setId(1L);
     testGame.setUserId(1L);
     testGame.setBlackCard(testBlackCard);
     testGame.setCreationTime(new Date());
     testGame.setGameStatus(GameStatus.ACTIVE);
+    userBlackCards = new UserBlackCards();
+    userBlackCards.setBlackCards(new ArrayList<>(Collections.singleton(testBlackCard)));
     // when -> any object is being saved in the userRepository -> return the dummy
     // testUser
     Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
@@ -128,7 +135,8 @@ class UserServiceTest {
 
     // then -> attempt to create second user with same user -> check that an error
     // is thrown
-    assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
+    assertEquals(HttpStatus.CONFLICT, e.getStatus());
   }
 
   @Test
@@ -177,7 +185,8 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // then error, because different password
-      assertThrows(ResponseStatusException.class, () -> userService.checkPasswordAndUsername(inputUser));
+      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.checkPasswordAndUsername(inputUser));
+      assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
   }
 
   @Test
@@ -203,7 +212,7 @@ class UserServiceTest {
   }
   
     @Test
-    void updateUser_success(){
+    void updateUser_success_sameUser(){
       userService.createUser(testUser);
       User putUser = new User();
       putUser.setId(1L);
@@ -211,6 +220,7 @@ class UserServiceTest {
       putUser.setGender(Gender.MALE);
 
       Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+      Mockito.when(userRepository.findByUsername(putUser.getUsername())).thenReturn(testUser);
 
       User updatedUser = userService.updateUser(putUser);
 
@@ -219,10 +229,27 @@ class UserServiceTest {
   }
 
     @Test
+    void updateUser_success_UsernameIsFree(){
+        userService.createUser(testUser);
+        User putUser = new User();
+        putUser.setId(1L);
+        putUser.setUsername("newUsername");
+        putUser.setGender(Gender.MALE);
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        Mockito.when(userRepository.findByUsername(putUser.getUsername())).thenReturn(null);
+
+        User updatedUser = userService.updateUser(putUser);
+
+        assertEquals("newUsername", updatedUser.getUsername());
+        assertEquals(Gender.MALE, updatedUser.getGender());
+    }
+
+    @Test
     void updateUser_Conflict(){ //Test what happens when user tries to change username to a name that already is taken
         //Second user, that has the newUsername, that testUser wants
         User conflictUser = new User();
-        conflictUser.setId(1L);
+        conflictUser.setId(2L);
         conflictUser.setName("conflictName");
         conflictUser.setUsername("newUsername");
         conflictUser.setPassword("1234");
@@ -236,9 +263,11 @@ class UserServiceTest {
         putUser.setUsername("newUsername");
         putUser.setGender(Gender.MALE);
 
-        Mockito.when(userRepository.findByUsername(testUser.getUsername())).thenReturn(testUser);
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        Mockito.when(userRepository.findByUsername(putUser.getUsername())).thenReturn(conflictUser);
 
-        assertThrows(ResponseStatusException.class, () -> userService.updateUser(putUser));
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.updateUser(putUser));
+        assertEquals(HttpStatus.CONFLICT, e.getStatus());
     }
 
     @Test
@@ -476,6 +505,18 @@ class UserServiceTest {
         //both users should now have the testmatch, so it should exist
         userService.setMatch(testMatch);
         assertTrue(userService.doesMatchExist(testUser, otherUser));
+        assertTrue(userService.doesMatchExist(otherUser, testUser));
+
+        //case multiple matches exist
+        User thirdUser = new User();
+        thirdUser.setId(13L);
+        Match otherMatch = userService.createMatch(testUser, thirdUser);
+        otherMatch.setMatchId(23L);
+
+        Mockito.when(matchRepository.findByMatchId(23L)).thenReturn(otherMatch);
+        userService.setMatch(otherMatch);
+        assertTrue(userService.doesMatchExist(testUser, thirdUser));
+        assertTrue(userService.doesMatchExist(thirdUser,testUser));
     }
 
     @Test
@@ -489,9 +530,146 @@ class UserServiceTest {
         testUser2.setGender(Gender.OTHER);
 
         Match testMatch = userService.createMatch(otherUser, testUser2);
+        testMatch.setMatchId(2L);
 
         Mockito.when(matchRepository.findByMatchId(2L)).thenReturn(testMatch);
+        userService.setMatch(testMatch);
         assertFalse(userService.doesMatchExist(testUser, otherUser));
+        assertFalse(userService.doesMatchExist(otherUser, testUser));
     }
 
+    @Test
+    void checkGeneralAccess_granted(){
+      testUser.setToken("token");
+      Mockito.when(userRepository.findByToken(testUser.getToken())).thenReturn(testUser);
+      userService.checkGeneralAccess(testUser.getToken());
+      Mockito.verify(userRepository, Mockito.times(1)).findByToken(Mockito.any());
+    }
+
+    @Test
+    void checkGeneralAccess_denied(){
+        testUser.setToken("token");
+        Mockito.when(userRepository.findByToken(testUser.getToken())).thenReturn(null);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, ()-> userService.checkGeneralAccess("token"));
+        assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+    }
+
+    @Test
+    void getCurrentBlackCards_emptyListReturned(){
+      Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+      assertEquals(Collections.emptyList(), userService.getCurrentBlackCards(testUser.getId()));
+      testUser.setUserBlackCards(null);
+      assertEquals(Collections.emptyList(), userService.getCurrentBlackCards(testUser.getId()));
+      testUser.setUserBlackCards(new UserBlackCards());
+      assertEquals(Collections.emptyList(), userService.getCurrentBlackCards(testUser.getId()));
+      List<BlackCard> cards = new ArrayList<>();
+      UserBlackCards ubc = new UserBlackCards();
+      ubc.setBlackCards(cards);
+      assertEquals(Collections.emptyList(), userService.getCurrentBlackCards(testUser.getId()));
+      testUser.setUserBlackCards(userBlackCards);
+      // ToDo: for 100% line coverage: test with Powermock to access private final Date of userBlackCards
+      //assertEquals(Collections.emptyList(), userService.getCurrentBlackCards(testUser.getId()));
+    }
+
+    @Test
+    void getCurrentBlackCards_blackCardReturned() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        testUser.setUserBlackCards(userBlackCards);
+        List<BlackCard> expected = new ArrayList<>();
+        expected.add(testBlackCard);
+        List<BlackCard> actual = userService.getCurrentBlackCards(testUser.getId());
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void assignBlackCardsToUser_successSingleCard() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        List<BlackCard> cards = new ArrayList<>();
+        cards.add(testBlackCard);
+        userService.assignBlackCardsToUser(testUser.getId(), cards);
+        UserBlackCards ubc = testUser.getUserBlackCards();
+        assertArrayEquals(new List[]{cards}, new List[]{ubc.getBlackCards()});
+    }
+
+    @Test
+    void assignBlackCardsToUser_successMultipleCards() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        List<BlackCard> cards = new ArrayList<>();
+        cards.add(testBlackCard);
+        BlackCard secondBlackCard = new BlackCard();
+        cards.add(secondBlackCard);
+        userService.assignBlackCardsToUser(testUser.getId(), cards);
+        UserBlackCards ubc = testUser.getUserBlackCards();
+        assertArrayEquals(new List[]{cards}, new List[]{ubc.getBlackCards()});
+    }
+
+    @Test
+    void checkBlackCard_success_givenBlackCard() {
+        Long id = testUser.getId();
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        testUser.setUserBlackCards(userBlackCards);
+        assertDoesNotThrow(() -> userService.checkBlackCard(id, testBlackCard));
+    }
+    @Test
+    void checkBlackCard_success_givenNoBlackCard() {
+        Long id = testUser.getId();
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        testUser.setUserBlackCards(null);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.checkBlackCard(id, testBlackCard));
+        assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+        UserBlackCards ubc = new UserBlackCards();
+        ubc.setBlackCards(null);
+        testUser.setUserBlackCards(ubc);
+        e = assertThrows(ResponseStatusException.class, () -> userService.checkBlackCard(id, testBlackCard));
+        assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+        List<BlackCard> cards = new ArrayList<>();
+        ubc.setBlackCards(cards);
+        testUser.setUserBlackCards(ubc);
+        e = assertThrows(ResponseStatusException.class, () -> userService.checkBlackCard(id, testBlackCard));
+        assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+    }
+    @Test
+    void checkBlackCard_success_givenWrongBlackCard() {
+        Long id = testUser.getId();
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        testUser.setUserBlackCards(userBlackCards);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.checkBlackCard(id, otherBlackCard));
+        assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+    }
+
+    @Test
+    void hasUserAlreadyPlayInGame_true() {
+        // case single Play
+        Play play1 = new Play();
+        play1.setUserId(testUser.getId());
+        testGame.enqueuePlay(play1);
+        assertTrue(userService.hasUserAlreadyPlayInGame(testGame, play1));
+        // case multiple Plays
+        Play play2 = new Play();
+        play2.setUserId(66L);
+        testGame.enqueuePlay(play2);
+        testGame.setUserId(66L);
+        assertTrue(userService.hasUserAlreadyPlayInGame(testGame, play2));
+    }
+
+    @Test
+    void hasUserAlreadyPlayInGame_false() {
+        // case single Play
+        Play play1 = new Play();
+        play1.setUserId(33L);
+        Play play2 = new Play();
+        play2.setUserId(66L);
+        Play play3 = new Play();
+        play3.setUserId(99L);
+        testGame.enqueuePlay(play1);
+        assertFalse(userService.hasUserAlreadyPlayInGame(testGame, play2));
+        // case multiple Plays
+        testGame.enqueuePlay(play2);
+        assertFalse(userService.hasUserAlreadyPlayInGame(testGame, play3));
+    }
+
+    @Test
+    void deleteUser_test(){
+      assertDoesNotThrow(()-> userService.deleteUser(1L));
+    }
 }
