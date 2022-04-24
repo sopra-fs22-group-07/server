@@ -334,7 +334,7 @@ public class UserService {
     // get current cards of user
     UserBlackCards usersBlackCards = user.getUserBlackCards();
     // case user hasn't been assigned black cards yet
-    if (usersBlackCards == null || usersBlackCards.getBlackCards().isEmpty()) {
+    if (usersBlackCards == null || usersBlackCards.getBlackCards() == null || usersBlackCards.getBlackCards().isEmpty()) {
       String err = "caller hasn't fetched black cards to vote on. Call GET /users/"
               + userId + "/games to get black cards to select from";
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, err);
@@ -449,7 +449,7 @@ public class UserService {
       // get users from match
       Pair<User, User> userPair = match.getUserPair();
       // compare users with users from match
-      if (userPair.getObj1() == user && userPair.getObj2() == otherUser) {
+      if (userPair.getObj1() == user && userPair.getObj2() == otherUser || userPair.getObj1() == otherUser && userPair.getObj2() == user) {
         return true;
       }
     }
