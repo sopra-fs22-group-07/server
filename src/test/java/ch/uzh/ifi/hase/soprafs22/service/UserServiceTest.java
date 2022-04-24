@@ -28,24 +28,18 @@ class UserServiceTest {
   @Mock
   private UserBlackCardsRepository userBlackCardsRepository;
 
-    @Mock
-    private MatchRepository matchRepository;
+  @Mock
+  private MatchRepository matchRepository;
 
   @InjectMocks
   private UserService userService;
 
-
-
   private User testUser;
-
   private User otherUser;
-
-
-    private WhiteCard testWhiteCard;
-    private List<WhiteCard> testWhiteCards;
-
-    private BlackCard testBlackCard;
-    private Game testGame;
+  private WhiteCard testWhiteCard;
+  private List<WhiteCard> testWhiteCards;
+  private BlackCard testBlackCard;
+  private Game testGame;
 
   @BeforeEach
   public void setup() {
@@ -74,23 +68,19 @@ class UserServiceTest {
     testWhiteCards = new ArrayList<>();
     testWhiteCards.add(testWhiteCard);
 
-
     testGame = new Game();
     testBlackCard = new BlackCard();
     testBlackCard.setText("GapText");
     testBlackCard.setId(1L);
-
-
 
     testGame.setId(1L);
     testGame.setUserId(1L);
     testGame.setBlackCard(testBlackCard);
     testGame.setCreationTime(new Date());
     testGame.setGameStatus(GameStatus.ACTIVE);
-    // when -> any object is being save in the userRepository -> return the dummy
+    // when -> any object is being saved in the userRepository -> return the dummy
     // testUser
     Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
-
   }
 
   @Test
@@ -113,7 +103,7 @@ class UserServiceTest {
 
   @Test
   void createUser_validInputs_success() {
-    // when -> any object is being save in the userRepository -> return the dummy
+    // when -> any object is being saved in the userRepository -> return the dummy
     // testUser
     User createdUser = userService.createUser(testUser);
 
@@ -143,7 +133,6 @@ class UserServiceTest {
 
   @Test
   void logOutUser_success(){
-
       long id = testUser.getId();
         //when -> looking for testuser by id then return testUser
       Mockito.when(userRepository.findById(id)).thenReturn(testUser);
@@ -154,7 +143,6 @@ class UserServiceTest {
       assertEquals(UserStatus.OFFLINE, testUser.getStatus());
   }
 
-
   @Test
   void loginUser_success() {
       // given
@@ -164,7 +152,7 @@ class UserServiceTest {
       inputUser.setUsername("testUsername");
       inputUser.setPassword("1234");
 
-      Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+      Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // when -> setup additional mocks for UserRepository
       User returnUser = userService.checkPasswordAndUsername(inputUser);
@@ -186,7 +174,7 @@ class UserServiceTest {
       inputUser.setUsername("testUsername");
       inputUser.setPassword("abcd");
 
-      Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+      Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // then error, because different password
       assertThrows(ResponseStatusException.class, () -> userService.checkPasswordAndUsername(inputUser));
@@ -209,7 +197,7 @@ class UserServiceTest {
   void username_available_failure() {
     String username = testUser.getUsername();
 
-    Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+    Mockito.when(userRepository.findByUsername(username)).thenReturn(testUser);
 
     assertFalse(userService.isAvailable(username));
   }
@@ -240,7 +228,6 @@ class UserServiceTest {
         conflictUser.setPassword("1234");
         conflictUser.setGender(Gender.OTHER);
 
-
         userService.createUser(testUser);
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(conflictUser);
 
@@ -249,14 +236,13 @@ class UserServiceTest {
         putUser.setUsername("newUsername");
         putUser.setGender(Gender.MALE);
 
-        Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(testUser);
+        Mockito.when(userRepository.findByUsername(testUser.getUsername())).thenReturn(testUser);
 
         assertThrows(ResponseStatusException.class, () -> userService.updateUser(putUser));
     }
 
     @Test
     void getWhiteCards_success_nonEmpty(){
-
       //User has a White Card
       testUser.setUserWhiteCards(testWhiteCards);
       long id = testUser.getId();
@@ -268,7 +254,6 @@ class UserServiceTest {
 
     @Test
     void getWhiteCards_success_Empty(){
-
         //User does not have a White Card
         long id = testUser.getId();
 
@@ -295,7 +280,7 @@ class UserServiceTest {
 
         Mockito.when(userRepository.findById(id)).thenReturn(testUser);
 
-        //By default user shouldnt have an active gamee so should be true as no game added here
+        //By default user shouldn't have an active game so should be true as no game added here
         assertEquals(true, userService.userHasNoActiveGame(id));
     }
 
@@ -389,8 +374,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findById(id)).thenReturn(testUser);
 
       userService.updateActiveGameIfNecessary(testUser.getId());
-      assertEquals(null, testUser.getActiveGame());
-
+        assertNull(testUser.getActiveGame());
     }
 
     @Test
@@ -403,10 +387,7 @@ class UserServiceTest {
 
         userService.updateActiveGameIfNecessary(testUser.getId());
         assertEquals(testGame, testUser.getActiveGame());
-
     }
-
-
 
     @Test
     void setMatch(){
@@ -430,10 +411,9 @@ class UserServiceTest {
 
     @Test
     void otherUserLikesUser_false(){
-        //testUser by default isnt liked by other user
+        //testUser by default isn't liked by other user
         assertFalse(userService.otherUserLikesUser(testUser, otherUser));
     }
-
 
     @Test
     void isGameBelongingToUSer_true(){
