@@ -217,6 +217,7 @@ public class GameService {
    * already has played on
    * @param userId: userId of the caller
    * @return Game: a random Game.
+   * @throws ResponseStatusException - 404: if there is no game of another user left
    */
   public Game getGameFromRandomUser(Long userId) {
     // count the possible games
