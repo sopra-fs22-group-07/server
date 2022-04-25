@@ -271,6 +271,40 @@ class UserServiceTest {
     }
 
     @Test
+    void getUserById_returns_user() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        assertEquals(testUser, userService.getUserById(testUser.getId()));
+    }
+
+    @Test
+    void getUserById_returns_exception(){
+        Mockito.when(userRepository.findById(1L)).thenReturn(null);
+        assertThrows(ResponseStatusException.class, () -> userService.getUserById(1L));
+    }
+
+    @Test
+    void checkSpecificAccess_true(){
+        testUser.setToken("token");
+        Mockito.when(userRepository.findByToken("token")).thenReturn(testUser);
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        assertDoesNotThrow(() -> userService.checkSpecificAccess(testUser.getToken(), testUser.getId()));
+    }
+
+    @Test
+    void checkSpecificAccess_false(){
+        testUser.setToken("token");
+        User otherUser = new User();
+        otherUser.setUsername("other");
+        otherUser.setPassword("other password");
+        Mockito.when(userRepository.findByToken("token")).thenReturn(null);
+        assertThrows(ResponseStatusException.class, () -> userService.checkSpecificAccess("token", 1L));
+
+        Mockito.when(userRepository.findByToken("token")).thenReturn(testUser);
+        Mockito.when(userRepository.findById(1L)).thenReturn(otherUser);
+        assertThrows(ResponseStatusException.class, () -> userService.checkSpecificAccess("token", 1L));
+    }
+
+    @Test
     void getWhiteCards_success_nonEmpty(){
       //User has a White Card
       testUser.setUserWhiteCards(testWhiteCards);
