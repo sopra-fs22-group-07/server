@@ -456,11 +456,28 @@ public class UserService {
     return false;
   }
 
-    /**
-     * Deletes a User from Repo By the USer id
-     * @param userId
-     */
-    public void deleteUser(long userId){
-        userRepository.deleteById(userId);
+  /**
+   * Deletes a User from Repo By the USer id
+   * @param userId
+   */
+  public void deleteUser(long userId){
+      userRepository.deleteById(userId);
+  }
+
+
+  public List<User> getMatchedUsers(long userId) {
+
+    // get id's of all matches of user with id userId
+    Set<Long> matches = getUserById(userId).getMatches();
+
+    // get user entities for all id's (i.e. matches)
+    List<User> users = new ArrayList<>();
+    for (long matchId : matches) {
+      User user = userRepository.findById(matchId);
+      users.add(user);
     }
+
+    // return list of users
+    return users;
+  }
 }
