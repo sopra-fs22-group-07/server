@@ -57,7 +57,7 @@ class UserServiceTest {
 
     //other user for matching etc
     otherUser = new User();
-    otherUser.setId(1L);
+    otherUser.setId(2L);
     otherUser.setName("otherUser");
     otherUser.setUsername("testOtherUsername");
     otherUser.setPassword("1234");
@@ -65,7 +65,7 @@ class UserServiceTest {
 
     //give; white card for testing
     testWhiteCard = new WhiteCard();
-    testWhiteCard.setId(1L);
+    testWhiteCard.setId(11L);
     testWhiteCard.setText("CardText");
     testWhiteCards = new ArrayList<>();
     testWhiteCards.add(testWhiteCard);
@@ -73,13 +73,13 @@ class UserServiceTest {
     testGame = new Game();
     testBlackCard = new BlackCard();
     testBlackCard.setText("GapText");
-    testBlackCard.setId(1L);
+    testBlackCard.setId(22L);
     otherBlackCard = new BlackCard();
     otherBlackCard.setId(33L);
     otherBlackCard.setText("some Text");
 
-    testGame.setId(1L);
-    testGame.setUserId(1L);
+    testGame.setId(111L);
+    testGame.setUserId(testUser.getId());
     testGame.setBlackCard(testBlackCard);
     testGame.setCreationTime(new Date());
     testGame.setGameStatus(GameStatus.ACTIVE);
@@ -155,7 +155,7 @@ class UserServiceTest {
   void loginUser_success() {
       // given
       User inputUser = new User();
-      inputUser.setId(1L);
+      inputUser.setId(testUser.getId());
       inputUser.setName("testName");
       inputUser.setUsername("testUsername");
       inputUser.setPassword("1234");
@@ -177,7 +177,7 @@ class UserServiceTest {
       // given -> a first user has already been created
       userService.createUser(testUser);
       User inputUser = new User();
-      inputUser.setId(1L);
+      inputUser.setId(testUser.getId());
       inputUser.setName("testName");
       inputUser.setUsername("testUsername");
       inputUser.setPassword("abcd");
@@ -215,7 +215,7 @@ class UserServiceTest {
     void updateUser_success_sameUser(){
       userService.createUser(testUser);
       User putUser = new User();
-      putUser.setId(1L);
+      putUser.setId(testUser.getId());
       putUser.setUsername("newUsername");
       putUser.setGender(Gender.MALE);
 
@@ -232,7 +232,7 @@ class UserServiceTest {
     void updateUser_success_UsernameIsFree(){
         userService.createUser(testUser);
         User putUser = new User();
-        putUser.setId(1L);
+        putUser.setId(testUser.getId());
         putUser.setUsername("newUsername");
         putUser.setGender(Gender.MALE);
 
@@ -259,7 +259,7 @@ class UserServiceTest {
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(conflictUser);
 
         User putUser = new User();
-        putUser.setId(1L);
+        putUser.setId(testUser.getId());
         putUser.setUsername("newUsername");
         putUser.setGender(Gender.MALE);
 
@@ -375,10 +375,10 @@ class UserServiceTest {
         long id = testUser.getId();
         //Creating white Card list with 2 whiteCards
         WhiteCard testWhiteCard1 = new WhiteCard();
-        testWhiteCard1.setId(2L);
+        testWhiteCard1.setId(31L);
         testWhiteCard1.setText("CardText2");
         WhiteCard testWhiteCard2 = new WhiteCard();
-        testWhiteCard1.setId(3L);
+        testWhiteCard1.setId(32L);
         testWhiteCard1.setText("CardText3");
 
         List<WhiteCard> WhiteCardList = new ArrayList<>();
@@ -481,14 +481,14 @@ class UserServiceTest {
     @Test
     void isGameBelongingToUSer_true(){
       //by default we set testgame to belong to user
-        testGame.setUserId(1L);
+        testGame.setUserId(testUser.getId());
       assertTrue(userService.isGameBelongingToUser(testGame, testUser));
     }
 
     @Test
     void isGameBelongingToUSer_false(){
         //we set the testgame to belong to other user by changing the userId of the testgame
-        testGame.setUserId(2L);
+        testGame.setUserId(testUser.getId() + 10);
         assertFalse(userService.isGameBelongingToUser(testGame, testUser));
     }
 
@@ -516,7 +516,7 @@ class UserServiceTest {
     void deleteWhiteCard(){
       //Create a second white card to delete
         WhiteCard deleteCard = new WhiteCard();
-        deleteCard.setId(1L);
+        deleteCard.setId(44L);
         deleteCard.setText("CardText");
         testWhiteCards.add(deleteCard); //Add the card to delete to the whitecards for the user
         testUser.setUserWhiteCards(testWhiteCards);
@@ -533,9 +533,9 @@ class UserServiceTest {
     @Test
     void doesMatchExist_true(){
         Match testMatch =  userService.createMatch(testUser, otherUser);
-        testMatch.setMatchId(2L);
+        testMatch.setMatchId(222L);
 
-        Mockito.when(matchRepository.findByMatchId(2L)).thenReturn(testMatch);
+        Mockito.when(matchRepository.findByMatchId(222L)).thenReturn(testMatch);
         //both users should now have the testmatch, so it should exist
         userService.setMatch(testMatch);
         assertTrue(userService.doesMatchExist(testUser, otherUser));
@@ -545,9 +545,9 @@ class UserServiceTest {
         User thirdUser = new User();
         thirdUser.setId(13L);
         Match otherMatch = userService.createMatch(testUser, thirdUser);
-        otherMatch.setMatchId(23L);
+        otherMatch.setMatchId(223L);
 
-        Mockito.when(matchRepository.findByMatchId(23L)).thenReturn(otherMatch);
+        Mockito.when(matchRepository.findByMatchId(223L)).thenReturn(otherMatch);
         userService.setMatch(otherMatch);
         assertTrue(userService.doesMatchExist(testUser, thirdUser));
         assertTrue(userService.doesMatchExist(thirdUser,testUser));
