@@ -101,7 +101,7 @@ public class GameController {
   }
 
     @GetMapping("users/{userId}/games/blackCards")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public CardAndGameIdGetDTO getBlackCardFromRandomUser(@RequestHeader(value = "authorization", required = false) String token,
                                       @PathVariable(value = "userId") Long id) {
@@ -114,13 +114,9 @@ public class GameController {
       // return it
       CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();
 
-        if (game != null) {
-        cardAndGameIdGetDTO.setBlackCard(game.getBlackCard());
-        cardAndGameIdGetDTO.setGameId(game.getId());
-      }else{
-            cardAndGameIdGetDTO.setGameId(1L);
-            cardAndGameIdGetDTO.setBlackCard(null);
-        }
+      cardAndGameIdGetDTO.setBlackCard(game.getBlackCard());
+      cardAndGameIdGetDTO.setGameId(game.getId());
+
       return cardAndGameIdGetDTO;
     }
 

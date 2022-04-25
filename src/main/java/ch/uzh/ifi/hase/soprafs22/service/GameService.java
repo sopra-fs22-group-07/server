@@ -223,7 +223,7 @@ public class GameService {
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
 
     if(numOfGames==0){
-        return null;
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
     }
 
     // limit page size to 100
@@ -235,10 +235,7 @@ public class GameService {
     // get the page with the game
     Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId);
 
-    // return the game if there is any, else return null
-    if (somePage.getTotalElements() > 0) {
-      return somePage.getContent().get(0);
-    }
-     return null;
+    // return the game
+    return somePage.getContent().get(0);
   }
 }
