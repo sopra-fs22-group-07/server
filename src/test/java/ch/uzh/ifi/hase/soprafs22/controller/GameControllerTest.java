@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -110,7 +111,7 @@ class GameControllerTest {
 
     @Test
     void givenBlackCards_whenGetBlackCards_thenNewCard() throws Exception {
-        given(userService.getCurrentBlackCards(isA(Long.class))).willReturn(null);
+        given(userService.getCurrentBlackCards(isA(Long.class))).willReturn(Collections.emptyList());
         given(gameService.getNRandomBlackCards(isA(Integer.class))).willReturn(bCards);
         doNothing().when(userService).assignBlackCardsToUser(isA(Long.class), eq(bCards));
 
