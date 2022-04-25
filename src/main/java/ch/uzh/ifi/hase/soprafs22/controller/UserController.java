@@ -1,9 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpHeaders;
@@ -108,10 +106,21 @@ public class UserController {
   @ResponseBody
   public UserGetDTO getUser(@RequestHeader(value = "authorization", required = false) String token,
                             @PathVariable(value = "id") int userId) {
-
     userService.checkGeneralAccess(token);
     User user = userService.getUserById(userId);
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+  }
+
+  // Just additional, not really to be implemented by the Client, returns much more details about the user
+  @GetMapping("/users/{id}/details")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDetailsDTO getUserInDetail(@RequestHeader(value = "authorization", required = false) String token,
+                                           @PathVariable(value = "id") int userId) {
+
+    userService.checkSpecificAccess(token, userId);
+    User user = userService.getUserById(userId);
+    return DTOMapper.INSTANCE.convertEntityToUserGetDetailsDTO(user);
   }
 
   @PutMapping("/users/{id}")
@@ -121,12 +130,36 @@ public class UserController {
           @RequestHeader(value = "authorization", required = false) String token,
           @PathVariable(value = "id") long userId,
           @RequestBody UserPutDTO userPutDTO){
-
-    userService.checkSpecificAccess(token, userId);
+    userService.checkSpecificAccess(token, userId); //checks for 401
 
     User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
     // make sure user has right ID
     userInput.setId(userId);
-    userService.updateUser(userInput); // this throws all errors
+    userService.updateUser(userInput); // this throws errors 404 and 409
+  }
+
+  @GetMapping("/users/usernames")
+  @ResponseBody
+  public ResponseEntity<UsernameGetDTO> checkUserNameAvailability(
+          @RequestParam String username){
+
+    // get the availability of the username
+    boolean isAvailable = userService.isAvailable(username);
+
+    // create and return ResponseEntity
+    UsernameGetDTO responseBody = new UsernameGetDTO();
+    responseBody.setAvailable(isAvailable);
+    responseBody.setUsername(username);
+    return new ResponseEntity<>(responseBody, null, HttpStatus.OK);
+  }
+
+  @DeleteMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteUser(
+          @RequestHeader(value = "authorization", required = false) String token,
+          @PathVariable(value = "id") long userId){
+
+      userService.checkSpecificAccess(token, userId); // throws 401 if Access isn't allowed
+      userService.deleteUser(userId); //Throws 404 if user with userId doesn't exist
   }
 }

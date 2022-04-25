@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,26 +22,81 @@ import java.util.List;
 
 @Entity
 @Table(name = "GAME")
-public class Game {
+public class Game implements Serializable {
 
   @Id
   @GeneratedValue
   private Long id;
 
   @Column
-  private LocalDate time;
+  private Long userId;
+
+  @Column
+  private GameStatus gameStatus;
+
+  @Column
+  private Date creationTime = new Date();
 
   @OneToOne
   private BlackCard blackCard;
 
   @OneToMany
-  private List<WhiteCard> whiteCards = new ArrayList<>();
+  private List<Play> plays = new ArrayList<>();
 
-  public void enqueueWhiteCard(Play play){
-    whiteCards.add(play.getCard());
+  // Getters and Setters
+
+  public void setId(long id){this.id=id;}
+
+  public Long getId(){return this.id;}
+
+  public void setUserId(long userId){
+      this.userId=userId;
+  }
+
+  public Long getUserId(){
+      return this.userId;
+  }
+
+  public void setBlackCard(BlackCard card){
+        this.blackCard=card;
   }
 
   public BlackCard getBlackCard(){
-    return this.blackCard;
+        return this.blackCard;
+  }
+
+  public void enqueuePlay(Play play){
+    plays.add(play);
+  }
+
+  public List<Play> getPlays() {
+      return this.plays;
+    }
+
+  public Date getCreationTime() {
+    return creationTime;
+  }
+
+  public void setCreationTime(Date creationTime) {
+    this.creationTime = creationTime;
+  }
+
+  public void deletePlaysFrom(Long userId) {
+    // safety net - assuming user has succeeded in inserting multiple plays into this game, we delete them all
+    List<Play> toBeRemoved= new ArrayList<>();
+    for(Play play : this.plays) {
+      if(play.getUserId() == userId){
+        toBeRemoved.add(play);
+      }
+    }
+    this.plays.removeAll(toBeRemoved);
+  }
+
+  public GameStatus getGameStatus() {
+    return gameStatus;
+  }
+
+  public void setGameStatus(GameStatus gameStatus) {
+    this.gameStatus = gameStatus;
   }
 }

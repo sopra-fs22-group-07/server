@@ -28,7 +28,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -482,6 +481,35 @@ class UserControllerTest {
                     .content(asJsonString(userPutDTO))
                     .header("authorization", "wrong token"))
             .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void test_check_username_username_is_available() throws Exception {
+
+    given(userService.isAvailable(Mockito.any())).willReturn(true);
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder getRequest = get("/users/usernames?username=available")
+            .contentType(MediaType.APPLICATION_JSON);
+
+    // then
+    mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available", is(true)))
+            .andExpect(jsonPath("$.username", is("available")));
+
+  }
+
+  @Test
+  void test_check_username_username_is_not_available() throws Exception {
+
+  given(userService.isAvailable(Mockito.any())).willReturn(false);
+
+    mockMvc.perform(get("/users/usernames?username=taken")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.available", is(false)))
+            .andExpect(jsonPath("$.username", is("taken")));
   }
 
 
