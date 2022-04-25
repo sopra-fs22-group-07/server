@@ -677,14 +677,14 @@ class UserServiceTest {
     void hasUserAlreadyPlayInGame_true() {
         // case single Play
         Play play1 = new Play();
-        play1.setUserId(testUser.getId());
+        play1.setUserId(otherUser.getId());
         testGame.enqueuePlay(play1);
         assertTrue(userService.hasUserAlreadyPlayInGame(testGame, play1));
         // case multiple Plays
         Play play2 = new Play();
         play2.setUserId(66L);
+        assertFalse(userService.hasUserAlreadyPlayInGame(testGame, play2));
         testGame.enqueuePlay(play2);
-        testGame.setUserId(66L);
         assertTrue(userService.hasUserAlreadyPlayInGame(testGame, play2));
     }
 
