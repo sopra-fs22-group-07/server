@@ -143,7 +143,6 @@ public class UserController {
   public ResponseEntity<UsernameGetDTO> checkUserNameAvailability(
           @RequestParam String username){
 
-
     // get the availability of the username
     boolean isAvailable = userService.isAvailable(username);
 

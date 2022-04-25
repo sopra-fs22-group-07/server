@@ -22,7 +22,6 @@ import ch.uzh.ifi.hase.soprafs22.repository.WhiteCardRepository;
 @Transactional
 public class CardService {
 
-
     private final Logger log = LoggerFactory.getLogger(CardService.class);
 
     private final BlackCardRepository blackCardRepository;
