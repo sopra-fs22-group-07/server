@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UsernameGetDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +28,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -485,14 +483,13 @@ class UserControllerTest {
             .andExpect(status().isUnauthorized());
   }
 
-/*
   @Test
   void test_check_username_username_is_available() throws Exception {
 
     given(userService.isAvailable(Mockito.any())).willReturn(true);
 
     // when/then -> do the request + validate the result
-    MockHttpServletRequestBuilder getRequest = get("/users/usernames?available=available")
+    MockHttpServletRequestBuilder getRequest = get("/users/usernames?username=available")
             .contentType(MediaType.APPLICATION_JSON);
 
     // then
@@ -506,15 +503,14 @@ class UserControllerTest {
   @Test
   void test_check_username_username_is_not_available() throws Exception {
 
-    given(userService.isAvailable(Mockito.any())).willReturn(false);
+  given(userService.isAvailable(Mockito.any())).willReturn(false);
 
-    mockMvc.perform(get("/users/usernames?available=taken")
+    mockMvc.perform(get("/users/usernames?username=taken")
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.available", is(false)))
             .andExpect(jsonPath("$.username", is("taken")));
   }
-  */
 
 
   /**

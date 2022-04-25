@@ -51,7 +51,7 @@ public class GameController {
     // In order to do that, first get current black cards, if there are any (in this case get empty list)
     cards = userService.getCurrentBlackCards(id);
     // if user has no current black cards, we get 8 new ones and assign them to the user for the next 24 hours
-    if (cards.isEmpty()){
+    if (cards == null || cards.isEmpty()){
       cards = gameService.getNRandomBlackCards(NUM_OF_BLACK_CARDS_TO_CHOOSE_FROM);
       userService.assignBlackCardsToUser(id, cards);
     }
@@ -124,7 +124,7 @@ public class GameController {
     * User gets his white Cards
      */
     @GetMapping("users/{userId}/games/whiteCards")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<CardGetDTO> getWhiteCardsFromUser(@RequestHeader(value = "authorization", required = false) String token,
                                                 @PathVariable(value = "userId") Long id) {
