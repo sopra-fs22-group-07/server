@@ -61,6 +61,10 @@ public class UserController {
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.set("token", createdUser.getToken());
 
+    System.out.println("created: " + createdUser.getName());
+    System.out.println(createdUser.getToken());
+    System.out.println(createdUser.getId());
+
     UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
 
     return new ResponseEntity<>(userGetDTO, headers, HttpStatus.CREATED);
@@ -166,7 +170,7 @@ public class UserController {
 
   @GetMapping("/users/{id}/matches")
   @ResponseStatus(HttpStatus.OK)
-  public ResponseEntity<List<UserGetDTO>> getMatches(
+  public List<UserGetDTO> getMatches(
           @RequestHeader(value = "authorization", required = false) String token,
           @PathVariable(value = "id") long id){
 
@@ -179,6 +183,6 @@ public class UserController {
           userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
       }
 
-      return new ResponseEntity<>(userGetDTOs, null, HttpStatus.OK);
+      return userGetDTOs;
   }
 }
