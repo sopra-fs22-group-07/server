@@ -430,7 +430,7 @@ class UserServiceTest {
 
     @Test
     void updateActiveGameIfNecessary_oldGame() {
-      testGame.setCreationTime(new Date(0,0,0));
+      testGame.setCreationTime(new Date(0));
       testUser.setActiveGame(testGame);
       long id = testUser.getId();
 
@@ -479,14 +479,14 @@ class UserServiceTest {
     }
 
     @Test
-    void isGameBelongingToUSer_true(){
+    void isGameBelongingToUser_true(){
       //by default we set testgame to belong to user
         testGame.setUserId(testUser.getId());
       assertTrue(userService.isGameBelongingToUser(testGame, testUser));
     }
 
     @Test
-    void isGameBelongingToUSer_false(){
+    void isGameBelongingToUser_false(){
         //we set the testgame to belong to other user by changing the userId of the testgame
         testGame.setUserId(testUser.getId() + 10);
         assertFalse(userService.isGameBelongingToUser(testGame, testUser));
@@ -524,6 +524,7 @@ class UserServiceTest {
         long id = testUser.getId();
         Mockito.when(userRepository.findById(id)).thenReturn(testUser);
 
+        assertTrue(userService.isWhiteCardBelongingToUser(deleteCard, testUser.getId()));
         userService.deleteWhiteCard(testUser.getId(), deleteCard);
 
         assertTrue(userService.isWhiteCardBelongingToUser(testWhiteCard, testUser.getId()));//should still be there
@@ -577,6 +578,8 @@ class UserServiceTest {
       testUser.setToken("token");
       Mockito.when(userRepository.findByToken(testUser.getToken())).thenReturn(testUser);
       userService.checkGeneralAccess(testUser.getToken());
+
+      // verifies that there is a call in this case there is one call to userRepository.findByToken(any parameter)
       Mockito.verify(userRepository, Mockito.times(1)).findByToken(Mockito.any());
     }
 
