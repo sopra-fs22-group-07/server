@@ -81,7 +81,6 @@ class UserServiceTest {
     testGame.setId(111L);
     testGame.setUserId(testUser.getId());
     testGame.setBlackCard(testBlackCard);
-    testGame.setCreationTime(new Date());
     testGame.setGameStatus(GameStatus.ACTIVE);
     userBlackCards = new UserBlackCards();
     userBlackCards.setBlackCards(new ArrayList<>(Collections.singleton(testBlackCard)));
@@ -99,7 +98,7 @@ class UserServiceTest {
     @Test
     void getUsers_not_empty(){
         User user = userService.createUser(testUser);
-        List<User> checkList = Arrays.asList(userService.createUser(testUser));
+        List<User> checkList = Arrays.asList(user);
         List<User> userList = new ArrayList<>();
         userList.add(user);
 
@@ -344,7 +343,7 @@ class UserServiceTest {
         Mockito.when(userRepository.findById(id)).thenReturn(testUser);
 
         //By default user shouldn't have an active game so should be true as no game added here
-        assertEquals(true, userService.userHasNoActiveGame(id));
+        assertTrue(userService.userHasNoActiveGame(id));
     }
 
     @Test
@@ -354,7 +353,7 @@ class UserServiceTest {
         Mockito.when(userRepository.findById(id)).thenReturn(testUser);
         //Game added to user
         userService.addGame(id, testGame);
-        assertEquals(false, userService.userHasNoActiveGame(id));
+        assertFalse(userService.userHasNoActiveGame(id));
     }
 
     @Test
