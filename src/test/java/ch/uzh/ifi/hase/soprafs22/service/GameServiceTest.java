@@ -316,4 +316,18 @@ class GameServiceTest {
         assertEquals(testGame.getGameStatus(), game.getGameStatus());
         assertEquals(testGame.getBlackCard(), game.getBlackCard());
     }
+
+    @Test
+    void getGameFromRandomUser_throwNotFound() {
+
+        // then
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L)).thenReturn(0L);
+
+        // test
+        // expect exception
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            gameService.getGameFromRandomUser(1L);
+        });
+        assertEquals("404 NOT_FOUND \"There is no black card of another user left\"", exception.getMessage());
+    }
 }
