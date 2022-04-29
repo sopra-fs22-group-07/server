@@ -40,6 +40,7 @@ class GameServiceIntegrationTest {
     @BeforeEach
     public void setup() {
         gameRepository.deleteAll();
+        playRepository.deleteAll();
         testBlackCard = new BlackCard();
         testBlackCard.setText("gap");
         testBlackCard.setId(1L);
@@ -73,7 +74,7 @@ class GameServiceIntegrationTest {
 
         // Test Game
         Game testGame = new Game();
-        Long testUserId = 1L;
+        Long testUserId = 2L;
         testGame.setBlackCard(testBlackCard);
         testGame.setUserId(testUserId);
         testGame.setGameStatus(GameStatus.ACTIVE);
@@ -81,7 +82,7 @@ class GameServiceIntegrationTest {
 
         // Test Play
         Play testPlay = new Play();
-        testPlay.setUserId(2L);
+        testPlay.setUserId(testUserId + 1);
 
         // when
         gameService.putPlayInGame(testGame, testPlay);
