@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
+import ch.uzh.ifi.hase.soprafs22.entity.Game;
+import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.CardPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.GameVotePutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
@@ -22,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -30,7 +34,8 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * GameControllerTest
@@ -340,6 +345,56 @@ class GameControllerTest {
 
         // then
         mockMvc.perform(postRequest).andExpect(status().isBadRequest());
+    }
+
+      @Test
+      void getCurrentBlackCard_success() throws Exception {
+        user.setActiveGame(game);
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(userService.getCurrentBlackCard(user.getId())).willReturn(blackCard);
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/blackCard", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+
+        // then
+          mockMvc.perform(getRequest).andExpect(status().isOk())
+                  .andExpect(jsonPath("$.id", is(blackCard.getId().intValue())))
+                  .andExpect(jsonPath("$.text", is(blackCard.getText())));
+      }
+
+    @Test
+    void getCurrentBlackCard_NoActiveGameFail() throws Exception {
+        // set game to be old
+        game.setCreationTime(new Date(0));
+        // set it as active
+        user.setActiveGame(game);
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(userService.getCurrentBlackCard(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/blackCard", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCurrentBlackCard_NoActiveBlackCardFail() throws Exception {
+
+        // game has no active black card:
+        user.setActiveGame(new Game());
+
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(userService.getCurrentBlackCard(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/blackCard", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
     }
 
     /**

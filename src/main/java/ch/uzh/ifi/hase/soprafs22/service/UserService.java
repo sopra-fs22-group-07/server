@@ -456,11 +456,26 @@ public class UserService {
     return false;
   }
 
-    /**
-     * Deletes a User from Repo By the USer id
-     * @param userId
-     */
-    public void deleteUser(long userId){
+  /**
+   * Deletes a User from Repo By the USer id
+   * @param userId
+   */
+  public void deleteUser(long userId){
         userRepository.deleteById(userId);
     }
+
+  /**
+   * Gets the black card of a user, but throws 404 if the user has no active game or no black card selected yet
+   * @param userId: UserID of the user that we want the current black card of
+   * @return blackCard (or 404)
+   */
+  public BlackCard getCurrentBlackCard(Long userId) {
+    User user = getUserById(userId);
+    // check if user has active game, or a black card chosen respectively
+    if (user.getActiveGame() == null || user.getActiveGame().getBlackCard() == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No black card selected");
+    }
+    // else return the black card
+    return user.getActiveGame().getBlackCard();
+  }
 }

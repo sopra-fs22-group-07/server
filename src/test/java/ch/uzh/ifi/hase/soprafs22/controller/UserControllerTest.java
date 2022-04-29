@@ -518,7 +518,7 @@ class UserControllerTest {
    * can be processed
    * Input will look like this: {"name": "Test User", "username": "testUsername"}
    * 
-   * @param object
+   * @param wobject
    * @return string
    */
   private String asJsonString(final Object object) {
