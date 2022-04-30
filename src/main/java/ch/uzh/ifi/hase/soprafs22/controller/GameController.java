@@ -106,17 +106,17 @@ public class GameController {
     public CardAndGameIdGetDTO getBlackCardFromRandomUser(@RequestHeader(value = "authorization", required = false) String token,
                                       @PathVariable(value = "userId") Long id) {
 
-        userService.checkSpecificAccess(token, id);
+      userService.checkSpecificAccess(token, id);
 
       // Get 'random' game
       Game game = gameService.getGameFromRandomUser(id);
 
       // return it
       CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();
-      if (game != null) {
-        cardAndGameIdGetDTO.setBlackCard(game.getBlackCard());
-        cardAndGameIdGetDTO.setGameId(game.getId());
-      }
+
+      cardAndGameIdGetDTO.setBlackCard(game.getBlackCard());
+      cardAndGameIdGetDTO.setGameId(game.getId());
+
       return cardAndGameIdGetDTO;
     }
 

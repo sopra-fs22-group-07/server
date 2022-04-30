@@ -217,10 +217,16 @@ public class GameService {
    * already has played on
    * @param userId: userId of the caller
    * @return Game: a random Game.
+   * @throws ResponseStatusException - 404: if there is no game of another user left
    */
   public Game getGameFromRandomUser(Long userId) {
     // count the possible games
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
+
+    if(numOfGames==0){
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
+    }
+
     // limit page size to 100
     int pageSize = (numOfGames < 100) ? numOfGames.intValue() : 100;
     int pageIndex = rand.nextInt(pageSize);
@@ -230,10 +236,7 @@ public class GameService {
     // get the page with the game
     Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId);
 
-    // return the game if there is any, else return null
-    if (somePage.getTotalElements() > 0) {
-      return somePage.getContent().get(0);
-    }
-     return null;
+    // return the game
+    return somePage.getContent().get(0);
   }
 }
