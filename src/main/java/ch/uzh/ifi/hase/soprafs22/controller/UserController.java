@@ -61,10 +61,6 @@ public class UserController {
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.set("token", createdUser.getToken());
 
-    System.out.println("created: " + createdUser.getName());
-    System.out.println(createdUser.getToken());
-    System.out.println(createdUser.getId());
-
     UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
 
     return new ResponseEntity<>(userGetDTO, headers, HttpStatus.CREATED);
@@ -174,8 +170,8 @@ public class UserController {
           @RequestHeader(value = "authorization", required = false) String token,
           @PathVariable(value = "id") long id){
 
-      userService.checkSpecificAccess(token, id); // throws 401 if Access isn't allowed
-      List<User> matchedUsers = userService.getMatchedUsers(id); // throws 404 if user with userId doesn't exist
+      userService.checkSpecificAccess(token, id); // throws 401 if Access isn't allowed, or 404 if user doesn't exist
+      List<User> matchedUsers = userService.getMatchedUsers(id); // throws 404 if user with id doesn't exist
 
       // create response object
       List<UserGetDTO> userGetDTOs = new ArrayList<>();
