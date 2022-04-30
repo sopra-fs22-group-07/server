@@ -456,11 +456,37 @@ public class UserService {
     return false;
   }
 
-    /**
-     * Deletes a User from Repo By the USer id
-     * @param userId
-     */
-    public void deleteUser(long userId){
-        userRepository.deleteById(userId);
+  /**
+   * Deletes a User from Repo By the USer id
+   * @param userId
+   */
+  public void deleteUser(long userId){
+      userRepository.deleteById(userId);
+  }
+
+
+  // return list of users that matched with the user with id "userId"
+  public List<User> getMatchedUsers(long userId) {
+
+    // get id's of all matches of user with id userId
+    Set<Long> matches = getUserById(userId).getMatches();
+
+    // get user entities for all users with a match
+    List<User> users = new ArrayList<>();
+
+    // for all matches do:
+    for (long matchId : matches) {
+      Match match = matchRepository.findByMatchId(matchId);
+      // get users from match and add to list the one that is not the user with id userId
+      Pair<User, User> userPair = match.getUserPair();
+      if (userPair.getObj1().getId() != userId) {
+        users.add(userPair.getObj1());
+      } else {
+        users.add(userPair.getObj2());
+      }
     }
+
+    // return list of users
+    return users;
+  }
 }
