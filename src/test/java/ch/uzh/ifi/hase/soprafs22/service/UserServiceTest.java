@@ -705,6 +705,37 @@ class UserServiceTest {
     }
 
     @Test
+    void getCurrentBlackCard_success() {
+
+      Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+      testUser.setActiveGame(testGame);
+
+      BlackCard expected = testBlackCard;
+      BlackCard actual = userService.getCurrentBlackCard(testUser.getId());
+      assertEquals(expected, actual, "Expected the correct black to be returned");
+    }
+
+  @Test
+  void getCurrentBlackCard_UserHasNoActiveGameOr_fail() {
+
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    testUser.setActiveGame(null);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(testUser.getId()));
+    assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+  }
+
+  @Test
+  void getCurrentBlackCard_UserHasNoBlackCardGame_fail() {
+
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    testGame.setBlackCard(null);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(testUser.getId()));
+    assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+  }
+
+    @Test
     void deleteUser_test(){
       assertDoesNotThrow(()-> userService.deleteUser(1L));
     }

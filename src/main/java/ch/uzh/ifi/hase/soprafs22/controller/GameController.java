@@ -252,4 +252,23 @@ public class GameController {
         userService.deleteWhiteCard(id, whiteCard);
       }
     }
+
+  /**
+   * Gets the current black card of a user or throws status exception
+   * @param token: token of the user
+   * @param userId: userId of the user
+   * @return: CardGetDTO
+   */
+    @GetMapping("/users/{userId}/games/blackCards/current")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public CardGetDTO getCurrentBlackCard(@RequestHeader(value = "authorization", required = false) String token,
+                                    @PathVariable(value = "userId") Long userId) {
+      userService.checkSpecificAccess(token, userId);
+      // first, check if active game is older than 24 hours.
+      userService.updateActiveGameIfNecessary(userId);
+
+      BlackCard blackCard = userService.getCurrentBlackCard(userId);
+      return DTOMapper.INSTANCE.convertEntityToCardGetDTO(blackCard);
+    }
 }
