@@ -289,6 +289,7 @@ public class UserService {
     if (userBlackCards == null || userBlackCards.getBlackCards() == null || userBlackCards.getBlackCards().isEmpty()) {
       return Collections.emptyList();
     }
+    // check if cards are older than one day, return empty list if so, else return the cards (that are younger than one day)
     long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
     if(diffTime > Time.ONE_DAY) {
       // update black cards
