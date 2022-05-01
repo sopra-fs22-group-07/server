@@ -54,7 +54,6 @@ public class GameService {
    */
   // See solution from https://stackoverflow.com/a/52409343/17532411
   public List<BlackCard> getNRandomBlackCards(int numOfCards) {
-    // TODO: 12.04.2022 It seems that it isn't quite random: Try it with PostMan and see that the cardIds are always near each other
 
     // get 8 random cards from the blackCardRepository
     int totalRecords = (int) blackCardRepository.count();

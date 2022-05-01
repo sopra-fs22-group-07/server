@@ -162,7 +162,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // when -> setup additional mocks for UserRepository
-      User returnUser = userService.checkPasswordAndUsername(inputUser);
+      User returnUser = userService.doLogin(inputUser);
 
       // then
       assertEquals(testUser.getId(), returnUser.getId());
@@ -184,7 +184,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // then error, because different password
-      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.checkPasswordAndUsername(inputUser));
+      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doLogin(inputUser));
       assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
   }
 
@@ -198,7 +198,7 @@ class UserServiceTest {
 
     Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(null);
 
-    assertTrue(userService.isAvailable(username));
+    assertTrue(userService.isUsernameAvailable(username));
   }
 
   @Test
@@ -207,7 +207,7 @@ class UserServiceTest {
 
     Mockito.when(userRepository.findByUsername(username)).thenReturn(testUser);
 
-    assertFalse(userService.isAvailable(username));
+    assertFalse(userService.isUsernameAvailable(username));
   }
   
     @Test
@@ -703,6 +703,37 @@ class UserServiceTest {
         testGame.enqueuePlay(play2);
         assertFalse(userService.hasUserAlreadyPlayInGame(testGame, play3));
     }
+
+    @Test
+    void getCurrentBlackCard_success() {
+
+      Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+      testUser.setActiveGame(testGame);
+
+      BlackCard expected = testBlackCard;
+      BlackCard actual = userService.getCurrentBlackCard(testUser.getId());
+      assertEquals(expected, actual, "Expected the correct black to be returned");
+    }
+
+  @Test
+  void getCurrentBlackCard_UserHasNoActiveGameOr_fail() {
+
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    testUser.setActiveGame(null);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(testUser.getId()));
+    assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+  }
+
+  @Test
+  void getCurrentBlackCard_UserHasNoBlackCardGame_fail() {
+
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    testGame.setBlackCard(null);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(testUser.getId()));
+    assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+  }
 
     @Test
     void deleteUser_test(){
