@@ -485,7 +485,7 @@ public class UserService {
       // get users from match
       Pair<User, User> userPair = match.getUserPair();
       // compare users with users from match
-      if (userPair.getObj1() == user && userPair.getObj2() == otherUser || userPair.getObj1() == otherUser && userPair.getObj2() == user) {
+      if (userPair.equals(new Pair<>(user, otherUser))) {
         return true;
       }
     }
