@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * User Controller
@@ -30,13 +29,16 @@ public class UserController {
     this.userService = userService;
   }
 
+  /**
+   * Not implemented by client, thus not documented in REST interface.
+   */
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<UserGetDTO> getAllUsers(@RequestHeader(value = "authorization", required = false) String token) {
 
     // check if source of query has access token
-    userService.checkGeneralAccess(token);
+    userService.checkGeneralAccess(token); // 401, 404
 
     // fetch all users in the internal representation
     List<User> users = userService.getUsers();
@@ -56,8 +58,9 @@ public class UserController {
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
     // create user
-    User createdUser = userService.createUser(userInput);
+    User createdUser = userService.createUser(userInput); // 409
 
+    // set header
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.set("token", createdUser.getToken());
 
@@ -73,8 +76,9 @@ public class UserController {
         User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
         // check username and password, throws UNAUTHORIZED if false
-        User returnUser = userService.checkPasswordAndUsername(userInput);
+        User returnUser = userService.doLogin(userInput); // 401
 
+        // set header
         MultiValueMap<String, String> httpHeaders = new HttpHeaders();
         httpHeaders.set("token", returnUser.getToken());
 
@@ -84,94 +88,96 @@ public class UserController {
         return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
     }
 
-  @PutMapping("/users/logout/{id}")
+  @PutMapping("/users/logout/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
   public void logoutUser(@RequestHeader(value = "authorization", required = false) String token,
-                         @PathVariable(value = "id") long userId
+                         @PathVariable(value = "userId") long userId
                         ){
 
     // check if caller is authorized
-    userService.checkSpecificAccess(token, userId); // throws 401
+    userService.checkSpecificAccess(token, userId); // throws 401, 404
 
     User userInput = new User();
     // make sure user has right ID
     userInput.setId(userId);
     userInput.setToken(token);
     userService.logoutUser(userInput); // throws 404
-
   }
 
-  @GetMapping("/users/{id}")
+  @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public UserGetDTO getUser(@RequestHeader(value = "authorization", required = false) String token,
-                            @PathVariable(value = "id") int userId) {
+                            @PathVariable(value = "userId") int userId) {
     userService.checkGeneralAccess(token);
     User user = userService.getUserById(userId);
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
 
-  // Just additional, not really to be implemented by the Client, returns much more details about the user
-  @GetMapping("/users/{id}/details")
+  /**
+   *Just additional, not really to be implemented by the Client, returns much more details about the user
+   */
+  @GetMapping("/users/{userId}/details")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public UserGetDetailsDTO getUserInDetail(@RequestHeader(value = "authorization", required = false) String token,
-                                           @PathVariable(value = "id") int userId) {
+                                           @PathVariable(value = "userId") int userId) {
 
     userService.checkSpecificAccess(token, userId);
     User user = userService.getUserById(userId);
     return DTOMapper.INSTANCE.convertEntityToUserGetDetailsDTO(user);
   }
 
-  @PutMapping("/users/{id}")
+  @PutMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
   public void updateUser(
           @RequestHeader(value = "authorization", required = false) String token,
-          @PathVariable(value = "id") long userId,
+          @PathVariable(value = "userId") long userId,
           @RequestBody UserPutDTO userPutDTO){
-    userService.checkSpecificAccess(token, userId); //checks for 401
 
+    userService.checkSpecificAccess(token, userId); // 401, 404
     User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
     // make sure user has right ID
     userInput.setId(userId);
-    userService.updateUser(userInput); // this throws errors 404 and 409
+    userService.updateUser(userInput); // 404, 409
   }
 
   @GetMapping("/users/usernames")
+  @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public ResponseEntity<UsernameGetDTO> checkUserNameAvailability(
+  public UsernameGetDTO checkUserNameAvailability(
           @RequestParam String username){
 
     // get the availability of the username
-    boolean isAvailable = userService.isAvailable(username);
+    boolean isAvailable = userService.isUsernameAvailable(username);
 
     // create and return ResponseEntity
     UsernameGetDTO responseBody = new UsernameGetDTO();
     responseBody.setAvailable(isAvailable);
     responseBody.setUsername(username);
-    return new ResponseEntity<>(responseBody, null, HttpStatus.OK);
+    return responseBody;
   }
 
-  @DeleteMapping("/users/{id}")
+  @DeleteMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteUser(
           @RequestHeader(value = "authorization", required = false) String token,
-          @PathVariable(value = "id") long userId){
+          @PathVariable(value = "userId") long userId){
 
-      userService.checkSpecificAccess(token, userId); // throws 401 if Access isn't allowed
-      userService.deleteUser(userId); //Throws 404 if user with userId doesn't exist
+      userService.checkSpecificAccess(token, userId); // 401, 404
+      userService.deleteUser(userId);
   }
 
-  @GetMapping("/users/{id}/matches")
+  @GetMapping("/users/{userId}/matches")
   @ResponseStatus(HttpStatus.OK)
   public List<UserGetDTO> getMatches(
           @RequestHeader(value = "authorization", required = false) String token,
-          @PathVariable(value = "id") long id){
+          @PathVariable(value = "userId") long id){
 
-      userService.checkSpecificAccess(token, id); // throws 401 if Access isn't allowed, or 404 if user doesn't exist
-      List<User> matchedUsers = userService.getMatchedUsers(id); // throws 404 if user with id doesn't exist
+      userService.checkSpecificAccess(token, id); // 401, 404
+      List<User> matchedUsers = userService.getMatchedUsers(id);
 
       // create response object
       List<UserGetDTO> userGetDTOs = new ArrayList<>();

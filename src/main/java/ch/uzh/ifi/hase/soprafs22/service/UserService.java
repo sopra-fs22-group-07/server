@@ -49,6 +49,11 @@ public class UserService {
     return this.userRepository.findAll();
   }
 
+  /**
+   * Creates and saves a new user
+   * @param newUser: User that shall be created
+   * @return: user that was created
+   */
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
@@ -64,9 +69,13 @@ public class UserService {
     return newUser;
   }
 
+  /**
+   * logout the user, sets the status to offline
+   * @param user: User to be logged out
+   * @return: User that was logged out
+   */
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
-
 
     userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
     return userToBeLoggedOut;
@@ -93,10 +102,14 @@ public class UserService {
     }
   }
 
+  /**
+   * This is a method that checks if a username is available, but only raises an error if the user given in the
+   * argument is different from the user retrieved from the userRepository.
+   * @param user: user with username that is checked against.
+   */
   private void checkIfUserExistsForNewUsername(User user) {
 
     User userByUsername = userRepository.findByUsername(user.getUsername());
-
     if (userByUsername != null && !Objects.equals(userByUsername.getId(), user.getId())) {
       throw new ResponseStatusException(HttpStatus.CONFLICT,
               "Username is already taken");
@@ -106,14 +119,13 @@ public class UserService {
     /**
      * This is a helper method that will check the uniqueness criteria of the
      * username and the password
-     * defined in the User entity. The method will do nothing if the input is unique
-     * and throw an error otherwise.
+     * defined in the User entity. The method also sets the status of the user to ONLINE.
      *
      * @param inputUser user as input
-     * @throws org.springframework.web.server.ResponseStatusException
+     * @throws org.springframework.web.server.ResponseStatusException: 401
      * @see User
      */
-    public User checkPasswordAndUsername(User inputUser) {
+    public User doLogin(User inputUser) {
         User userByUsername = userRepository.findByUsername(inputUser.getUsername());
         // test if user exists and correct password is given
         if (userByUsername == null || !Objects.equals(inputUser.getPassword(), userByUsername.getPassword())){
@@ -121,10 +133,14 @@ public class UserService {
                     "Your Username or password is incorrect");
         }
         userByUsername.setStatus(UserStatus.ONLINE);
-        this.userRepository.save(userByUsername);
+        userRepository.saveAndFlush(userByUsername);
         return userByUsername;
     }
 
+  /**
+   * Check if the token belongs to any user, throws an Exception otherwise
+   * @param token: String, token of a user
+   */
   public void checkGeneralAccess(String token) {
     User user = userRepository.findByToken(token);
     if(user == null) {
@@ -132,6 +148,11 @@ public class UserService {
     }
   }
 
+  /**
+   * Gets a user by his userId, throws if there is no such user
+   * @param userId: long
+   * @return User retrieved
+   */
   public User getUserById(long userId) {
     User user = this.userRepository.findById(userId);
     if(user == null){
@@ -140,21 +161,31 @@ public class UserService {
     return user;
   }
 
+  /**
+   * Check if the token belongs to User with userId, throws Exception if it does not.
+   * @param token: String, token of a user
+   * @param userId: long, id of a user
+   */
   public void checkSpecificAccess(String token, long userId) {
     User userByToken = userRepository.findByToken(token);
-    User userById = getUserById(userId);
+    User userById = getUserById(userId); // 404
     if(userByToken == null || userByToken != userById) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You're not allowed to Access this user! ");
     }
   }
 
+  /**
+   * This method call updates a user
+   * @param user: User to be updated
+   * @return updated User
+   */
   public User updateUser(User user) {
     // user has right id since we set it in the user-controller
     User userToBeUpdated = getUserById(user.getId()); // 404
     checkIfUserExistsForNewUsername(user); // 409
 
     // finally, update User in repository
-    //check if the username is not just spaces
+    // check if the username is not just spaces
     if(!user.getUsername().equals("")){
         userToBeUpdated.setUsername(user.getUsername());
     }
@@ -162,8 +193,12 @@ public class UserService {
     return userToBeUpdated;
   }
 
-  public boolean isAvailable(String userInput) {
-
+  /**
+   * Checks if a username is available
+   * @param userInput: String
+   * @return true if username is available, false otherwise
+   */
+  public boolean isUsernameAvailable(String userInput) {
     User user = userRepository.findByUsername(userInput);
     return user == null;
   }
@@ -291,6 +326,7 @@ public class UserService {
     if (userBlackCards == null || userBlackCards.getBlackCards() == null || userBlackCards.getBlackCards().isEmpty()) {
       return Collections.emptyList();
     }
+    // check if cards are older than one day, return empty list if so, else return the cards (that are younger than one day)
     long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
     if(diffTime > Time.ONE_DAY) {
       // update black cards
@@ -449,7 +485,7 @@ public class UserService {
       // get users from match
       Pair<User, User> userPair = match.getUserPair();
       // compare users with users from match
-      if (userPair.getObj1() == user && userPair.getObj2() == otherUser || userPair.getObj1() == otherUser && userPair.getObj2() == user) {
+      if (userPair.equals(new Pair<>(user, otherUser))) {
         return true;
       }
     }
@@ -458,13 +494,18 @@ public class UserService {
 
   /**
    * Deletes a User from Repo By the USer id
-   * @param userId
+   * @param userId: userId of a user
    */
   public void deleteUser(long userId){
       userRepository.deleteById(userId);
   }
 
 
+  /**
+   * get all users that user has matched with
+   * @param userId: userId of user
+   * @return list of users that matched with the user with id "userId"
+   */
   // return list of users that matched with the user with id "userId"
   public List<User> getMatchedUsers(long userId) {
 

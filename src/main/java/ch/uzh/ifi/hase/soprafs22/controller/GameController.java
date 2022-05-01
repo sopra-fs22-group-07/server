@@ -43,8 +43,6 @@ public class GameController {
 
     userService.checkSpecificAccess(token, id); // throws 401, 404
 
-    // first, check and update if active game is older than 24 hours.
-
     List<BlackCard> cards;
 
     // We don't want the user just to refresh the page, so we only give him new black cards every 24 hours
@@ -81,10 +79,10 @@ public class GameController {
 
       // get the black card from the request body
       BlackCard userInputCard = DTOMapper.INSTANCE.convertGamePostDTOToEntity(blackCardPostDTO);
-      BlackCard blackCard = gameService.getBlackCardById(userInputCard.getId());
+      BlackCard blackCard = gameService.getBlackCardById(userInputCard.getId()); // 404
 
       // make sure that black card is in user's current black cards (which the user gets assigned when he retrieves some blackCards)
-      userService.checkBlackCard(id, blackCard);
+      userService.checkBlackCard(id, blackCard); // 403
 
       // create game with game service
       Game game = gameService.createGame(blackCard, id);
@@ -93,7 +91,7 @@ public class GameController {
       userService.addGame(id, game);
 
       // get and assign white card to the user for the next 24 hours
-      // the white cards are decoupled from any time, but we only assign and create them here, so the user could potentially play
+      // the white cards are decoupled from any time, but we only assign and create them here, so the user can play
       // white cards after his own game expired.
       List<WhiteCard> whiteCards = gameService.getNRandomWhiteCards(NUM_OF_WHITE_CARDS_PER_DAY);
       userService.assignWhiteCards(id, whiteCards);
@@ -132,7 +130,7 @@ public class GameController {
       userService.checkSpecificAccess(token, id); // throws 401, 404
 
       // get white cards of user
-      List <WhiteCard> cards = userService.getWhiteCards(id); // throws 409
+      List <WhiteCard> cards = userService.getWhiteCards(id);
 
       // return them
       List<CardGetDTO> cardGetDTO= new ArrayList<>();
@@ -154,7 +152,7 @@ public class GameController {
       userService.checkSpecificAccess(token, id); // throws 401, 404
 
       User user = userService.getUserById(id);
-      // get one random play (first the past games)
+      // get one game (first get the old ones)
       Game game = gameService.getGame(user.getActiveGame(), user.getPastGames());
       return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
     }
@@ -163,7 +161,6 @@ public class GameController {
      * set Like to WhiteCard
      */
     @PutMapping("/users/{userId}/games/{gameId}/vote")
-    @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ResponseEntity<UserGetDTO> voteCard(
             @RequestHeader(value = "authorization", required = false) String token,
@@ -182,8 +179,8 @@ public class GameController {
       // the relationship from the call is: user likes otherUser (user is the caller of the URI)
       // get both users
       User user = userService.getUserById(id);
-      Game game = gameService.getGameById(gameId);
-      User otherUser = userService.getUserById(otherUserId);
+      Game game = gameService.getGameById(gameId); // 404
+      User otherUser = userService.getUserById(otherUserId); // 404
 
       // make sure that user does not like himself (safety net)
       if(user == otherUser) {
@@ -229,12 +226,12 @@ public class GameController {
 
       // get the game that is voted on
       Game inputGame = DTOMapper.INSTANCE.convertGameIDPostDTOToEntity(gameIDPostDTO);
-      Game game = gameService.getGameById(inputGame.getId());
+      Game game = gameService.getGameById(inputGame.getId()); // 404
 
       // make sure that the game does not belong to the caller himself, you shall not give a white card to your own game.
       if(userService.isGameBelongingToUser(game, userService.getUserById(id))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Wrong use of API call: gameId must belong to userId");
+                "Wrong use of API call: gameId must not belong to userId");
       }
       // get the played white card
       WhiteCard whiteCard = gameService.getWhiteCardById(cardId);
