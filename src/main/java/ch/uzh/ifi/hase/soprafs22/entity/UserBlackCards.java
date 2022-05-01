@@ -8,6 +8,7 @@ import java.util.List;
 @Entity
 @Table(name = "USERBLACKCARDS")
 public class UserBlackCards implements Serializable {
+
   @Id
   @GeneratedValue
   private Long id;

@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -18,22 +17,4 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "BLACKCARD")
-public class BlackCard extends Card implements Serializable {
-
-
-  // we need nullable=true for black cards
-  // otherwise it is impossible to add WHITE (!) cards to the repository.
-  // I have no idea where this is coming from, but it is not a problem for
-  // the black cards, as all have the nrOfBlanks set to some value.
-  // @Column(nullable = true)
-  // private int nrOfBlanks;
-
-  // public int getNrOfBlanks() {
-  //   return nrOfBlanks;
-  // }
-
-  // public void setNrOfBlanks(int nrOfBlanks) {
-  //   this.nrOfBlanks = nrOfBlanks;
-  // }
-
-}
+public class BlackCard extends Card implements Serializable {}

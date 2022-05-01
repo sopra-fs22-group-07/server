@@ -68,5 +68,5 @@ public class UserGetDTO {
       return this.gender;
   }
 
- public void setGender(Gender gender){this.gender = gender; }
+  public void setGender(Gender gender){this.gender = gender; }
 }

@@ -53,7 +53,6 @@ public class GameService {
    */
   // See solution from https://stackoverflow.com/a/52409343/17532411
   public List<BlackCard> getNRandomBlackCards(int numOfCards) {
-    // TODO: 12.04.2022 It seems that it isn't quite random: Try it with PostMan and see that the cardIds are always near each other
 
     // get 8 random cards from the blackCardRepository
     int totalRecords = (int) blackCardRepository.count();
@@ -217,10 +216,16 @@ public class GameService {
    * already has played on
    * @param userId: userId of the caller
    * @return Game: a random Game.
+   * @throws ResponseStatusException - 404: if there is no game of another user left
    */
   public Game getGameFromRandomUser(Long userId) {
     // count the possible games
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
+
+    if(numOfGames==0){
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
+    }
+
     // limit page size to 100
     int pageSize = (numOfGames < 100) ? numOfGames.intValue() : 100;
     int pageIndex = rand.nextInt(pageSize);
@@ -230,10 +235,7 @@ public class GameService {
     // get the page with the game
     Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId);
 
-    // return the game if there is any, else return null
-    if (somePage.getTotalElements() > 0) {
-      return somePage.getContent().get(0);
-    }
-     return null;
+    // return the game
+    return somePage.getContent().get(0);
   }
 }
