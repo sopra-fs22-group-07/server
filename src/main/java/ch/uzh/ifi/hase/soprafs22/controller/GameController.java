@@ -79,7 +79,7 @@ public class GameController {
 
       // get the black card from the request body
       BlackCard userInputCard = DTOMapper.INSTANCE.convertGamePostDTOToEntity(blackCardPostDTO);
-      BlackCard blackCard = gameService.getBlackCardById(userInputCard.getId());
+      BlackCard blackCard = gameService.getBlackCardById(userInputCard.getId()); // 404
 
       // make sure that black card is in user's current black cards (which the user gets assigned when he retrieves some blackCards)
       userService.checkBlackCard(id, blackCard); // 403
