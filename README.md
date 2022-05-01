@@ -1,30 +1,15 @@
-# SoPra RESTful Service Template FS22
+# SoPra FS22 - Group 07 - RESTful Service
 
-## Getting started with Spring Boot
+## Project: Date against humanity (Network and Game)
+Date against humanity helps you meet people with the same sense of humour and allows you to network with others in a fun way.
+The basic principle is simple. You can publish on your profile some gap texts (black cards) from the game "Cards against Humanity". By doing so, you give other users the chance to fill your gap text with terms (white cards). From the selection of white cards that respond to your black card you choose the funniest one and thus match with that person. This allows you to view their profile, chat and network with them.
 
--   Documentation: https://docs.spring.io/spring-boot/docs/current/reference/html/index.html
--   Guides: http://spring.io/guides
-    -   Building a RESTful Web Service: http://spring.io/guides/gs/rest-service/
-    -   Building REST services with Spring: http://spring.io/guides/tutorials/bookmarks/
+### Goal: network with other people in a fun way, play and have fun together
 
-## Setup this Template with your IDE of choice
+### Rules:
+Gap text and terms are all from the game "Cards against humanity". You get dealt a total of N terms (white cards) per day, from which you can only see 8 at any given time. For each term you use, you draw another one until you have used up all your N cards for this day. Each day, you can write one term by yourself (wild card).
 
-Download your IDE of choice: (e.g., [Eclipse](http://www.eclipse.org/downloads/), [IntelliJ](https://www.jetbrains.com/idea/download/)), [Visual Studio Code](https://code.visualstudio.com/) and make sure Java 15 is installed on your system (for Windows-users, please make sure your JAVA_HOME environment variable is set to the correct version of Java).
-
-1. File -> Open... -> SoPra Server Template
-2. Accept to import the project as a `gradle project`
-
-To build right click the `build.gradle` file and choose `Run Build`
-
-### VS Code
-The following extensions will help you to run it more easily:
--   `pivotal.vscode-spring-boot`
--   `vscjava.vscode-spring-initializr`
--   `vscjava.vscode-spring-boot-dashboard`
--   `vscjava.vscode-java-pack`
--   `richardwillis.vscode-gradle`
-
-**Note:** You'll need to build the project first with Gradle, just click on the `build` command in the _Gradle Tasks_ extension. Then check the _Spring Boot Dashboard_ extension if it already shows `soprafs22` and hit the play button to start the server. If it doesn't show up, restart VS Code and check again.
+More information: https://www.cardsagainsthumanity.com/
 
 ## Building with Gradle
 
@@ -92,10 +77,33 @@ do the following:
 6. Step through the process one step at a time
 
 ## Testing
-
 Have a look here: https://www.baeldung.com/spring-boot-testing
 
-## Diagrams
+## Docs Spring Boot
 
-Class diagram: https://lucid.app/lucidchart/7f230dca-7fe6-4d8f-bb70-13a0f86d467f/edit?from_internal=true
+-   Documentation: https://docs.spring.io/spring-boot/docs/current/reference/html/index.html
+-   Guides: http://spring.io/guides
+    -   Building a RESTful Web Service: http://spring.io/guides/gs/rest-service/
+    -   Building REST services with Spring: http://spring.io/guides/tutorials/bookmarks/
+
+## Setup this Template with your IDE of choice
+
+Download your IDE of choice: (e.g., [Eclipse](http://www.eclipse.org/downloads/), [IntelliJ](https://www.jetbrains.com/idea/download/)), [Visual Studio Code](https://code.visualstudio.com/) and make sure Java 15 is installed on your system (for Windows-users, please make sure your JAVA_HOME environment variable is set to the correct version of Java).
+
+1. File -> Open... -> SoPra Server Template
+2. Accept to import the project as a `gradle project`
+
+To build right click the `build.gradle` file and choose `Run Build`
+
+### VS Code
+The following extensions will help you to run it more easily:
+-   `pivotal.vscode-spring-boot`
+-   `vscjava.vscode-spring-initializr`
+-   `vscjava.vscode-spring-boot-dashboard`
+-   `vscjava.vscode-java-pack`
+-   `richardwillis.vscode-gradle`
+
+**Note:** You'll need to build the project first with Gradle, just click on the `build` command in the _Gradle Tasks_ extension. Then check the _Spring Boot Dashboard_ extension if it already shows `soprafs22` and hit the play button to start the server. If it doesn't show up, restart VS Code and check again.
+
+### The server is built on the SoPra RESTful Service Template FS22
 
