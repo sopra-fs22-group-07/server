@@ -105,5 +105,5 @@ The following extensions will help you to run it more easily:
 
 **Note:** You'll need to build the project first with Gradle, just click on the `build` command in the _Gradle Tasks_ extension. Then check the _Spring Boot Dashboard_ extension if it already shows `soprafs22` and hit the play button to start the server. If it doesn't show up, restart VS Code and check again.
 
-### The server is built on the SoPra RESTful Service Template FS22
+### The server is built on the SoPra RESTful Service Template FS22: https://github.com/HASEL-UZH/sopra-fs22-template-server
 
