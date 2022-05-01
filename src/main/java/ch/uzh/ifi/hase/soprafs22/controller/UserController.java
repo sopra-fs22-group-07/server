@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * User Controller
@@ -161,5 +162,23 @@ public class UserController {
 
       userService.checkSpecificAccess(token, userId); // throws 401 if Access isn't allowed
       userService.deleteUser(userId); //Throws 404 if user with userId doesn't exist
+  }
+
+  @GetMapping("/users/{id}/matches")
+  @ResponseStatus(HttpStatus.OK)
+  public List<UserGetDTO> getMatches(
+          @RequestHeader(value = "authorization", required = false) String token,
+          @PathVariable(value = "id") long id){
+
+      userService.checkSpecificAccess(token, id); // throws 401 if Access isn't allowed, or 404 if user doesn't exist
+      List<User> matchedUsers = userService.getMatchedUsers(id); // throws 404 if user with id doesn't exist
+
+      // create response object
+      List<UserGetDTO> userGetDTOs = new ArrayList<>();
+      for (User user : matchedUsers) {
+          userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+      }
+
+      return userGetDTOs;
   }
 }
