@@ -353,7 +353,7 @@ class GameControllerTest {
         given(userService.getUserById(user.getId())).willReturn(user);
         given(userService.getCurrentBlackCard(user.getId())).willReturn(blackCard);
 
-        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/blackCard", user.getId())
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/blackCards/current", user.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("authorization", user.getToken());
 
@@ -372,7 +372,7 @@ class GameControllerTest {
         given(userService.getUserById(user.getId())).willReturn(user);
         given(userService.getCurrentBlackCard(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/blackCard", user.getId())
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/blackCards/current", user.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("authorization", user.getToken());
 
@@ -389,7 +389,7 @@ class GameControllerTest {
         given(userService.getUserById(user.getId())).willReturn(user);
         given(userService.getCurrentBlackCard(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/blackCard", user.getId())
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/blackCards/current", user.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("authorization", user.getToken());
 

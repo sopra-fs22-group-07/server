@@ -259,7 +259,7 @@ public class GameController {
    * @param userId: userId of the user
    * @return: CardGetDTO
    */
-    @GetMapping("/users/{userId}/blackCard")
+    @GetMapping("/users/{userId}/games/blackCards/current")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public CardGetDTO getCurrentBlackCard(@RequestHeader(value = "authorization", required = false) String token,
