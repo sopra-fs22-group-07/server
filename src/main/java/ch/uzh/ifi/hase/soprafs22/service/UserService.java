@@ -494,7 +494,7 @@ public class UserService {
 
   /**
    * Deletes a User from Repo By the USer id
-   * @param userId
+   * @param userId: userId of a user
    */
   public void deleteUser(long userId){
       userRepository.deleteById(userId);
