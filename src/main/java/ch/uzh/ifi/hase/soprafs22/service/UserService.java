@@ -586,59 +586,17 @@ public class UserService {
     Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
 
 
-    // // ======= create demo plays and enqueue them to the games =======
-    // WhiteCard whiteCard1 = gameService.getNRandomWhiteCards(1).get(0);
-    // WhiteCard whiteCard2 = gameService.getNRandomWhiteCards(1).get(0);
-    // WhiteCard whiteCard3 = gameService.getNRandomWhiteCards(1).get(0);
-
-    // Play play2on1 = gameService.createPlay(demoUser2.getId(), whiteCard1.getId());
-    // Play play3on1 = gameService.createPlay(demoUser3.getId(), whiteCard2.getId());
-    // Play play3on2 = gameService.createPlay(demoUser3.getId(), whiteCard3.getId());
-
-    // gameService.putPlayInGame(game1, play2on1);
-    // gameService.putPlayInGame(game1, play3on1);
-    // gameService.putPlayInGame(game2, play3on2);
-
-    // // remove the played cards from the player's hands
-    // deleteWhiteCard(demoUser2.getId(), whiteCard1);
-    // deleteWhiteCard(demoUser3.getId(), whiteCard2);
-    // deleteWhiteCard(demoUser3.getId(), whiteCard3);
-
-
     // ======= create likes and matches =======
-    // System.out.println("Creating matches between demo users...");
-    // Match demoMatch1 = createMatch(demoUser1, demoUser2);
+    Match demoMatch1 = createMatch(demoUser1, demoUser2);
+    setMatch(demoMatch1);
 
+    // the following code breaks (as far as I can tell between the 2 calls)
     // Match demoMatch2 = createMatch(demoUser1, demoUser3);
-
-    // System.out.println("repo");
-    // System.out.println(matchRepository.findAll().size());
-
-    // System.out.println(demoMatch1.getMatchId());
-    // System.out.println(demoMatch2.getMatchId());
-    // Match demoMatch2 = createMatch(demoUser1, demoUser3);
-    // Pair<User, User> demoPair1 = new Pair<>(demoUser1, demoUser2);
-    // Match demoMatch1 = new Match();
-    // demoMatch1.setUserPair(demoPair1);
-    // demoMatch1.setCreationDate(new Date());
-
-    // Pair<User, User> demoPair2 = new Pair<>(demoUser1, demoUser3);
-    // Match demoMatch2 = new Match();
-    // demoMatch2.setUserPair(demoPair2);
-    // demoMatch2.setCreationDate(new Date());
-
-    // // make matches persistent in repository
-    // matchRepository.save(demoMatch1);
-    // matchRepository.save(demoMatch2);
-    // matchRepository.flush();
-
-    // // setMatch(demoMatch1);
-    // // setMatch(demoMatch2);
-
-    // create new active games
-
+    // setMatch(demoMatch2);
 
     System.out.println("Demo users instantiated.");
+  }
+
   /**
    * Gets the black card of a user, but throws 404 if the user has no active game or no black card selected yet
    * @param userId: UserID of the user that we want the current black card of
