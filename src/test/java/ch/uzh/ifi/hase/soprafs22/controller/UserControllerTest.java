@@ -486,7 +486,7 @@ class UserControllerTest {
   @Test
   void test_check_username_username_is_available() throws Exception {
 
-    given(userService.isAvailable(Mockito.any())).willReturn(true);
+    given(userService.isUsernameAvailable(Mockito.any())).willReturn(true);
 
     // when/then -> do the request + validate the result
     MockHttpServletRequestBuilder getRequest = get("/users/usernames?username=available")
@@ -503,7 +503,7 @@ class UserControllerTest {
   @Test
   void test_check_username_username_is_not_available() throws Exception {
 
-  given(userService.isAvailable(Mockito.any())).willReturn(false);
+  given(userService.isUsernameAvailable(Mockito.any())).willReturn(false);
 
     mockMvc.perform(get("/users/usernames?username=taken")
                     .contentType(MediaType.APPLICATION_JSON))

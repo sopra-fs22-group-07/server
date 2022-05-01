@@ -151,7 +151,7 @@ public class UserController {
           @RequestParam String username){
 
     // get the availability of the username
-    boolean isAvailable = userService.isAvailable(username);
+    boolean isAvailable = userService.isUsernameAvailable(username);
 
     // create and return ResponseEntity
     UsernameGetDTO responseBody = new UsernameGetDTO();

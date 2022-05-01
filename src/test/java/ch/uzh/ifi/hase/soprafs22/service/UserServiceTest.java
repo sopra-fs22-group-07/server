@@ -198,7 +198,7 @@ class UserServiceTest {
 
     Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(null);
 
-    assertTrue(userService.isAvailable(username));
+    assertTrue(userService.isUsernameAvailable(username));
   }
 
   @Test
@@ -207,7 +207,7 @@ class UserServiceTest {
 
     Mockito.when(userRepository.findByUsername(username)).thenReturn(testUser);
 
-    assertFalse(userService.isAvailable(username));
+    assertFalse(userService.isUsernameAvailable(username));
   }
   
     @Test
