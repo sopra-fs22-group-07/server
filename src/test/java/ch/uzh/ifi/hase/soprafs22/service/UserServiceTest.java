@@ -162,7 +162,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // when -> setup additional mocks for UserRepository
-      User returnUser = userService.checkPasswordAndUsername(inputUser);
+      User returnUser = userService.doLogin(inputUser);
 
       // then
       assertEquals(testUser.getId(), returnUser.getId());
@@ -184,7 +184,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // then error, because different password
-      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.checkPasswordAndUsername(inputUser));
+      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doLogin(inputUser));
       assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
   }
 

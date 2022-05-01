@@ -67,7 +67,6 @@ public class UserService {
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
 
-
     userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
     return userToBeLoggedOut;
   }
@@ -96,7 +95,6 @@ public class UserService {
   private void checkIfUserExistsForNewUsername(User user) {
 
     User userByUsername = userRepository.findByUsername(user.getUsername());
-
     if (userByUsername != null && !Objects.equals(userByUsername.getId(), user.getId())) {
       throw new ResponseStatusException(HttpStatus.CONFLICT,
               "Username is already taken");
@@ -113,7 +111,7 @@ public class UserService {
      * @throws org.springframework.web.server.ResponseStatusException
      * @see User
      */
-    public User checkPasswordAndUsername(User inputUser) {
+    public User doLogin(User inputUser) {
         User userByUsername = userRepository.findByUsername(inputUser.getUsername());
         // test if user exists and correct password is given
         if (userByUsername == null || !Objects.equals(inputUser.getPassword(), userByUsername.getPassword())){
@@ -154,7 +152,7 @@ public class UserService {
     checkIfUserExistsForNewUsername(user); // 409
 
     // finally, update User in repository
-    //check if the username is not just spaces
+    // check if the username is not just spaces
     if(!user.getUsername().equals("")){
         userToBeUpdated.setUsername(user.getUsername());
     }

@@ -125,7 +125,7 @@ class UserControllerTest {
       userPostDTO.setBirthday(new Date());
 
 
-      given(userService.checkPasswordAndUsername(Mockito.any())).willReturn(user);
+      given(userService.doLogin(Mockito.any())).willReturn(user);
 
       // when/then -> do the request + validate the result
       MockHttpServletRequestBuilder postRequest = post("/users/login")
@@ -151,7 +151,7 @@ class UserControllerTest {
       userPostDTO.setGender("MALE");
       userPostDTO.setBirthday(new Date());
 
-      given(userService.checkPasswordAndUsername(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+      given(userService.doLogin(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
 
       // when/then -> do the request + validate the result
@@ -378,7 +378,7 @@ class UserControllerTest {
     userPostDTO.setPassword(user.getPassword());
     userPostDTO.setGender("OTHER");
 
-    given(userService.checkPasswordAndUsername(Mockito.any())).willReturn(user);
+    given(userService.doLogin(Mockito.any())).willReturn(user);
 
     mockMvc.perform(post("/users/login")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -409,7 +409,7 @@ class UserControllerTest {
       userPostDTO.setGender("MALE");
       userPostDTO.setBirthday(new Date());
 
-    given(userService.checkPasswordAndUsername(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+    given(userService.doLogin(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     mockMvc.perform(post("/users/login")
                     .contentType(MediaType.APPLICATION_JSON)
