@@ -17,6 +17,4 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "WHITECARD")
-public class WhiteCard extends Card implements Serializable {
-
-}
+public class WhiteCard extends Card implements Serializable {}
