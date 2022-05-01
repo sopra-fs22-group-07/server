@@ -85,6 +85,7 @@ public class GameController {
 
       // make sure that black card is in user's current black cards (which the user gets assigned when he retrieves some blackCards)
       userService.checkBlackCard(id, blackCard);
+      System.out.println("\n\n\n" + blackCard.getId() + "\n\n\n");
 
       // create game with game service
       Game game = gameService.createGame(blackCard, id);
@@ -199,7 +200,7 @@ public class GameController {
       game = gameService.deletePlay(game, otherUserId);
       // a game can be empty, thus we delete it (if not active)
       userService.deleteGameIfEmpty(user, game);
-      // Create a match between the users if we like each other
+      // Create a match between the users if they like each other
       if(userService.otherUserLikesUser(user, otherUser) && userLikesOtherUser){
         Match match = userService.createMatch(user, otherUser);
         userService.setMatch(match);

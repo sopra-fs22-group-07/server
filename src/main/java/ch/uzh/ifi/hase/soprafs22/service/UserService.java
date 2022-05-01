@@ -1,12 +1,16 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+
+// import org.h2.command.ddl.CreateDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +38,28 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
+  private final GameService gameService;
+  private final GameRepository gameRepository;
+  // adding cardService in order to force SpringBoot to initialize it before the userService (even though cardService is not used directly in this file). This allows the userService to add cards to the demo users.
+  private final CardService cardService;
 
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
-                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
+                     @Qualifier("gameService") GameService gameService,
+                     @Qualifier("gameRepository") GameRepository gameRepository,
+                     @Qualifier("MatchRepository") MatchRepository matchRepository,
+                     @Qualifier("cardService") CardService cardService) {
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
+    this.gameService = gameService;
+    this.gameRepository = gameRepository;
+    this.cardService = cardService;
+
+    // instantiate demo users
+    instantiateDemoUsers();
   }
 
   public List<User> getUsers() {
@@ -222,7 +239,7 @@ public class UserService {
    */
   public Match createMatch(User user, User otherUser) {
 
-      // first, delete likes
+    // first, delete likes
     user.removeLikeFromUser(otherUser);
     otherUser.removeLikeFromUser(user);
 
@@ -488,5 +505,98 @@ public class UserService {
 
     // return list of users
     return users;
+  }
+
+
+  // instantiate demo users
+  public void instantiateDemoUsers() {
+    System.out.println("Instantiating demo users...");
+
+
+    // ======= create demo users =======
+    User demoUser1 = new User();
+    demoUser1.setUsername("demoUser1");
+    demoUser1.setPassword("demoUser1");
+    demoUser1.setName("Demo User 1");
+    demoUser1.setGender(Gender.MALE);
+    demoUser1 = createUser(demoUser1);
+
+    User demoUser2 = new User();
+    demoUser2.setUsername("demoUser2");
+    demoUser2.setPassword("demoUser2");
+    demoUser2.setName("Demo User 2");
+    demoUser2.setGender(Gender.FEMALE);
+    demoUser2 = createUser(demoUser2);
+
+    User demoUser3 = new User();
+    demoUser3.setUsername("demoUser3");
+    demoUser3.setPassword("demoUser3");
+    demoUser3.setName("Demo User 3");
+    demoUser3.setGender(Gender.OTHER);
+    demoUser3 = createUser(demoUser3);
+
+
+    // ======= create active games =======
+    BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
+    BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
+    BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
+    Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
+    Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
+    Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
+
+
+    // // ======= create demo plays and enqueue them to the games =======
+    // WhiteCard whiteCard1 = gameService.getNRandomWhiteCards(1).get(0);
+    // WhiteCard whiteCard2 = gameService.getNRandomWhiteCards(1).get(0);
+    // WhiteCard whiteCard3 = gameService.getNRandomWhiteCards(1).get(0);
+
+    // Play play2on1 = gameService.createPlay(demoUser2.getId(), whiteCard1.getId());
+    // Play play3on1 = gameService.createPlay(demoUser3.getId(), whiteCard2.getId());
+    // Play play3on2 = gameService.createPlay(demoUser3.getId(), whiteCard3.getId());
+
+    // gameService.putPlayInGame(game1, play2on1);
+    // gameService.putPlayInGame(game1, play3on1);
+    // gameService.putPlayInGame(game2, play3on2);
+
+    // // remove the played cards from the player's hands
+    // deleteWhiteCard(demoUser2.getId(), whiteCard1);
+    // deleteWhiteCard(demoUser3.getId(), whiteCard2);
+    // deleteWhiteCard(demoUser3.getId(), whiteCard3);
+
+
+    // ======= create likes and matches =======
+    // System.out.println("Creating matches between demo users...");
+    // Match demoMatch1 = createMatch(demoUser1, demoUser2);
+
+    // Match demoMatch2 = createMatch(demoUser1, demoUser3);
+
+    // System.out.println("repo");
+    // System.out.println(matchRepository.findAll().size());
+
+    // System.out.println(demoMatch1.getMatchId());
+    // System.out.println(demoMatch2.getMatchId());
+    // Match demoMatch2 = createMatch(demoUser1, demoUser3);
+    // Pair<User, User> demoPair1 = new Pair<>(demoUser1, demoUser2);
+    // Match demoMatch1 = new Match();
+    // demoMatch1.setUserPair(demoPair1);
+    // demoMatch1.setCreationDate(new Date());
+
+    // Pair<User, User> demoPair2 = new Pair<>(demoUser1, demoUser3);
+    // Match demoMatch2 = new Match();
+    // demoMatch2.setUserPair(demoPair2);
+    // demoMatch2.setCreationDate(new Date());
+
+    // // make matches persistent in repository
+    // matchRepository.save(demoMatch1);
+    // matchRepository.save(demoMatch2);
+    // matchRepository.flush();
+
+    // // setMatch(demoMatch1);
+    // // setMatch(demoMatch2);
+
+    // create new active games
+
+
+    System.out.println("Demo users instantiated.");
   }
 }
