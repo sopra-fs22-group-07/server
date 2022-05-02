@@ -405,8 +405,10 @@ class UserServiceTest {
 
     @Test
     void deleteGameIfEmpty_emptyGame(){
+      assertEquals(Collections.emptyList(), testUser.getPastGames());
       Game emptyGame = new Game();
       testUser.setActiveGame(emptyGame);
+      assertEquals(Collections.emptyList(), testUser.getPastGames());
       //This moves the emptyGame to past Games
       testUser.flushGameToPastGames();
       userService.deleteGameIfEmpty(testUser, emptyGame);
@@ -420,7 +422,8 @@ class UserServiceTest {
         Game nonEmptyGame = new Game();
         nonEmptyGame.enqueuePlay(play);
         testUser.setActiveGame(nonEmptyGame);
-        //This moves the emptyGame to past Games
+        assertEquals(Collections.emptyList(), testUser.getPastGames());
+        //This moves the nonEmptyGame to past Games
         testUser.flushGameToPastGames();
         userService.deleteGameIfEmpty(testUser, nonEmptyGame);
         //Should now not return empty list for past games
@@ -536,8 +539,8 @@ class UserServiceTest {
         testMatch.setMatchId(222L);
 
         Mockito.when(matchRepository.findByMatchId(222L)).thenReturn(testMatch);
-        //both users should now have the testmatch, so it should exist
         userService.setMatch(testMatch);
+        //both users should now have the testMatch, so it should exist
         assertTrue(userService.doesMatchExist(testUser, otherUser));
         assertTrue(userService.doesMatchExist(otherUser, testUser));
 
@@ -720,8 +723,9 @@ class UserServiceTest {
 
     Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
     testUser.setActiveGame(null);
+    Long id = testUser.getId();
 
-    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(testUser.getId()));
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(id));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
 
@@ -730,8 +734,9 @@ class UserServiceTest {
 
     Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
     testGame.setBlackCard(null);
+    Long id = testUser.getId();
 
-    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(testUser.getId()));
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(id));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
 
