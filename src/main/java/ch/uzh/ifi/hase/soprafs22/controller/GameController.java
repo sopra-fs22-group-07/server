@@ -98,174 +98,174 @@ public class GameController {
     }
   }
 
-    @GetMapping("users/{userId}/games/blackCards")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public CardAndGameIdGetDTO getBlackCardFromRandomUser(@RequestHeader(value = "authorization", required = false) String token,
-                                      @PathVariable(value = "userId") Long id) {
+  @GetMapping("users/{userId}/games/blackCards")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public CardAndGameIdGetDTO getBlackCardFromRandomUser(@RequestHeader(value = "authorization", required = false) String token,
+                                    @PathVariable(value = "userId") Long id) {
 
-      userService.checkSpecificAccess(token, id);
+    userService.checkSpecificAccess(token, id);
 
-      // Get 'random' game
-      Game game = gameService.getGameFromRandomUser(id);
+    // Get 'random' game
+    Game game = gameService.getGameFromRandomUser(id);
 
-      // return it
-      CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();
+    // return it
+    CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();
 
-      cardAndGameIdGetDTO.setBlackCard(game.getBlackCard());
-      cardAndGameIdGetDTO.setGameId(game.getId());
+    cardAndGameIdGetDTO.setBlackCard(game.getBlackCard());
+    cardAndGameIdGetDTO.setGameId(game.getId());
 
-      return cardAndGameIdGetDTO;
-    }
-
-    /**
-    * User gets his white Cards
-     */
-    @GetMapping("users/{userId}/games/whiteCards")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<CardGetDTO> getWhiteCardsFromUser(@RequestHeader(value = "authorization", required = false) String token,
-                                                @PathVariable(value = "userId") Long id) {
-      // check token
-      userService.checkSpecificAccess(token, id); // throws 401, 404
-
-      // get white cards of user
-      List <WhiteCard> cards = userService.getWhiteCards(id);
-
-      // return them
-      List<CardGetDTO> cardGetDTO= new ArrayList<>();
-      for (WhiteCard card : cards){
-          cardGetDTO.add(DTOMapper.INSTANCE.convertEntityToCardGetDTO(card));
-      }
-      return cardGetDTO;
-    }
-
-    /**
-     * get a game with all plays
-     */
-    @GetMapping("/users/{userId}/games/vote")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public GameGetDTO getGame(@RequestHeader(value = "authorization", required = false) String token,
-                        @PathVariable(value = "userId") Long id) {
-
-      userService.checkSpecificAccess(token, id); // throws 401, 404
-
-      User user = userService.getUserById(id);
-      // get one game (first get the old ones)
-      Game game = gameService.getGame(user.getActiveGame(), user.getPastGames());
-      return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
-    }
-
-    /**
-     * set Like to WhiteCard
-     */
-    @PutMapping("/users/{userId}/games/{gameId}/vote")
-    @ResponseBody
-    public ResponseEntity<UserGetDTO> voteCard(
-            @RequestHeader(value = "authorization", required = false) String token,
-            @PathVariable(value = "gameId") Long gameId,
-            @PathVariable(value = "userId") Long id,
-            @RequestBody GameVotePutDTO gameVotePutDTO
-                        ) {
-
-      userService.checkSpecificAccess(token, id); // throws 401, 404
-
-      // extract data from PutDTO
-      long otherUserId = gameVotePutDTO.getUserId();
-      boolean userLikesOtherUser = gameVotePutDTO.isLike();
-      // TODO: 20.04.2022 Assert that this value was actually passed - maybe with javax.validation?
-
-      // the relationship from the call is: user likes otherUser (user is the caller of the URI)
-      // get both users
-      User user = userService.getUserById(id);
-      Game game = gameService.getGameById(gameId); // 404
-      User otherUser = userService.getUserById(otherUserId); // 404
-
-      // make sure that user does not like himself (safety net)
-      if(user == otherUser) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong use of API call: you cannot vote on your cards");
-      }
-
-      // make sure that the game with gameId belongs the user who is voting
-      if(!userService.isGameBelongingToUser(game, user)) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong use of API call: gameId must belong to userId");
-      }
-
-      // delete play
-      game = gameService.deletePlay(game, otherUserId);
-      // a game can be empty, thus we delete it (if not active)
-      userService.deleteGameIfEmpty(user, game);
-      // Create a match between the users if they like each other
-      if(userService.otherUserLikesUser(user, otherUser) && userLikesOtherUser){
-        Match match = userService.createMatch(user, otherUser);
-        userService.setMatch(match);
-        UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(otherUser);
-        return new ResponseEntity<>(userGetDTO, null, HttpStatus.CREATED);
-      } else {
-        // only set like if we haven't a match - handles multiple identical requests
-        if (!userService.doesMatchExist(user, otherUser)){
-          userService.setUserLikesOtherUser(user, otherUser);
-        }
-        return new ResponseEntity<>(null, null, HttpStatus.NO_CONTENT);
-      }
-    }
-
-    /**
-     * create Play of a player
-     */
-    @PostMapping("/users/{userId}/whiteCards/{cardId}")
-    @ResponseStatus(HttpStatus.CREATED)
-    @ResponseBody
-    public void submitWhiteCard(@RequestHeader(value = "authorization", required = false) String token,
-                            @PathVariable(value = "userId") Long id,
-                            @PathVariable(value = "cardId") Long cardId,
-                            @RequestBody GameIDPostDTO gameIDPostDTO){
-
-      userService.checkSpecificAccess(token, id); // throws 401, 404
-
-      // get the game that is voted on
-      Game inputGame = DTOMapper.INSTANCE.convertGameIDPostDTOToEntity(gameIDPostDTO);
-      Game game = gameService.getGameById(inputGame.getId()); // 404
-
-      // make sure that the game does not belong to the caller himself, you shall not give a white card to your own game.
-      if(userService.isGameBelongingToUser(game, userService.getUserById(id))) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Wrong use of API call: gameId must not belong to userId");
-      }
-      // get the played white card
-      WhiteCard whiteCard = gameService.getWhiteCardById(cardId);
-      // check if the white card is one that has been assigned to user and not a random one
-      if(!userService.isWhiteCardBelongingToUser(whiteCard, id)){
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Wrong use of API call: You can only submit your white cards. Call \n" +
-                        "GET /users/" + id + "games/whiteCards \n to get your cards!");
-      }
-      // create a play
-      Play play = gameService.createPlay(id, cardId);
-      // only assign the play to the game if user has not already played on that game (he won't lose his white card if he has)
-      if(!userService.hasUserAlreadyPlayInGame(game, play)){
-        gameService.putPlayInGame(game, play);
-        userService.deleteWhiteCard(id, whiteCard);
-      }
-    }
+    return cardAndGameIdGetDTO;
+  }
 
   /**
-   * Gets the current black card of a user or throws status exception
-   * @param token: token of the user
-   * @param userId: userId of the user
-   * @return: CardGetDTO
-   */
-    @GetMapping("/users/{userId}/games/blackCards/current")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public CardGetDTO getCurrentBlackCard(@RequestHeader(value = "authorization", required = false) String token,
-                                    @PathVariable(value = "userId") Long userId) {
-      userService.checkSpecificAccess(token, userId);
-      // first, check if active game is older than 24 hours.
-      userService.updateActiveGameIfNecessary(userId);
+  * User gets his white Cards
+    */
+  @GetMapping("users/{userId}/games/whiteCards")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<CardGetDTO> getWhiteCardsFromUser(@RequestHeader(value = "authorization", required = false) String token,
+                                              @PathVariable(value = "userId") Long id) {
+    // check token
+    userService.checkSpecificAccess(token, id); // throws 401, 404
 
-      BlackCard blackCard = userService.getCurrentBlackCard(userId);
-      return DTOMapper.INSTANCE.convertEntityToCardGetDTO(blackCard);
+    // get white cards of user
+    List <WhiteCard> cards = userService.getWhiteCards(id);
+
+    // return them
+    List<CardGetDTO> cardGetDTO= new ArrayList<>();
+    for (WhiteCard card : cards){
+        cardGetDTO.add(DTOMapper.INSTANCE.convertEntityToCardGetDTO(card));
     }
+    return cardGetDTO;
+  }
+
+  /**
+   * get a game with all plays
+   */
+  @GetMapping("/users/{userId}/games/vote")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public GameGetDTO getGame(@RequestHeader(value = "authorization", required = false) String token,
+                      @PathVariable(value = "userId") Long id) {
+
+    userService.checkSpecificAccess(token, id); // throws 401, 404
+
+    User user = userService.getUserById(id);
+    // get one game (first get the old ones)
+    Game game = gameService.getGame(user.getActiveGame(), user.getPastGames());
+    return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
+  }
+
+  /**
+   * set Like to WhiteCard
+   */
+  @PutMapping("/users/{userId}/games/{gameId}/vote")
+  @ResponseBody
+  public ResponseEntity<UserGetDTO> voteCard(
+          @RequestHeader(value = "authorization", required = false) String token,
+          @PathVariable(value = "gameId") Long gameId,
+          @PathVariable(value = "userId") Long id,
+          @RequestBody GameVotePutDTO gameVotePutDTO
+                      ) {
+
+    userService.checkSpecificAccess(token, id); // throws 401, 404
+
+    // extract data from PutDTO
+    long otherUserId = gameVotePutDTO.getUserId();
+    boolean userLikesOtherUser = gameVotePutDTO.isLike();
+    // TODO: 20.04.2022 Assert that this value was actually passed - maybe with javax.validation?
+
+    // the relationship from the call is: user likes otherUser (user is the caller of the URI)
+    // get both users
+    User user = userService.getUserById(id);
+    Game game = gameService.getGameById(gameId); // 404
+    User otherUser = userService.getUserById(otherUserId); // 404
+
+    // make sure that user does not like himself (safety net)
+    if(user == otherUser) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong use of API call: you cannot vote on your cards");
+    }
+
+    // make sure that the game with gameId belongs the user who is voting
+    if(!userService.isGameBelongingToUser(game, user)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong use of API call: gameId must belong to userId");
+    }
+
+    // delete play
+    game = gameService.deletePlay(game, otherUserId);
+    // a game can be empty, thus we delete it (if not active)
+    userService.deleteGameIfEmpty(user, game);
+    // Create a match between the users if they like each other
+    if(userService.otherUserLikesUser(user, otherUser) && userLikesOtherUser){
+      Match match = userService.createMatch(user, otherUser);
+      userService.setMatch(match);
+      UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(otherUser);
+      return new ResponseEntity<>(userGetDTO, null, HttpStatus.CREATED);
+    } else {
+      // only set like if we haven't a match - handles multiple identical requests
+      if (!userService.doesMatchExist(user, otherUser)){
+        userService.setUserLikesOtherUser(user, otherUser);
+      }
+      return new ResponseEntity<>(null, null, HttpStatus.NO_CONTENT);
+    }
+  }
+
+  /**
+   * create Play of a player
+   */
+  @PostMapping("/users/{userId}/whiteCards/{cardId}")
+  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseBody
+  public void submitWhiteCard(@RequestHeader(value = "authorization", required = false) String token,
+                          @PathVariable(value = "userId") Long id,
+                          @PathVariable(value = "cardId") Long cardId,
+                          @RequestBody GameIDPostDTO gameIDPostDTO){
+
+    userService.checkSpecificAccess(token, id); // throws 401, 404
+
+    // get the game that is voted on
+    Game inputGame = DTOMapper.INSTANCE.convertGameIDPostDTOToEntity(gameIDPostDTO);
+    Game game = gameService.getGameById(inputGame.getId()); // 404
+
+    // make sure that the game does not belong to the caller himself, you shall not give a white card to your own game.
+    if(userService.isGameBelongingToUser(game, userService.getUserById(id))) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "Wrong use of API call: gameId must not belong to userId");
+    }
+    // get the played white card
+    WhiteCard whiteCard = gameService.getWhiteCardById(cardId);
+    // check if the white card is one that has been assigned to user and not a random one
+    if(!userService.isWhiteCardBelongingToUser(whiteCard, id)){
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "Wrong use of API call: You can only submit your white cards. Call \n" +
+                      "GET /users/" + id + "games/whiteCards \n to get your cards!");
+    }
+    // create a play
+    Play play = gameService.createPlay(id, cardId);
+    // only assign the play to the game if user has not already played on that game (he won't lose his white card if he has)
+    if(!userService.hasUserAlreadyPlayInGame(game, play)){
+      gameService.putPlayInGame(game, play);
+      userService.deleteWhiteCard(id, whiteCard);
+    }
+  }
+
+/**
+ * Gets the current black card of a user or throws status exception
+ * @param token: token of the user
+ * @param userId: userId of the user
+ * @return: CardGetDTO
+ */
+  @GetMapping("/users/{userId}/games/blackCards/current")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public CardGetDTO getCurrentBlackCard(@RequestHeader(value = "authorization", required = false) String token,
+                                  @PathVariable(value = "userId") Long userId) {
+    userService.checkSpecificAccess(token, userId);
+    // first, check if active game is older than 24 hours.
+    userService.updateActiveGameIfNecessary(userId);
+
+    BlackCard blackCard = userService.getCurrentBlackCard(userId);
+    return DTOMapper.INSTANCE.convertEntityToCardGetDTO(blackCard);
+  }
 }

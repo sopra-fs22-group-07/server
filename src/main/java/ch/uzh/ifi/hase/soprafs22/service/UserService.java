@@ -39,27 +39,25 @@ public class UserService {
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
   private final GameService gameService;
-  private final GameRepository gameRepository;
-  // adding cardService in order to force SpringBoot to initialize it before the userService (even though cardService is not used directly in this file). This allows the userService to add cards to the demo users.
-  private final CardService cardService;
+  // private final GameRepository gameRepository;
+  // // adding cardService in order to force SpringBoot to initialize it before the userService (even though cardService is not used directly in this file). This allows the userService to add cards to the demo users.
+  // private final CardService cardService;
+  private boolean areInstantiatedDemoUsers = false;
 
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
                      @Qualifier("gameService") GameService gameService,
-                     @Qualifier("gameRepository") GameRepository gameRepository,
-                     @Qualifier("MatchRepository") MatchRepository matchRepository,
-                     @Qualifier("cardService") CardService cardService) {
+                    //  @Qualifier("gameRepository") GameRepository gameRepository,
+                    //  @Qualifier("cardService") CardService cardService,
+                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
     this.gameService = gameService;
-    this.gameRepository = gameRepository;
-    this.cardService = cardService;
-
-    // instantiate demo users
-    instantiateDemoUsers();
+    // this.gameRepository = gameRepository;
+    // this.cardService = cardService;
   }
 
   public List<User> getUsers() {
@@ -551,51 +549,62 @@ public class UserService {
 
   // instantiate demo users
   public void instantiateDemoUsers() {
-    System.out.println("Instantiating demo users...");
+
+    if (areInstantiatedDemoUsers) {
+      // throw exception if demo users are already instantiated
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Demo users are already instantiated");
+
+    } else {
+
+      System.out.println("Instantiating demo users...");
+
+      // ======= create demo users =======
+      User demoUser1 = new User();
+      demoUser1.setUsername("demoUser1");
+      demoUser1.setPassword("demoUser1");
+      demoUser1.setName("Demo User 1");
+      demoUser1.setGender(Gender.MALE);
+      demoUser1 = createUser(demoUser1);
+
+      User demoUser2 = new User();
+      demoUser2.setUsername("demoUser2");
+      demoUser2.setPassword("demoUser2");
+      demoUser2.setName("Demo User 2");
+      demoUser2.setGender(Gender.FEMALE);
+      demoUser2 = createUser(demoUser2);
+
+      User demoUser3 = new User();
+      demoUser3.setUsername("demoUser3");
+      demoUser3.setPassword("demoUser3");
+      demoUser3.setName("Demo User 3");
+      demoUser3.setGender(Gender.OTHER);
+      demoUser3 = createUser(demoUser3);
 
 
-    // ======= create demo users =======
-    User demoUser1 = new User();
-    demoUser1.setUsername("demoUser1");
-    demoUser1.setPassword("demoUser1");
-    demoUser1.setName("Demo User 1");
-    demoUser1.setGender(Gender.MALE);
-    demoUser1 = createUser(demoUser1);
-
-    User demoUser2 = new User();
-    demoUser2.setUsername("demoUser2");
-    demoUser2.setPassword("demoUser2");
-    demoUser2.setName("Demo User 2");
-    demoUser2.setGender(Gender.FEMALE);
-    demoUser2 = createUser(demoUser2);
-
-    User demoUser3 = new User();
-    demoUser3.setUsername("demoUser3");
-    demoUser3.setPassword("demoUser3");
-    demoUser3.setName("Demo User 3");
-    demoUser3.setGender(Gender.OTHER);
-    demoUser3 = createUser(demoUser3);
+      // ======= create active games =======
+      BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
+      Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
+      Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
+      Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
 
 
-    // ======= create active games =======
-    BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
-    BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
-    BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
-    Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
-    Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
-    Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
+      // ======= create likes and matches =======
+      Match demoMatch1 = createMatch(demoUser1, demoUser2);
+      setMatch(demoMatch1);
 
+      // TODO: find reason for this
+      // the following code breaks (as far as I can tell between the 2 calls)
+      // Match demoMatch2 = createMatch(demoUser1, demoUser3);
+      // setMatch(demoMatch2);
 
-    // ======= create likes and matches =======
-    Match demoMatch1 = createMatch(demoUser1, demoUser2);
-    setMatch(demoMatch1);
+      areInstantiatedDemoUsers = true;
+      System.out.println("Demo users instantiated.");
 
-    // the following code breaks (as far as I can tell between the 2 calls)
-    // Match demoMatch2 = createMatch(demoUser1, demoUser3);
-    // setMatch(demoMatch2);
-
-    System.out.println("Demo users instantiated.");
+    }
   }
+
 
   /**
    * Gets the black card of a user, but throws 404 if the user has no active game or no black card selected yet

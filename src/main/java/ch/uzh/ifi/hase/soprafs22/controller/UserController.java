@@ -69,24 +69,24 @@ public class UserController {
     return new ResponseEntity<>(userGetDTO, headers, HttpStatus.CREATED);
   }
 
-    @PostMapping("/users/login")
-    @ResponseBody
-    public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
-        // convert API user to internal representation convertUserPostDTOtoEntity
-        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+  @PostMapping("/users/login")
+  @ResponseBody
+  public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
+      // convert API user to internal representation convertUserPostDTOtoEntity
+      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
-        // check username and password, throws UNAUTHORIZED if false
-        User returnUser = userService.doLogin(userInput); // 401
+      // check username and password, throws UNAUTHORIZED if false
+      User returnUser = userService.doLogin(userInput); // 401
 
-        // set header
-        MultiValueMap<String, String> httpHeaders = new HttpHeaders();
-        httpHeaders.set("token", returnUser.getToken());
+      // set header
+      MultiValueMap<String, String> httpHeaders = new HttpHeaders();
+      httpHeaders.set("token", returnUser.getToken());
 
-        UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
+      UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
 
-        // convert internal representation of user back to API
-        return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
-    }
+      // convert internal representation of user back to API
+      return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
+  }
 
   @PutMapping("/users/logout/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -172,6 +172,7 @@ public class UserController {
 
   @GetMapping("/users/{userId}/matches")
   @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
   public List<UserGetDTO> getMatches(
           @RequestHeader(value = "authorization", required = false) String token,
           @PathVariable(value = "userId") long id){
@@ -187,4 +188,14 @@ public class UserController {
 
       return userGetDTOs;
   }
+
+  @PostMapping("/users/demo")
+  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseBody
+  public void createDemoUsers(
+          @RequestHeader(value = "authorization", required = false) String token){
+
+      userService.instantiateDemoUsers();  // throws 400 if the function has been called previously since the server was started
+  }
+
 }
