@@ -52,6 +52,12 @@ public class User implements Serializable {
     private Date birthday;
 
     @Column
+    private int minAge;
+
+    @Column
+    private int maxAge;
+
+    @Column
     private Gender gender;
 
     @OneToOne
@@ -65,6 +71,9 @@ public class User implements Serializable {
 
     @OneToOne
     private UserBlackCards userBlackCards;
+
+    @ElementCollection
+    private List<Gender> genderPreferences = new ArrayList<>();
 
     @ElementCollection
     private Set<Long> likedByUsers = new TreeSet<>();
@@ -144,6 +153,7 @@ public class User implements Serializable {
         this.pastGames.add(game);
     }
 
+
     // move active game to past games
     public void flushGameToPastGames(){
         Game game = this.getActiveGame();
@@ -214,4 +224,17 @@ public class User implements Serializable {
     public void setUserBlackCards(UserBlackCards userBlackCards) {
         this.userBlackCards = userBlackCards;
     }
+
+    public List<Gender> getGenderPreferences(){return genderPreferences;}
+
+    public void setGenderPreferences(List<Gender> genderPreferences) {this.genderPreferences = genderPreferences;}
+
+    public int getMinAge(){return minAge;}
+
+    public void setMinAge(int minAge){this.minAge = minAge;}
+
+    public int getMaxAge(){return maxAge;}
+
+    public void setMaxAge(int maxAge){this.maxAge = maxAge;}
+
 }
