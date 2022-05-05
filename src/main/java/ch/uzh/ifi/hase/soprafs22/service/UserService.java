@@ -229,6 +229,15 @@ public class UserService {
     return userToBeUpdated;
   }
 
+  public void updatePreferences(User user){
+      //Getting the correct user (404 and 409 should be check by specific access already)
+      User userToUpdatePreferences = getUserById(user.getId());
+      //Update User Preferences
+      userToUpdatePreferences.setMinAge(user.getMinAge());
+      userToUpdatePreferences.setMaxAge(user.getMaxAge());
+      userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
+  }
+
   /**
    * Checks if a username is available
    * @param userInput: String

@@ -195,8 +195,23 @@ public class UserController {
                               @PathVariable(value = "userId") int userId) {
         userService.checkGeneralAccess(token);
         User user = userService.getUserById(userId);
-        //TODO: Create get Preferences DTO and get it here. Maybe delete the line above
-        return DTOMapper.INSTANCE.convertEntityToUserGetPreferencesDTO(user);
+        return DTOMapper.INSTANCE.convertEntityToUserPreferencesGetDTO(user);
+    }
+
+    @PutMapping("/users/{userId}/preferences")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void updateUserPreferences(
+            @RequestHeader(value = "authorization", required = false) String token,
+            @PathVariable(value = "userId") long userId,
+            @RequestBody UserPreferencesPutDTO userPutPreferencesDTO){
+
+        userService.checkSpecificAccess(token, userId); // 401, 404
+        User userPreferences = DTOMapper.INSTANCE.convertUserPreferencesPutDTOtoEntity(userPutPreferencesDTO);
+        //userPreferences is just a user that only has the preferences and user id
+        userPreferences.setId(userId);
+
+        userService.updatePreferences(userPreferences);
     }
 
 
