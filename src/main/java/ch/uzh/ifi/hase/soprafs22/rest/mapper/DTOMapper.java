@@ -36,6 +36,13 @@ public interface DTOMapper {
   @Mapping(source = "gender", target = "gender")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "minAge", target = "minAge")
+  @Mapping(source = "maxAge", target = "maxAge")
+  @Mapping(source = "genderPreferences", target = "genderPreferences")
+  UserGetPreferencesDTO convertEntityToUserGetPreferencesDTO(User user);
+
   @Mapping(source = "id", target = "id")
   @Mapping(source = "name", target = "name")
   @Mapping(source = "username", target = "username")

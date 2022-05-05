@@ -187,4 +187,17 @@ public class UserController {
 
       return userGetDTOs;
   }
+
+    @GetMapping("/users/{userId}/preferences")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetPreferencesDTO getUserPreferences(@RequestHeader(value = "authorization", required = false) String token,
+                              @PathVariable(value = "userId") int userId) {
+        userService.checkGeneralAccess(token);
+        User user = userService.getUserById(userId);
+        //TODO: Create get Preferences DTO and get it here. Maybe delete the line above
+        return DTOMapper.INSTANCE.convertEntityToUserGetPreferencesDTO(user);
+    }
+
+
 }

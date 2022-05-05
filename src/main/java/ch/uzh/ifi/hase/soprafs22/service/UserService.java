@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
@@ -52,11 +53,14 @@ public class UserService {
   /**
    * Creates and saves a new user
    * @param newUser: User that shall be created
-   * @return: user that was created
+   * @return user : that was created
    */
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
+    newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
+    newUser.setGenderPreferences(Arrays.asList(Gender.MALE, Gender.FEMALE, Gender.OTHER));
 
     checkIfUserExists(newUser);
 
@@ -69,10 +73,42 @@ public class UserService {
     return newUser;
   }
 
+    /**
+     * Returns max{userAge-3, 18}, used for initializing accounts
+     * @param userBirthday: birthday of the zser
+     * @return int max{userAge-3, 18}
+     */
+  private int findMinAgeDefault(Date userBirthday){
+      Date currentDate = new Date();
+      Calendar calendarUserBirthday = Calendar.getInstance();
+      calendarUserBirthday.setTime(userBirthday);
+      Calendar calendarCurrentDate = Calendar.getInstance();
+      calendarUserBirthday.setTime(currentDate);
+      int userAge = calendarCurrentDate.get(Calendar.YEAR) - calendarUserBirthday.get(Calendar.YEAR);
+      if(userAge - 3 < 18){
+          return 18;}
+      return userAge -3;
+  }
+
+    /**
+     * Used for initializing account
+     * @param userBirthday
+     * @return userage + 3
+     */
+  private int findMaxAgeDefault(Date userBirthday){
+      Date currentDate = new Date();
+      Calendar calendarUserBirthday = Calendar.getInstance();
+      calendarUserBirthday.setTime(userBirthday);
+      Calendar calendarCurrentDate = Calendar.getInstance();
+      calendarUserBirthday.setTime(currentDate);
+      int userAge = calendarCurrentDate.get(Calendar.YEAR) - calendarUserBirthday.get(Calendar.YEAR);
+      return userAge +3;
+  }
+
   /**
    * logout the user, sets the status to offline
    * @param user: User to be logged out
-   * @return: User that was logged out
+   * @return : User that was logged out
    */
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
@@ -253,7 +289,7 @@ public class UserService {
    * Create a Match between two users. Also, it removes any likes from each others
    * @param user: User
    * @param otherUser: User
-   * @return: created Match
+   * @return : created Match
    */
   public Match createMatch(User user, User otherUser) {
 
@@ -317,7 +353,7 @@ public class UserService {
   /**
    * Get the current black cards of a user: automatically delete old black cards that are older than some time period
    * @param userId: userId from the user from whom we want to get the current black cards
-   * @return: a list of black cards - can be empty
+   * @return : a list of black cards - can be empty
    */
   public List<BlackCard> getCurrentBlackCards(Long userId) {
     User user = getUserById(userId);
