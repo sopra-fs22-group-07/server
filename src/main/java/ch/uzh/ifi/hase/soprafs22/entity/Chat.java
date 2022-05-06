@@ -52,9 +52,17 @@ public class Chat {
      * @return Message: the Message on position index
      */
     public Message getMessages(int index) {
-        // make sure that we don't throw an index error here
-        // new messages are at head of list
+
         return messages.get(index);
+    }
+
+    /**
+     * Gets all teh messages
+     * @return Message: List of all messages
+     */
+    public List<Message> getMessages() {
+        // return all
+        return messages;
     }
 
   public void pushMessage(Message message) {

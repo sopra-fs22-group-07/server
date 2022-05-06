@@ -1,8 +1,10 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
+import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.Match;
 import ch.uzh.ifi.hase.soprafs22.entity.Message;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.CardGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatCreationPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessageGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
@@ -62,16 +64,25 @@ public class ChatController {
 
   @GetMapping("/users/{userId}/chats/{chatId}")
   @ResponseBody
-  public ResponseEntity<ChatMessageGetDTO> getMessagesFromChat(@RequestHeader(value = "authorization", required = false) String token,
+  public ResponseEntity<List<ChatMessageGetDTO>> getMessagesFromChat(@RequestHeader(value = "authorization", required = false) String token,
                                                                @PathVariable(value = "userId") long userId,
                                                                @PathVariable(value = "chatId") long chatId,
                                                                @RequestParam(value = "from", required = false) long from,
                                                                @RequestParam(value = "to", required = false) long to) {
     userService.checkSpecificAccess(token, userId); // 404, 409
 
-    // you can use the mapper here
-    ChatMessageGetDTO chatMessageGetDTO = DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(new Message());
-    return new ResponseEntity<>(null, null, null);
+
+    List<Message> messageFromChat = matchService.getMessagesFromChat(chatId);
+      // return the black cards
+      List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
+
+      // mapp the messages
+      for (Message message : messageFromChat){
+          chatMessageGetDTOList.add(DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(message));
+      }
+
+
+      return new ResponseEntity<>(chatMessageGetDTOList, null, HttpStatus.OK);
   }
 
 
