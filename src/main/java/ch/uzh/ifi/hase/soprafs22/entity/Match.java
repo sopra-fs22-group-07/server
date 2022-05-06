@@ -23,6 +23,9 @@ public class Match implements Serializable {
   @OneToMany
   private List<User> userPair = new ArrayList<>();
 
+  @OneToOne
+  private Chat chat = new Chat();
+
 
   // GETTERS AND SETTERS
 
@@ -49,6 +52,12 @@ public class Match implements Serializable {
 
   public Pair<User, User> getUserPair() {
     return new Pair<>(userPair.get(0), userPair.get(1));
+  }
+
+  public Chat getChat(){ return  this.chat; }
+
+  public void setChat(Chat chat){
+      this.chat = chat;
   }
 
 }

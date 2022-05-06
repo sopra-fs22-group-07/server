@@ -46,6 +46,16 @@ public class Chat {
     // now, fromIndex must be < size, and toIndex too.
     return messages.subList(fromIndex, toIndex);
   }
+    /**
+     * Gets one Message from the chat
+     * @param index: the index of the message
+     * @return Message: the Message on position index
+     */
+    public Message getMessages(int index) {
+        // make sure that we don't throw an index error here
+        // new messages are at head of list
+        return messages.get(index);
+    }
 
   public void pushMessage(Message message) {
     // add at head, makes calculation easier

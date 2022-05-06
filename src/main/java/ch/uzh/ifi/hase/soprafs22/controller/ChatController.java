@@ -1,7 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.constant.Gender;
-import ch.uzh.ifi.hase.soprafs22.constant.MessageType;
+import ch.uzh.ifi.hase.soprafs22.entity.Match;
 import ch.uzh.ifi.hase.soprafs22.entity.Message;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatCreationPostDTO;
@@ -9,7 +8,7 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessageGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatOverViewGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
-import ch.uzh.ifi.hase.soprafs22.service.ChatService;
+import ch.uzh.ifi.hase.soprafs22.service.MatchService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +16,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class ChatController {
 
   private final UserService userService;
-  private final ChatService chatService;
+  private final MatchService matchService;
 
 
-  ChatController(ChatService chatService, UserService userService) {
-    this.chatService = chatService;
+  ChatController(MatchService chatService, UserService userService) {
+    this.matchService = chatService;
     this.userService = userService;
   }
 
@@ -36,25 +36,23 @@ public class ChatController {
   public ResponseEntity<List<ChatOverViewGetDTO>> getFirstMessageOfEveryChat(@RequestHeader(value = "authorization", required = false) String token,
                                                                              @PathVariable(value = "userId") long userId) {
     userService.checkSpecificAccess(token, userId); // 404, 409
-    User user = new User();
-    user.setId(5L);
-    user.setGender(Gender.MALE);
-    user.setName("David");
 
-    User self = userService.getUserById(userId);
-    Message msg = new Message();
-    msg.setId(6L);
-    msg.setMessageType(MessageType.PLAIN_TEXT);
-    msg.setRead(false);
-    msg.setFromUserId(user.getId());
-    msg.setToUserId(self.getId());
-    msg.setContent("Hi, how are you");
+    User user = userService.getUserById(userId);
 
-    ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
-    chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-    chatOverViewGetDTO.setMessage(msg);
+    List<Match> matches = matchService.getMatches(user);
+
+    List<Message> msg = matchService.getFirstMessages(matches);
 
     List<ChatOverViewGetDTO> chatOverViewGetDTOList = new ArrayList<>();
+
+    //TODO: map to each chatOverViewGetDTOList one match/ userID and one message
+
+    ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
+
+    // this should be done for all users and messages, or matches and messages?
+    chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+    chatOverViewGetDTO.setMessage(msg.get(0));
+
     chatOverViewGetDTOList.add(chatOverViewGetDTO);
 
     // I would not use the mapper here but do it myself
