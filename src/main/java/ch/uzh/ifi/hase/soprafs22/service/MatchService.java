@@ -1,13 +1,12 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
-import ch.uzh.ifi.hase.soprafs22.entity.Chat;
-import ch.uzh.ifi.hase.soprafs22.entity.Match;
-import ch.uzh.ifi.hase.soprafs22.entity.Message;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MessageRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -25,23 +24,18 @@ import java.util.Set;
 public class MatchService {
 
   private final MatchRepository matchRepository;
-  private final UserRepository userRepository;
-  private final ChatRepository chatRepository;
-  private final MessageRepository messageRepository;
 
   @Autowired
-  public MatchService(@Qualifier("MatchRepository")MatchRepository matchRepository,
-                      @Qualifier("userRepository") UserRepository userRepository,
-                      @Qualifier("ChatRepository") ChatRepository chatRepository,
-                      @Qualifier("MessageRepository") MessageRepository messageRepository) {
+  public MatchService(@Qualifier("MatchRepository")MatchRepository matchRepository){
 
     this.matchRepository = matchRepository;
-    this.userRepository = userRepository;
-    this.chatRepository = chatRepository;
-    this.messageRepository = messageRepository;
   }
 
-
+    /**
+     * get matches of a user
+     * @param user: user from which the matches are taken
+     * @return Lsit of Matches
+     */
   public List<Match> getMatches(User user){
       Set<Long> matchesOfUser = user.getMatches();
       List<Match> matches = new ArrayList<>();
@@ -52,24 +46,26 @@ public class MatchService {
       return matches;
   }
 
-  public List<Message> getFirstMessages(List<Match> matches){
+    /**
+     * Get all users which match with the known user
+     * @param user: known user
+     * @param matches: all matches from suer
+     * @return list of users which mach with known user
+     */
+    public List<User> getUsersFromMatches(User user, List<Match> matches) {
+        List<User> matchedUsers = new ArrayList<>();
 
-      List<Message> firstMessages = new ArrayList<>();
+        // map the users to the matches
+        for (Match match : matches){
+            Pair<User,User> users = match.getUserPair();
+            // add other user (by comparing it with the user, which is known)
+            if(user.equals(users.getObj1())){
+                matchedUsers.add(users.getObj2());
+            }else{
+                matchedUsers.add(users.getObj1());
+            }
+        }
 
-      for(Match match : matches){
-          firstMessages.add(match.getChat().getMessages(0));
-      }
-
-      return firstMessages;
-
-  }
-
-    public List<Message> getMessagesFromChat(long chatId) {
-
-      Chat chat = chatRepository.findById(chatId).orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user does not exit"));
-
-      return  chat.getMessages();
-
+        return matchedUsers;
     }
 }

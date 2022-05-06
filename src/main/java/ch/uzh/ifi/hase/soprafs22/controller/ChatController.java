@@ -1,15 +1,14 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.Match;
 import ch.uzh.ifi.hase.soprafs22.entity.Message;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.CardGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatCreationPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessageGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatOverViewGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs22.service.ChatService;
 import ch.uzh.ifi.hase.soprafs22.service.MatchService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -17,19 +16,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+
 
 @RestController
 public class ChatController {
 
   private final UserService userService;
   private final MatchService matchService;
+  private final ChatService chatService;
 
 
-  ChatController(MatchService chatService, UserService userService) {
-    this.matchService = chatService;
+  ChatController(MatchService matchService, UserService userService, ChatService chatService) {
+    this.matchService = matchService;
     this.userService = userService;
+    this.chatService = chatService;
   }
 
 
@@ -39,23 +41,27 @@ public class ChatController {
                                                                              @PathVariable(value = "userId") long userId) {
     userService.checkSpecificAccess(token, userId); // 404, 409
 
+      // get User by ID
     User user = userService.getUserById(userId);
-
+    // get all matches from user
     List<Match> matches = matchService.getMatches(user);
-
-    List<Message> msg = matchService.getFirstMessages(matches);
+    // get matchedUser
+    List<User> usersMatched = matchService.getUsersFromMatches(user, matches);
+    // get the last Message from the matches/ chats
+    List<Message> msg = chatService.getFirstMessages(matches);
 
     List<ChatOverViewGetDTO> chatOverViewGetDTOList = new ArrayList<>();
 
-    //TODO: map to each chatOverViewGetDTOList one match/ userID and one message
+      // mapp the messages, go through both lists and add them to chatOverViewGetDTOList
+      Iterator<User> matchedUser = usersMatched.iterator();
+      Iterator<Message> message = msg.iterator();
 
-    ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
-
-    // this should be done for all users and messages, or matches and messages?
-    chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-    chatOverViewGetDTO.setMessage(msg.get(0));
-
-    chatOverViewGetDTOList.add(chatOverViewGetDTO);
+      while (matchedUser.hasNext() && message.hasNext()) {
+          ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
+          chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(matchedUser.next()));
+          chatOverViewGetDTO.setMessage(message.next());
+          chatOverViewGetDTOList.add(chatOverViewGetDTO);
+      }
 
     // I would not use the mapper here but do it myself
     return new ResponseEntity<>(chatOverViewGetDTOList, null, HttpStatus.OK);
@@ -72,7 +78,7 @@ public class ChatController {
     userService.checkSpecificAccess(token, userId); // 404, 409
 
 
-    List<Message> messageFromChat = matchService.getMessagesFromChat(chatId);
+    List<Message> messageFromChat = chatService.getMessagesFromChat(chatId);
       // return the black cards
       List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
 
@@ -85,7 +91,7 @@ public class ChatController {
       return new ResponseEntity<>(chatMessageGetDTOList, null, HttpStatus.OK);
   }
 
-
+    // TODO: How to implement?
   @GetMapping("/users/{userId}/chats/DOCHUNTIRGENDEBBISABRWEISSNONIWAS")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -95,7 +101,7 @@ public class ChatController {
     return false;
   }
 
-
+  // TODO: instead create chat when match is created?
   @PostMapping("/users/{userId}/chats")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
@@ -118,8 +124,10 @@ public class ChatController {
                              @PathVariable(value = "chatId") long chatId,
                              @RequestBody ChatMessagePutDTO chatMessagePutDTO) {
     userService.checkSpecificAccess(token, userId); // 404, 409
-    // you SHOULD definitely use this:
+      // add message to chat
     Message message = DTOMapper.INSTANCE.convertChatMessagePutDTOToEntity(chatMessagePutDTO);
+
+    chatService.addMessageToChat(chatId, message);
 
   }
 }

@@ -57,7 +57,7 @@ public class Chat {
     }
 
     /**
-     * Gets all teh messages
+     * Gets all the messages
      * @return Message: List of all messages
      */
     public List<Message> getMessages() {
