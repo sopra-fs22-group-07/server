@@ -4,12 +4,13 @@ package ch.uzh.ifi.hase.soprafs22.rest.dto;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 
 import java.util.List;
+import java.util.Set;
 
 public class UserGetPreferencesDTO {
 
     private int minAge;
     private int maxAge;
-    private List<Gender> genderPreferences;
+    private Set<Gender> genderPreferences;
 
 
     public int getMinAge() {
@@ -28,11 +29,11 @@ public class UserGetPreferencesDTO {
         this.maxAge = maxAge;
     }
 
-    public List<Gender> getGenderPreferences() {
+    public Set<Gender> getGenderPreferences() {
         return genderPreferences;
     }
 
-    public void setGenderPreferences(List<Gender> genderPreferences) {
+    public void setGenderPreferences(Set<Gender> genderPreferences) {
         this.genderPreferences = genderPreferences;
     }
 }

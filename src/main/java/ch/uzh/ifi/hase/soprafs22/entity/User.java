@@ -73,7 +73,7 @@ public class User implements Serializable {
     private UserBlackCards userBlackCards;
 
     @ElementCollection
-    private List<Gender> genderPreferences = new ArrayList<>();
+    private Set<Gender> genderPreferences = new TreeSet<>();
 
     @ElementCollection
     private Set<Long> likedByUsers = new TreeSet<>();
@@ -225,9 +225,9 @@ public class User implements Serializable {
         this.userBlackCards = userBlackCards;
     }
 
-    public List<Gender> getGenderPreferences(){return genderPreferences;}
+    public Set<Gender> getGenderPreferences(){return genderPreferences;}
 
-    public void setGenderPreferences(List<Gender> genderPreferences) {this.genderPreferences = genderPreferences;}
+    public void setGenderPreferences(Set<Gender> genderPreferences) {this.genderPreferences = genderPreferences;}
 
     public int getMinAge(){return minAge;}
 

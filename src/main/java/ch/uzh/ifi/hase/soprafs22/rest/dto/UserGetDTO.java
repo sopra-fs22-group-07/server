@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
 import java.util.Date;
+import java.util.Set;
 
 public class UserGetDTO {
 
@@ -14,6 +15,9 @@ public class UserGetDTO {
   private Date birthday;
   private Gender gender;
   private Date creationDate;
+  private int minAge;
+  private int maxAge;
+  private Set<Gender> genderPreferences;
 
   public Long getId() {
     return id;
@@ -69,4 +73,28 @@ public class UserGetDTO {
   }
 
   public void setGender(Gender gender){this.gender = gender; }
+
+    public int getMinAge() {
+        return minAge;
+    }
+
+    public void setMinAge(int minAge) {
+        this.minAge = minAge;
+    }
+
+    public int getMaxAge() {
+        return maxAge;
+    }
+
+    public void setMaxAge(int maxAge) {
+        this.maxAge = maxAge;
+    }
+
+    public Set<Gender> getGenderPreferences() {
+        return genderPreferences;
+    }
+
+    public void setGenderPreferences(Set<Gender> genderPreferences) {
+        this.genderPreferences = genderPreferences;
+    }
 }

@@ -191,11 +191,11 @@ public class UserController {
     @GetMapping("/users/{userId}/preferences")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public UserGetPreferencesDTO getUserPreferences(@RequestHeader(value = "authorization", required = false) String token,
-                              @PathVariable(value = "userId") int userId) {
-        userService.checkGeneralAccess(token);
+    public UserGetDTO getUserPreferences(@RequestHeader(value = "authorization", required = false) String token,
+                              @PathVariable(value = "userId") long userId) {
+        userService.checkSpecificAccess(token, userId);
         User user = userService.getUserById(userId);
-        return DTOMapper.INSTANCE.convertEntityToUserPreferencesGetDTO(user);
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
     }
 
     @PutMapping("/users/{userId}/preferences")
@@ -204,10 +204,10 @@ public class UserController {
     public void updateUserPreferences(
             @RequestHeader(value = "authorization", required = false) String token,
             @PathVariable(value = "userId") long userId,
-            @RequestBody UserPreferencesPutDTO userPutPreferencesDTO){
+            @RequestBody UserPutDTO userPutDTO){
 
         userService.checkSpecificAccess(token, userId); // 401, 404
-        User userPreferences = DTOMapper.INSTANCE.convertUserPreferencesPutDTOtoEntity(userPutPreferencesDTO);
+        User userPreferences = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
         //userPreferences is just a user that only has the preferences and user id
         userPreferences.setId(userId);
 

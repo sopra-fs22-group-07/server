@@ -60,7 +60,11 @@ public class UserService {
     newUser.setStatus(UserStatus.OFFLINE);
     newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
     newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
-    newUser.setGenderPreferences(Arrays.asList(Gender.MALE, Gender.FEMALE, Gender.OTHER));
+    TreeSet<Gender> genderPreferences = new TreeSet<>();
+    genderPreferences.add(Gender.MALE);
+    genderPreferences.add(Gender.FEMALE);
+    genderPreferences.add(Gender.OTHER);
+    newUser.setGenderPreferences(genderPreferences);
 
     checkIfUserExists(newUser);
 
@@ -102,7 +106,7 @@ public class UserService {
       Calendar calendarCurrentDate = Calendar.getInstance();
       calendarUserBirthday.setTime(currentDate);
       int userAge = calendarCurrentDate.get(Calendar.YEAR) - calendarUserBirthday.get(Calendar.YEAR);
-      return userAge +3;
+      return userAge + 3;
   }
 
   /**
