@@ -21,10 +21,10 @@ public class Message {
 
   @Column(nullable = false)
   // cannot call it 'from', that would trigger a syntax error in DDL
-  private long fromUserId;
+  private Long fromUserId;
 
   @Column(nullable = false)
-  private long toUserId;
+  private Long toUserId;
 
   @Column
   private Date creationDate = new Date();
@@ -72,19 +72,19 @@ public class Message {
     this.read = read;
   }
 
-  public long getFromUserId() {
+  public Long getFromUserId() {
     return fromUserId;
   }
 
-  public void setFromUserId(long fromUserId) {
+  public void setFromUserId(Long fromUserId) {
     this.fromUserId = fromUserId;
   }
 
-  public long getToUserId() {
+  public Long getToUserId() {
     return toUserId;
   }
 
-  public void setToUserId(long toUserId) {
+  public void setToUserId(Long toUserId) {
     this.toUserId = toUserId;
   }
 }

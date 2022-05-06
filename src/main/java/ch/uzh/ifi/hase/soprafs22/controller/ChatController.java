@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
+import ch.uzh.ifi.hase.soprafs22.constant.MessageType;
 import ch.uzh.ifi.hase.soprafs22.entity.Message;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatCreationPostDTO;
@@ -29,13 +31,28 @@ public class ChatController {
   @GetMapping("/users/{userId}/chats")
   @ResponseBody
   public ResponseEntity<ChatOverViewGetDTO> getFirstMessageOfEveryChat(@RequestHeader(value = "authorization", required = false) String token,
-                                                                @PathVariable(value = "userId") long userId,
-                                                                @RequestParam(value = "from", required = false) long from,
-                                                                @RequestParam(value = "to", required = false) long to) {
+                                                                @PathVariable(value = "userId") long userId) {
     userService.checkSpecificAccess(token, userId); // 404, 409
+    User user = new User();
+    user.setId(5L);
+    user.setGender(Gender.MALE);
+    user.setName("David");
+
+    User self = userService.getUserById(userId);
+    Message msg = new Message();
+    msg.setId(6L);
+    msg.setMessageType(MessageType.PLAIN_TEXT);
+    msg.setRead(false);
+    msg.setFromUserId(user.getId());
+    msg.setToUserId(self.getId());
+    msg.setContent("Hi, how are you");
+
+    ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
+    chatOverViewGetDTO.setUser(user);
+    chatOverViewGetDTO.setMessage(msg);
 
     // I would not use the mapper here but do it myself
-    return new ResponseEntity<>(null, null, null);
+    return new ResponseEntity<>(chatOverViewGetDTO, null, HttpStatus.OK);
   }
 
 
