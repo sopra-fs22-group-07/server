@@ -53,7 +53,7 @@ public class UserService {
   /**
    * Creates and saves a new user
    * @param newUser: User that shall be created
-   * @return user : that was created
+   * @return user that was created
    */
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
@@ -77,37 +77,27 @@ public class UserService {
     return newUser;
   }
 
-    /**
-     * Returns max{userAge-3, 18}, used for initializing accounts
-     * @param userBirthday: birthday of the zser
-     * @return int max{userAge-3, 18}
-     */
-  private int findMinAgeDefault(Date userBirthday){
-      Date currentDate = new Date();
-      Calendar calendarUserBirthday = Calendar.getInstance();
-      calendarUserBirthday.setTime(userBirthday);
-      Calendar calendarCurrentDate = Calendar.getInstance();
-      calendarUserBirthday.setTime(currentDate);
-      int userAge = calendarCurrentDate.get(Calendar.YEAR) - calendarUserBirthday.get(Calendar.YEAR);
-      if(userAge - 3 < 18){
-          return 18;}
-      return userAge -3;
-  }
+    private long getAgeInMilliSeconds(Date birthday) {
+        return new Date().getTime() - birthday.getTime();
+    }
 
-    /**
-     * Used for initializing account
-     * @param userBirthday
-     * @return userage + 3
-     */
-  private int findMaxAgeDefault(Date userBirthday){
-      Date currentDate = new Date();
-      Calendar calendarUserBirthday = Calendar.getInstance();
-      calendarUserBirthday.setTime(userBirthday);
-      Calendar calendarCurrentDate = Calendar.getInstance();
-      calendarUserBirthday.setTime(currentDate);
-      int userAge = calendarCurrentDate.get(Calendar.YEAR) - calendarUserBirthday.get(Calendar.YEAR);
-      return userAge + 3;
-  }
+    private int getAge(Date birthday) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        int currentYear = c.get(Calendar.YEAR);
+        c.setTime(birthday);
+        int birthYear = c.get(Calendar.YEAR);
+        return currentYear - birthYear;
+    }
+
+    private int findMinAgeDefault(Date userBirthday){
+        long age = getAgeInMilliSeconds(userBirthday);
+        return age - 3 * Time.ONE_YEAR < 18 * Time.ONE_YEAR ? 18 : getAge(userBirthday) - 3;
+    }
+
+    private int findMaxAgeDefault(Date userBirthday) {
+        return getAge(userBirthday) + 3;
+    }
 
   /**
    * logout the user, sets the status to offline
