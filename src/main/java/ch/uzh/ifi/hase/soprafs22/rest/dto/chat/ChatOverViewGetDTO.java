@@ -1,17 +1,17 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto.chat;
 
 import ch.uzh.ifi.hase.soprafs22.entity.Message;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 
 public class ChatOverViewGetDTO {
-  private User user;
+  private UserGetDTO user;
   private Message message;
 
-  public User getUser() {
+  public UserGetDTO getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(UserGetDTO user) {
     this.user = user;
   }
 

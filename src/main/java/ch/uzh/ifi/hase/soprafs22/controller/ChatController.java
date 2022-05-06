@@ -48,7 +48,7 @@ public class ChatController {
     msg.setContent("Hi, how are you");
 
     ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
-    chatOverViewGetDTO.setUser(user);
+    chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
     chatOverViewGetDTO.setMessage(msg);
 
     // I would not use the mapper here but do it myself
