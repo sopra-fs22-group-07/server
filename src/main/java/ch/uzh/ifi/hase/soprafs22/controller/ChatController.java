@@ -15,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 public class ChatController {
 
@@ -30,8 +33,8 @@ public class ChatController {
 
   @GetMapping("/users/{userId}/chats")
   @ResponseBody
-  public ResponseEntity<ChatOverViewGetDTO> getFirstMessageOfEveryChat(@RequestHeader(value = "authorization", required = false) String token,
-                                                                @PathVariable(value = "userId") long userId) {
+  public ResponseEntity<List<ChatOverViewGetDTO>> getFirstMessageOfEveryChat(@RequestHeader(value = "authorization", required = false) String token,
+                                                                             @PathVariable(value = "userId") long userId) {
     userService.checkSpecificAccess(token, userId); // 404, 409
     User user = new User();
     user.setId(5L);
@@ -51,8 +54,11 @@ public class ChatController {
     chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
     chatOverViewGetDTO.setMessage(msg);
 
+    List<ChatOverViewGetDTO> chatOverViewGetDTOList = new ArrayList<>();
+    chatOverViewGetDTOList.add(chatOverViewGetDTO);
+
     // I would not use the mapper here but do it myself
-    return new ResponseEntity<>(chatOverViewGetDTO, null, HttpStatus.OK);
+    return new ResponseEntity<>(chatOverViewGetDTOList, null, HttpStatus.OK);
   }
 
 
