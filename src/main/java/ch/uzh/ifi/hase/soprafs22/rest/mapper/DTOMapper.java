@@ -28,7 +28,7 @@ public interface DTOMapper {
   @Mapping(source = "gender", target = "gender")
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
-  @Mapping(source = "id", target = "id")
+  //@Mapping(source = "id", target = "id") I thinks this should be deleted, Why was it here?
   @Mapping(source = "name", target = "name")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")
