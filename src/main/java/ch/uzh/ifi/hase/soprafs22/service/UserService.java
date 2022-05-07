@@ -227,9 +227,13 @@ public class UserService {
       //Getting the correct user (404 and 409 should be check by specific access already)
       User userToUpdatePreferences = getUserById(user.getId());
       //Update User Preferences
-      userToUpdatePreferences.setMinAge(user.getMinAge());
-      userToUpdatePreferences.setMaxAge(user.getMaxAge());
-      userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
+      if(user.getMinAge()>= 18 && user.getMinAge() <= user.getMaxAge()){ //they can both be 22 for instance. If you only want people that are 22 years old
+          userToUpdatePreferences.setMinAge(user.getMinAge());
+          userToUpdatePreferences.setMaxAge(user.getMaxAge());
+      }
+      if(!Objects.isNull(user.getGenderPreferences()) || user.getGenderPreferences().isEmpty()){
+          userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
+      }
   }
 
   /**
