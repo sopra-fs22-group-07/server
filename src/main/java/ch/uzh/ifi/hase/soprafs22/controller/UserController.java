@@ -188,6 +188,8 @@ public class UserController {
       return userGetDTOs;
   }
 
+
+  //TODO: DELETE THIS MAPPING: I AM KEEPING IT IN HERE SO THE USERPAGE WORKS UNTIL THE NEW CHANGES ARE ALSO ADJUSTER IN THE CLIENT
     @GetMapping("/users/{userId}/preferences")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -196,7 +198,7 @@ public class UserController {
         userService.checkSpecificAccess(token, userId);
         User user = userService.getUserById(userId);
         return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-    }
+    }//TODO: DELETE MAPPING ABOVE
 
     @PutMapping("/users/{userId}/preferences")
     @ResponseStatus(HttpStatus.NO_CONTENT)
