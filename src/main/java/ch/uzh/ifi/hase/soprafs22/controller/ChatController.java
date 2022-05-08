@@ -48,7 +48,7 @@ public class ChatController {
     // get matchedUser
     List<User> usersMatched = matchService.getUsersFromMatches(user, matches);
     // get the last Message from the matches/ chats
-    List<Message> msg = chatService.getFirstMessages(matches);
+    List<Message> msg = chatService.firstMessages(matches);
 
     List<ChatOverViewGetDTO> chatOverViewGetDTOList = new ArrayList<>();
 
@@ -78,7 +78,7 @@ public class ChatController {
     userService.checkSpecificAccess(token, userId); // 404, 409
 
 
-    List<Message> messageFromChat = chatService.getMessagesFromChat(chatId, from, to);
+    List<Message> messageFromChat = chatService.messagesFromChat(chatId, from, to);
 
     // return the black cards
       List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
@@ -100,20 +100,6 @@ public class ChatController {
                                    @PathVariable(value = "userId") long userId) {
     userService.checkSpecificAccess(token, userId); // 404, 409
     return false;
-  }
-
-  // TODO: instead create chat when match is created?
-  @PostMapping("/users/{userId}/chats")
-  @ResponseStatus(HttpStatus.CREATED)
-  @ResponseBody
-  public void createNewChat(@RequestHeader(value = "authorization", required = false) String token,
-                            @PathVariable(value = "userId") long userId,
-                            @RequestBody ChatCreationPostDTO chatCreationPostDTO) {
-    userService.checkSpecificAccess(token, userId); // 404, 409
-    long otherUserId = chatCreationPostDTO.getUserId();
-    // remove if not needed:
-    User otherUser = userService.getUserById(otherUserId); // 404
-
   }
 
 
