@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
-import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -49,15 +48,11 @@ public class UserService {
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
                      @Qualifier("gameService") GameService gameService,
-                    //  @Qualifier("gameRepository") GameRepository gameRepository,
-                    //  @Qualifier("cardService") CardService cardService,
                      @Qualifier("MatchRepository") MatchRepository matchRepository) {
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
     this.gameService = gameService;
-    // this.gameRepository = gameRepository;
-    // this.cardService = cardService;
   }
 
   public List<User> getUsers() {
@@ -556,7 +551,7 @@ public class UserService {
 
     } else {
 
-      System.out.println("Instantiating demo users...");
+      log.info("Instantiating demo users...");
 
       // ======= create demo users =======
       User demoUser1 = new User();
@@ -600,7 +595,7 @@ public class UserService {
       // setMatch(demoMatch2);
 
       areInstantiatedDemoUsers = true;
-      System.out.println("Demo users instantiated.");
+      log.info("Demo users instantiated.");
 
     }
   }

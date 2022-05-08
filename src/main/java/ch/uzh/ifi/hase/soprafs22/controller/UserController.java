@@ -192,9 +192,7 @@ public class UserController {
   @PostMapping("/users/demo")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public void createDemoUsers(
-          @RequestHeader(value = "authorization", required = false) String token){
-
+  public void createDemoUsers(){
       userService.instantiateDemoUsers();  // throws 400 if the function has been called previously since the server was started
   }
 
