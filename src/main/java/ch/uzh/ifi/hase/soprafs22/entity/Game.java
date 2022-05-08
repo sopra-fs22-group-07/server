@@ -46,40 +46,19 @@ public class Game implements Serializable {
   // Getters and Setters
 
   public void setId(long id){this.id=id;}
-
   public Long getId(){return this.id;}
 
-  public void setUserId(long userId){
-      this.userId=userId;
-  }
+  public void setUserId(long userId){this.userId=userId;}
+  public Long getUserId(){return this.userId;}
 
-  public Long getUserId(){
-      return this.userId;
-  }
+  public void setBlackCard(BlackCard card){this.blackCard=card;}
+  public BlackCard getBlackCard(){return this.blackCard;}
 
-  public void setBlackCard(BlackCard card){
-        this.blackCard=card;
-  }
+  public void enqueuePlay(Play play){plays.add(play);}
+  public List<Play> getPlays() {return this.plays;}
 
-  public BlackCard getBlackCard(){
-        return this.blackCard;
-  }
-
-  public void enqueuePlay(Play play){
-    plays.add(play);
-  }
-
-  public List<Play> getPlays() {
-      return this.plays;
-    }
-
-  public Date getCreationTime() {
-    return creationTime;
-  }
-
-  public void setCreationTime(Date creationTime) {
-    this.creationTime = creationTime;
-  }
+  public Date getCreationTime() {return creationTime;}
+  public void setCreationTime(Date creationTime) {this.creationTime = creationTime;}
 
   public void deletePlaysFrom(Long userId) {
     // safety net - assuming user has succeeded in inserting multiple plays into this game, we delete them all
@@ -92,11 +71,6 @@ public class Game implements Serializable {
     this.plays.removeAll(toBeRemoved);
   }
 
-  public GameStatus getGameStatus() {
-    return gameStatus;
-  }
-
-  public void setGameStatus(GameStatus gameStatus) {
-    this.gameStatus = gameStatus;
-  }
+  public GameStatus getGameStatus() {return gameStatus;}
+  public void setGameStatus(GameStatus gameStatus) {this.gameStatus = gameStatus;}
 }

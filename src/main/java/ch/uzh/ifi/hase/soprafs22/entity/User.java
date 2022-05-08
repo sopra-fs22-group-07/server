@@ -75,70 +75,55 @@ public class User implements Serializable {
 
     // GETTERS AND SETTERS
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getUsername() {return username;}
+    public void setUsername(String username) {this.username = username;}
 
-    public String getUsername() {
-        return username;
-    }
+    public String getName() {return name;}
+    public void setName(String name) {this.name = name;}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getToken() {return token;}
+    public void setToken(String token) {this.token = token;}
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public UserStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(UserStatus status) {
-        this.status = status;
-    }
+    public UserStatus getStatus() {return status;}
+    public void setStatus(UserStatus status) {this.status = status;}
 
     public Date getCreationDate(){return this.creationDate; }
-
     public void setCreationDate(Date creationDate){this.creationDate = creationDate; }
 
     public Date getBirthday(){return this.birthday; }
-
     public void setBirthday(Date birthday){this.birthday = birthday; }
 
     public String getPassword(){return this.password; }
-
     public void setPassword(String password){this.password = password; }
 
     public Gender getGender(){return this.gender; }
+    public void setGender(Gender gender){this.gender = gender; }
+
+    public Game getActiveGame() {return activeGame;}
+    public void setActiveGame(Game activeGame) {this.activeGame = activeGame;}
+
+    public List<Game> getPastGames() {return pastGames;}
+
+    public Set<Long> getMatches() {return matches;}
+
+    public List<WhiteCard> getUserWhiteCards() {return userWhiteCards;}
+    public void setUserWhiteCards(List<WhiteCard> usersWhiteCards) {this.userWhiteCards = usersWhiteCards;}
+
+    public UserBlackCards getUserBlackCards() {return userBlackCards;}
+    public void setUserBlackCards(UserBlackCards userBlackCards) {this.userBlackCards = userBlackCards;}
+
+
+    // HELPER FUNCTIONS
 
     /**
      * Method for Testing the gender of the user in JSON, as the gender should be
      * as string and not ENUM there
       * @return User.gender as string
      */
-    public String getGenderString(){
-        return this.gender.toString();
-    }
-
-    public void setGender(Gender gender){this.gender = gender; }
+    public String getGenderString(){return this.gender.toString();}
 
     public void addGame(Game game){
         this.pastGames.add(game);
@@ -151,25 +136,10 @@ public class User implements Serializable {
         this.addGame(game);
     }
 
-    public Game getActiveGame() {
-        return activeGame;
-    }
-
-    public void setActiveGame(Game activeGame) {
-        this.activeGame = activeGame;
-    }
-
-    public List<Game> getPastGames() {
-        return pastGames;
-    }
-
     public void deletePastGame(Game game) {
         this.pastGames.remove(game);
     }
 
-    public Set<Long> getMatches() {
-        return matches;
-    }
 
     public void addMatch(Long matchId) {
         this.matches.add(matchId);
@@ -195,23 +165,9 @@ public class User implements Serializable {
         return this.likedByUsers.contains(user.getId());
     }
 
-    public List<WhiteCard> getUserWhiteCards() {
-        return userWhiteCards;
-    }
-
-    public void setUserWhiteCards(List<WhiteCard> usersWhiteCards) {
-        this.userWhiteCards = usersWhiteCards;
-    }
 
     public void removeWhiteCard(WhiteCard whiteCard) {
         this.userWhiteCards.remove(whiteCard);
     }
 
-    public UserBlackCards getUserBlackCards() {
-        return userBlackCards;
-    }
-
-    public void setUserBlackCards(UserBlackCards userBlackCards) {
-        this.userBlackCards = userBlackCards;
-    }
 }
