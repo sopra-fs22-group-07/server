@@ -78,8 +78,9 @@ public class ChatController {
     userService.checkSpecificAccess(token, userId); // 404, 409
 
 
-    List<Message> messageFromChat = chatService.getMessagesFromChat(chatId);
-      // return the black cards
+    List<Message> messageFromChat = chatService.getMessagesFromChat(chatId, from, to);
+
+    // return the black cards
       List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
 
       // mapp the messages

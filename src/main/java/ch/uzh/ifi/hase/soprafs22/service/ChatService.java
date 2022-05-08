@@ -50,12 +50,13 @@ public class ChatService {
      * @param chatId: Id of chat
      * @return Message: all messages of chat
      */
-    public List<Message> getMessagesFromChat(long chatId) {
+    public List<Message> getMessagesFromChat(Long chatId, Long from, Long to) {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "chat does not exit"));
 
-        return  chat.getMessages();
+        // from to (long) cast to int
+        return  chat.getMessages(from.intValue(), to.intValue());
 
     }
 
