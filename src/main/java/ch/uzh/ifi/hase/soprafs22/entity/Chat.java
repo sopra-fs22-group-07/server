@@ -1,23 +1,22 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
 @Table(name = "CHAT")
-public class Chat {
+public class Chat implements Serializable {
 
   @Id
   @GeneratedValue
-  private Long id;
+  @Column(name ="id")
+  private long id;
 
   @OneToMany
   private List<Message> messages = new ArrayList<>();
 
-  @ElementCollection
-  private Set<Long> userIds = new HashSet<>();
-
-  public long getId() {
+    public long getId() {
     return id;
   }
 
@@ -51,8 +50,10 @@ public class Chat {
      * @param index: the index of the message
      * @return Message: the Message on position index
      */
-    public Message getMessages(int index) {
-
+    public Message getMessages(int index){
+        if (messages.isEmpty()){
+            return null;
+        }
         return messages.get(index);
     }
 
@@ -70,11 +71,4 @@ public class Chat {
     messages.add(0, message);
   }
 
-  public Set<Long> getUserIds() {
-    return userIds;
-  }
-
-  public void setUserIds(Set<Long> userIds) {
-    this.userIds = userIds;
-  }
 }

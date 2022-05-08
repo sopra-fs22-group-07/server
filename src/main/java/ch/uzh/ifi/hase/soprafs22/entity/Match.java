@@ -24,7 +24,7 @@ public class Match implements Serializable {
   private List<User> userPair = new ArrayList<>();
 
   @OneToOne
-  private Chat chat = new Chat();
+  private Chat chat;
 
 
   // GETTERS AND SETTERS

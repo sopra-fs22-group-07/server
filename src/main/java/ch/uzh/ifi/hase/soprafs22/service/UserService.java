@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -34,15 +35,18 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
+  private final ChatRepository chatRepository;
 
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
-                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
+                     @Qualifier("MatchRepository") MatchRepository matchRepository,
+                     @Qualifier("ChatRepository")ChatRepository chatRepository) {
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
+    this.chatRepository = chatRepository;
   }
 
   public List<User> getUsers() {
@@ -266,6 +270,12 @@ public class UserService {
     // Yes, it would be absolutely possible to do without the Pair class...
     Pair<User, User> pair = new Pair<>(user, otherUser);
     match.setUserPair(pair);
+
+    Chat chat = new Chat();
+    chatRepository.saveAndFlush(chat);
+
+    // new Chat gets added
+    match.setChat(chat);
     matchRepository.saveAndFlush(match);
 
     return match;

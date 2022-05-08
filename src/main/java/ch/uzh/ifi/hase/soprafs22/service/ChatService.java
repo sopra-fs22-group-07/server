@@ -29,7 +29,7 @@ public class ChatService {
     }
 
     /**
-     * Get the first emssages of all chats
+     * Get the first messages of all chats, if chat is empty, add null
      * @param matches
      * @return
      */
@@ -38,7 +38,12 @@ public class ChatService {
         List<Message> firstMessages = new ArrayList<>();
 
         for(Match match : matches){
+            // if no message, add null
+            try{
             firstMessages.add(match.getChat().getMessages(0));
+            }catch(ArrayIndexOutOfBoundsException e) {
+                firstMessages.add(null);
+            }
         }
 
         return firstMessages;
