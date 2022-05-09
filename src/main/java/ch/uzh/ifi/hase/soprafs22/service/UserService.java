@@ -8,6 +8,8 @@ import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+
+// import org.h2.command.ddl.CreateDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +37,22 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
+  private final GameService gameService;
+  // private final GameRepository gameRepository;
+  // // adding cardService in order to force SpringBoot to initialize it before the userService (even though cardService is not used directly in this file). This allows the userService to add cards to the demo users.
+  // private final CardService cardService;
+  private boolean areInstantiatedDemoUsers = false;
 
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
+                     @Qualifier("gameService") GameService gameService,
                      @Qualifier("MatchRepository") MatchRepository matchRepository) {
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
+    this.gameService = gameService;
   }
 
   public List<User> getUsers() {
@@ -231,7 +240,7 @@ public class UserService {
           userToUpdatePreferences.setMinAge(user.getMinAge());
           userToUpdatePreferences.setMaxAge(user.getMaxAge());
       }
-      if(!Objects.isNull(user.getGenderPreferences()) || user.getGenderPreferences().isEmpty()){
+      if(!Objects.isNull(user.getGenderPreferences()) && !user.getGenderPreferences().isEmpty()){
           userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
       }
   }
@@ -300,7 +309,7 @@ public class UserService {
    */
   public Match createMatch(User user, User otherUser) {
 
-      // first, delete likes
+    // first, delete likes
     user.removeLikeFromUser(otherUser);
     otherUser.removeLikeFromUser(user);
 
@@ -573,6 +582,66 @@ public class UserService {
     // return list of users
     return users;
   }
+
+
+  // instantiate demo users
+  public void instantiateDemoUsers() {
+
+    if (areInstantiatedDemoUsers) {
+      // throw exception if demo users are already instantiated
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Demo users are already instantiated");
+
+    } else {
+
+      log.info("Instantiating demo users...");
+
+      // ======= create demo users =======
+      User demoUser1 = new User();
+      demoUser1.setUsername("demoUser1");
+      demoUser1.setPassword("demoUser1");
+      demoUser1.setName("Demo User 1");
+      demoUser1.setGender(Gender.MALE);
+      demoUser1 = createUser(demoUser1);
+
+      User demoUser2 = new User();
+      demoUser2.setUsername("demoUser2");
+      demoUser2.setPassword("demoUser2");
+      demoUser2.setName("Demo User 2");
+      demoUser2.setGender(Gender.FEMALE);
+      demoUser2 = createUser(demoUser2);
+
+      User demoUser3 = new User();
+      demoUser3.setUsername("demoUser3");
+      demoUser3.setPassword("demoUser3");
+      demoUser3.setName("Demo User 3");
+      demoUser3.setGender(Gender.OTHER);
+      demoUser3 = createUser(demoUser3);
+
+
+      // ======= create active games =======
+      BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
+      Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
+      Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
+      Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
+
+
+      // ======= create likes and matches =======
+      Match demoMatch1 = createMatch(demoUser1, demoUser2);
+      setMatch(demoMatch1);
+
+      // TODO: find reason for this
+      // the following code breaks (as far as I can tell between the 2 calls)
+      // Match demoMatch2 = createMatch(demoUser1, demoUser3);
+      // setMatch(demoMatch2);
+
+      areInstantiatedDemoUsers = true;
+      log.info("Demo users instantiated.");
+
+    }
+  }
+
 
   /**
    * Gets the black card of a user, but throws 404 if the user has no active game or no black card selected yet

@@ -41,6 +41,7 @@ public class GameService {
                        @Qualifier("playRepository") PlayRepository playRepository,
                        @Qualifier("WhiteCardRepository") WhiteCardRepository whiteCardRepository,
                        @Qualifier("BlackCardRepository") BlackCardRepository blackCardRepository) {
+
         this.gameRepository = gameRepository;
         this.playRepository = playRepository;
         this.whiteCardRepository = whiteCardRepository;
@@ -238,4 +239,6 @@ public class GameService {
     // return the game
     return somePage.getContent().get(0);
   }
+
+
 }
