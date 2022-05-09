@@ -20,7 +20,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
 
-    private final String notExists= "chat does not exist";
+    private static final String NOT_EXISTS= "chat does not exist";
 
     @Autowired
     public ChatService( @Qualifier("ChatRepository") ChatRepository chatRepository,
@@ -56,7 +56,7 @@ public class ChatService {
     public List<Message> getMessagesFromChat(Long chatId, Long from, Long to) {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS));
 
         // from to (long) cast to int
         return  chat.getMessages(from.intValue(), to.intValue());
@@ -71,12 +71,12 @@ public class ChatService {
     public void addMessageToChat(Long chatId, Message message) {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS)
         );
 
         chat.pushMessage(message);
-        chatRepository.saveAndFlush(chat);
         messageRepository.saveAndFlush(message);
+        chatRepository.saveAndFlush(chat);
     }
 
     /**
@@ -86,7 +86,7 @@ public class ChatService {
      */
     public List<Message> getUnreadMessages(long chatId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS)
         );
 
         List<Message> unreadMessages = new ArrayList<>();
@@ -101,9 +101,14 @@ public class ChatService {
         return unreadMessages;
     }
 
+    /**
+     * Get size of chat
+     * @param chatId id of chat
+     * @return returns size of chat as int
+     */
     public int getSize(long chatId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS)
         );
 
         return chat.size();
@@ -111,20 +116,23 @@ public class ChatService {
 
     /**
      * Set the messages of chat with chatID to read
-     * @param chatId: wanted chat
+     * @param chatId : wanted chat
+     * @param userId : id of user, which read the chat and read the other users messages
      */
-    public void setMessagesOfRead(long chatId) {
+    public void setMessagesOfRead(long chatId, long userId) {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS)
         );
 
         for(Message msg : chat.getMessages(0, chat.size())){
             // if no message, add null
-            if(msg.isRead()){
+            if(msg.isRead() && msg.getFromUserId()!=userId){
                 break;
             }
-            msg.setRead(true);
+            if(msg.getFromUserId()!=userId){
+                msg.setRead(true);
+            }
         }
     }
 }

@@ -7,7 +7,6 @@ public class ChatMessagePutDTO {
   private MessageType messageType;
   private String content;
 
-
   public MessageType getMessageType() {
     return messageType;
   }

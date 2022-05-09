@@ -24,11 +24,11 @@ public class ChatOverViewGetDTO {
     this.message = message;
   }
 
-    public Long getChatId() {
+    public long getChatId() {
         return chatId;
     }
 
-    public void setChatId(Long chatId) {
+    public void setChatId(long chatId) {
         this.chatId = chatId;
     }
 }

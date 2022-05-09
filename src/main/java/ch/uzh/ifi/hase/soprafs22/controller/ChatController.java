@@ -130,7 +130,7 @@ public class ChatController {
 
     }
 
-    @PutMapping("/users/{userId}/chats/{chatId}")
+    @PutMapping("/users/{userId}/chats/{chatId}/read")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public void readMessages(@RequestHeader(value = "authorization", required = false) String token,
@@ -141,7 +141,7 @@ public class ChatController {
 
         // Set all to read
         if(read){
-            chatService.setMessagesOfRead(chatId);
+            chatService.setMessagesOfRead(userId, chatId);
         }
 
     }
