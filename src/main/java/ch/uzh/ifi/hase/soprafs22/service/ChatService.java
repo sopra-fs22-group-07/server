@@ -20,6 +20,8 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageRepository messageRepository;
 
+    private final String notExists= "chat does not exist";
+
     @Autowired
     public ChatService( @Qualifier("ChatRepository") ChatRepository chatRepository,
                         @Qualifier("MessageRepository") MessageRepository messageRepository) {
@@ -30,8 +32,8 @@ public class ChatService {
 
     /**
      * Get the first messages of all chats, if chat is empty, add null
-     * @param matches
-     * @return
+     * @param matches: list of matches
+     * @return first message of the chats
      */
     public List<Message> getFirstMessages(List<Match> matches){
 
@@ -39,11 +41,7 @@ public class ChatService {
 
         for(Match match : matches){
             // if no message, add null
-            try{
             firstMessages.add(match.getChat().getFirstMessage());
-            }catch(ArrayIndexOutOfBoundsException e) {
-                firstMessages.add(null);
-            }
         }
 
         return firstMessages;
@@ -58,7 +56,7 @@ public class ChatService {
     public List<Message> getMessagesFromChat(Long chatId, Long from, Long to) {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "chat does not exit"));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists));
 
         // from to (long) cast to int
         return  chat.getMessages(from.intValue(), to.intValue());
@@ -67,13 +65,13 @@ public class ChatService {
 
     /**
      * Add Message to chat and save it in the message repository
-     * @param chatId
-     * @param message
+     * @param chatId: chat, where message gets added
+     * @param message: massage to add
      */
     public void addMessageToChat(Long chatId, Message message) {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "chat does not exit")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
         );
 
         chat.pushMessage(message);
@@ -81,4 +79,52 @@ public class ChatService {
         messageRepository.saveAndFlush(message);
     }
 
+    /**
+     * Returns all unread messages of the chat
+     * @param chatId: id of chat
+     * @return List with all unread messages
+     */
+    public List<Message> getUnreadMessages(long chatId) {
+        Chat chat = chatRepository.findById(chatId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
+        );
+
+        List<Message> unreadMessages = new ArrayList<>();
+
+        for(Message msg : chat.getMessages(0, chat.size())){
+            // if no message, add null
+            if(msg.isRead()){
+                break;
+            }
+            unreadMessages.add(msg);
+        }
+        return unreadMessages;
+    }
+
+    public int getSize(long chatId) {
+        Chat chat = chatRepository.findById(chatId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
+        );
+
+        return chat.size();
+    }
+
+    /**
+     * Set the messages of chat with chatID to read
+     * @param chatId: wanted chat
+     */
+    public void setMessagesOfRead(long chatId) {
+
+        Chat chat = chatRepository.findById(chatId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, notExists)
+        );
+
+        for(Message msg : chat.getMessages(0, chat.size())){
+            // if no message, add null
+            if(msg.isRead()){
+                break;
+            }
+            msg.setRead(true);
+        }
+    }
 }

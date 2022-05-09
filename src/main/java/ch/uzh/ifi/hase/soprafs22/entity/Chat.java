@@ -62,4 +62,8 @@ public class Chat implements Serializable {
     messages.add(0, message);
   }
 
+  public int size(){
+        return messages.size();
+  }
+
 }

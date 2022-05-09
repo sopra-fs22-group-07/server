@@ -48,7 +48,7 @@ public class ChatController {
 
     List<ChatOverViewGetDTO> chatOverViewGetDTOList = new ArrayList<>();
 
-      // mapp the messages, go through both lists and add them to chatOverViewGetDTOList
+      // map messages, go through both lists and add them to chatOverViewGetDTOList
       Iterator<User> matchedUser = usersMatched.iterator();
       Iterator<Message> message = msg.iterator();
 
@@ -90,6 +90,7 @@ public class ChatController {
       return new ResponseEntity<>(chatMessageGetDTOList, null, HttpStatus.OK);
   }
 
+  /*
     // TODO: How to implement?
   @GetMapping("/users/{userId}/chats/DOCHUNTIRGENDEBBISABRWEISSNONIWAS")
   @ResponseStatus(HttpStatus.OK)
@@ -98,7 +99,7 @@ public class ChatController {
                                    @PathVariable(value = "userId") long userId) {
     userService.checkSpecificAccess(token, userId); // 404, 409
     return false;
-  }
+  }*/
 
 
   @PutMapping("/users/{userId}/chats/{chatId}")
@@ -115,4 +116,56 @@ public class ChatController {
     chatService.addMessageToChat(chatId, message);
 
   }
+
+    @GetMapping("/users/{userId}/chats/{chatId}/newMsgs")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ResponseEntity<List<ChatMessageGetDTO>> getNewMessages(@RequestHeader(value = "authorization", required = false) String token,
+                                  @PathVariable(value = "userId") long userId,
+                                  @PathVariable(value = "chatId") long chatId) {
+        userService.checkSpecificAccess(token, userId); // 404, 409
+
+        List<Message> unreadMessages = chatService.getUnreadMessages(chatId);
+        // return the black cards
+        List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
+
+        // map messages
+        for (Message message : unreadMessages){
+            chatMessageGetDTOList.add(DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(message));
+        }
+
+
+        return new ResponseEntity<>(chatMessageGetDTOList, null, HttpStatus.OK);
+
+    }
+
+    @PutMapping("/users/{userId}/chats/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void readMessages(@RequestHeader(value = "authorization", required = false) String token,
+                                  @PathVariable(value = "userId") long userId,
+                                  @PathVariable(value = "chatId") long chatId,
+                                  @RequestParam(value = "read", required = false) boolean read) {
+        userService.checkSpecificAccess(token, userId); // 404, 409
+
+        // Set all to read
+        if(read){
+            chatService.setMessagesOfRead(chatId);
+        }
+
+    }
+
+    @GetMapping("/users/{userId}/chats/{chatId}/size")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public int getSizeOfChat(@RequestHeader(value = "authorization", required = false) String token,
+                                 @PathVariable(value = "userId") long userId,
+                                 @PathVariable(value = "chatId") long chatId) {
+        userService.checkSpecificAccess(token, userId); // 404, 409
+
+        return chatService.getSize(chatId);
+    }
+
+
+
 }
