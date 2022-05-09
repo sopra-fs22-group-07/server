@@ -209,11 +209,11 @@ public class UserController {
             @RequestBody UserPutDTO userPutDTO){
 
         userService.checkSpecificAccess(token, userId); // 401, 404
-        User userPreferences = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+        User user = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
         //userPreferences is just a user that only has the preferences and user id
-        userPreferences.setId(userId);
+        user.setId(userId);
 
-        userService.updatePreferences(userPreferences);
+        userService.updatePreferences(user);
     }
 
 
