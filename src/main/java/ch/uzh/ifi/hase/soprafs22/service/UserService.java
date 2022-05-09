@@ -69,7 +69,7 @@ public class UserService {
     newUser.setStatus(UserStatus.OFFLINE);
     newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
     newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
-    TreeSet<Gender> genderPreferences = new TreeSet<>();
+    Set<Gender> genderPreferences = new TreeSet<>();
     genderPreferences.add(Gender.MALE);
     genderPreferences.add(Gender.FEMALE);
     genderPreferences.add(Gender.OTHER);
