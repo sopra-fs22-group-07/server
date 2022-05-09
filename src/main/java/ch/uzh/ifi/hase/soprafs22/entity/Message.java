@@ -3,11 +3,12 @@ package ch.uzh.ifi.hase.soprafs22.entity;
 import ch.uzh.ifi.hase.soprafs22.constant.MessageType;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
 @Table(name = "MESSAGE")
-public class Message {
+public class Message implements Serializable {
 
   @Id
   @GeneratedValue

@@ -10,7 +10,7 @@ import java.util.List;
  * This is the Match Entity, it saves two users into it, and has a unique ID. It receives and returns a Pair of users.
  */
 @Entity
-@Table(name = "Match")
+@Table(name = "MATCH")
 public class Match implements Serializable {
 
   @Id
@@ -23,6 +23,9 @@ public class Match implements Serializable {
   @OneToMany
   private List<User> userPair = new ArrayList<>();
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "chatId", referencedColumnName = "id")
+  private Chat chat;
 
   // GETTERS AND SETTERS
 
@@ -49,6 +52,12 @@ public class Match implements Serializable {
 
   public Pair<User, User> getUserPair() {
     return new Pair<>(userPair.get(0), userPair.get(1));
+  }
+
+  public Chat getChat(){ return  this.chat; }
+
+  public void setChat(Chat chat){
+      this.chat = chat;
   }
 
 }
