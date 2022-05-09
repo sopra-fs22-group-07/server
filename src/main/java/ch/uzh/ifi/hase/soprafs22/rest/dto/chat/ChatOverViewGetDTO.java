@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
 public class ChatOverViewGetDTO {
   private UserGetDTO user;
   private Message message;
+  private Long chatId;
 
   public UserGetDTO getUser() {
     return user;
@@ -22,4 +23,12 @@ public class ChatOverViewGetDTO {
   public void setMessage(Message message) {
     this.message = message;
   }
+
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
+    }
 }

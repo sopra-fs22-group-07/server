@@ -41,6 +41,8 @@ public class ChatController {
     User user = userService.getUserById(userId);
     // get all matches from user
     List<Match> matches = userService.getMatches(user);
+    // get chatID
+    List<Long> chatIds = userService.getChatIds(matches);
     // get matchedUser
     List<User> usersMatched = userService.getUsersFromMatches(user, matches);
     // get the last Message from the matches/ chats
@@ -51,15 +53,15 @@ public class ChatController {
       // map messages, go through both lists and add them to chatOverViewGetDTOList
       Iterator<User> matchedUser = usersMatched.iterator();
       Iterator<Message> message = msg.iterator();
+      Iterator<Long> chatId = chatIds.iterator();
 
-      while (matchedUser.hasNext() && message.hasNext()) {
+      while (matchedUser.hasNext() && message.hasNext() && chatId.hasNext()) {
           ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
           chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(matchedUser.next()));
           chatOverViewGetDTO.setMessage(message.next());
+          chatOverViewGetDTO.setChatId(chatId.next());
           chatOverViewGetDTOList.add(chatOverViewGetDTO);
       }
-
-      // TODO: return machtId / ChatId
 
     // I would not use the mapper here but do it myself
     return new ResponseEntity<>(chatOverViewGetDTOList, null, HttpStatus.OK);
@@ -81,7 +83,7 @@ public class ChatController {
     // return the black cards
       List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
 
-      // mapp the messages
+      // map the messages
       for (Message message : messagesFromChat){
           chatMessageGetDTOList.add(DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(message));
       }
@@ -89,17 +91,6 @@ public class ChatController {
 
       return new ResponseEntity<>(chatMessageGetDTOList, null, HttpStatus.OK);
   }
-
-  /*
-    // TODO: How to implement?
-  @GetMapping("/users/{userId}/chats/DOCHUNTIRGENDEBBISABRWEISSNONIWAS")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public boolean hasUnreadMessages(@RequestHeader(value = "authorization", required = false) String token,
-                                   @PathVariable(value = "userId") long userId) {
-    userService.checkSpecificAccess(token, userId); // 404, 409
-    return false;
-  }*/
 
 
   @PutMapping("/users/{userId}/chats/{chatId}")

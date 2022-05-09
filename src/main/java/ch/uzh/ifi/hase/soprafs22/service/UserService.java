@@ -505,7 +505,7 @@ public class UserService {
     /**
      * get matches of a user
      * @param user: user from which the matches are taken
-     * @return Lsit of Matches
+     * @return List of Matches
      */
     public List<Match> getMatches(User user){
         Set<Long> matchesOfUser = user.getMatches();
@@ -594,4 +594,18 @@ public class UserService {
     // else return the black card
     return user.getActiveGame().getBlackCard();
   }
+
+    /**
+     * get id of chat
+     * @param matches List of matches
+     * @return ids of the chats
+     */
+    public List<Long> getChatIds(List<Match> matches) {
+        List<Long> chatIds = new ArrayList<>();
+      for(Match match: matches){
+          Chat chat = match.getChat();
+          chatIds.add(chat.getId());
+      }
+      return chatIds;
+    }
 }
