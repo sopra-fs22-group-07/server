@@ -3,13 +3,11 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.entity.Match;
 import ch.uzh.ifi.hase.soprafs22.entity.Message;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatCreationPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessageGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatOverViewGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.ChatService;
-import ch.uzh.ifi.hase.soprafs22.service.MatchService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +22,10 @@ import java.util.List;
 public class ChatController {
 
   private final UserService userService;
-  private final MatchService matchService;
   private final ChatService chatService;
 
 
-  ChatController(MatchService matchService, UserService userService, ChatService chatService) {
-    this.matchService = matchService;
+  ChatController(UserService userService, ChatService chatService) {
     this.userService = userService;
     this.chatService = chatService;
   }
@@ -44,11 +40,11 @@ public class ChatController {
       // get User by ID
     User user = userService.getUserById(userId);
     // get all matches from user
-    List<Match> matches = matchService.getMatches(user);
+    List<Match> matches = userService.getMatches(user);
     // get matchedUser
-    List<User> usersMatched = matchService.getUsersFromMatches(user, matches);
+    List<User> usersMatched = userService.getUsersFromMatches(user, matches);
     // get the last Message from the matches/ chats
-    List<Message> msg = chatService.firstMessages(matches);
+    List<Message> msg = chatService.getFirstMessages(matches);
 
     List<ChatOverViewGetDTO> chatOverViewGetDTOList = new ArrayList<>();
 
@@ -62,6 +58,8 @@ public class ChatController {
           chatOverViewGetDTO.setMessage(message.next());
           chatOverViewGetDTOList.add(chatOverViewGetDTO);
       }
+
+      // TODO: return machtId / ChatId
 
     // I would not use the mapper here but do it myself
     return new ResponseEntity<>(chatOverViewGetDTOList, null, HttpStatus.OK);
@@ -78,13 +76,13 @@ public class ChatController {
     userService.checkSpecificAccess(token, userId); // 404, 409
 
 
-    List<Message> messageFromChat = chatService.messagesFromChat(chatId, from, to);
+    List<Message> messagesFromChat = chatService.getMessagesFromChat(chatId, from, to);
 
     // return the black cards
       List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
 
       // mapp the messages
-      for (Message message : messageFromChat){
+      for (Message message : messagesFromChat){
           chatMessageGetDTOList.add(DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(message));
       }
 

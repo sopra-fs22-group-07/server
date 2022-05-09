@@ -33,14 +33,14 @@ public class ChatService {
      * @param matches
      * @return
      */
-    public List<Message> firstMessages(List<Match> matches){
+    public List<Message> getFirstMessages(List<Match> matches){
 
         List<Message> firstMessages = new ArrayList<>();
 
         for(Match match : matches){
             // if no message, add null
             try{
-            firstMessages.add(match.getChat().getMessages(0));
+            firstMessages.add(match.getChat().getFirstMessage());
             }catch(ArrayIndexOutOfBoundsException e) {
                 firstMessages.add(null);
             }
@@ -55,7 +55,7 @@ public class ChatService {
      * @param chatId: Id of chat
      * @return Message: all messages of chat
      */
-    public List<Message> messagesFromChat(Long chatId, Long from, Long to) {
+    public List<Message> getMessagesFromChat(Long chatId, Long from, Long to) {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "chat does not exit"));

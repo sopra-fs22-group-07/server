@@ -47,24 +47,15 @@ public class Chat implements Serializable {
   }
     /**
      * Gets one Message from the chat
-     * @param index: the index of the message
      * @return Message: the Message on position index
      */
-    public Message getMessages(int index){
+    public Message getFirstMessage(){
         if (messages.isEmpty()){
             return null;
         }
-        return messages.get(index);
+        return messages.get(0);
     }
 
-    /**
-     * Gets all the messages
-     * @return Message: List of all messages
-     */
-    public List<Message> getMessages() {
-        // return all
-        return messages;
-    }
 
   public void pushMessage(Message message) {
     // add at head, makes calculation easier
