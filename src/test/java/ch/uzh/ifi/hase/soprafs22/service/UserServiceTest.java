@@ -54,6 +54,7 @@ class UserServiceTest {
     testUser.setUsername("testUsername");
     testUser.setPassword("1234");
     testUser.setGender(Gender.OTHER);
+    testUser.setBirthday(new Date());
 
     //other user for matching etc
     otherUser = new User();

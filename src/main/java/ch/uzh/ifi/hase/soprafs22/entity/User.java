@@ -52,6 +52,12 @@ public class User implements Serializable {
     private Date birthday;
 
     @Column
+    private int minAge;
+
+    @Column
+    private int maxAge;
+
+    @Column
     private Gender gender;
 
     @OneToOne
@@ -65,6 +71,9 @@ public class User implements Serializable {
 
     @OneToOne
     private UserBlackCards userBlackCards;
+
+    @ElementCollection
+    private Set<Gender> genderPreferences = new TreeSet<>();
 
     @ElementCollection
     private Set<Long> likedByUsers = new TreeSet<>();
@@ -123,7 +132,10 @@ public class User implements Serializable {
      * as string and not ENUM there
       * @return User.gender as string
      */
-    public String getGenderString(){return this.gender.toString();}
+    public String getGenderString(){
+        return this.gender.toString();
+    }
+
 
     public void addGame(Game game){
         this.pastGames.add(game);
@@ -169,5 +181,19 @@ public class User implements Serializable {
     public void removeWhiteCard(WhiteCard whiteCard) {
         this.userWhiteCards.remove(whiteCard);
     }
+
+    public Set<Gender> getGenderPreferences(){return genderPreferences;}
+
+    public void setGenderPreferences(Set<Gender> genderPreferences) {this.genderPreferences = genderPreferences;}
+
+    public int getMinAge(){return minAge;}
+
+    public void setMinAge(int minAge){this.minAge = minAge;}
+
+    public int getMaxAge(){return maxAge;}
+
+    public void setMaxAge(int maxAge){this.maxAge = maxAge;}
+
+
 
 }

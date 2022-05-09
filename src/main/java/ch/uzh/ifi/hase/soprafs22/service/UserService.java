@@ -62,11 +62,18 @@ public class UserService {
   /**
    * Creates and saves a new user
    * @param newUser: User that shall be created
-   * @return: user that was created
+   * @return user that was created
    */
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
+    newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
+    Set<Gender> genderPreferences = new TreeSet<>();
+    genderPreferences.add(Gender.MALE);
+    genderPreferences.add(Gender.FEMALE);
+    genderPreferences.add(Gender.OTHER);
+    newUser.setGenderPreferences(genderPreferences);
 
     checkIfUserExists(newUser);
 
@@ -79,10 +86,32 @@ public class UserService {
     return newUser;
   }
 
+    private long getAgeInMilliSeconds(Date birthday) {
+        return new Date().getTime() - birthday.getTime();
+    }
+
+    private int getAge(Date birthday) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        int currentYear = c.get(Calendar.YEAR);
+        c.setTime(birthday);
+        int birthYear = c.get(Calendar.YEAR);
+        return currentYear - birthYear;
+    }
+
+    private int findMinAgeDefault(Date userBirthday){
+        long age = getAgeInMilliSeconds(userBirthday);
+        return age - 3 * Time.ONE_YEAR < 18 * Time.ONE_YEAR ? 18 : getAge(userBirthday) - 3;
+    }
+
+    private int findMaxAgeDefault(Date userBirthday) {
+        return getAge(userBirthday) + 3;
+    }
+
   /**
    * logout the user, sets the status to offline
    * @param user: User to be logged out
-   * @return: User that was logged out
+   * @return : User that was logged out
    */
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
@@ -203,6 +232,19 @@ public class UserService {
     return userToBeUpdated;
   }
 
+  public void updatePreferences(User user){
+      //Getting the correct user (404 and 409 should be check by specific access already)
+      User userToUpdatePreferences = getUserById(user.getId());
+      //Update User Preferences
+      if(user.getMinAge()>= 18 && user.getMinAge() <= user.getMaxAge()){ //they can both be 22 for instance. If you only want people that are 22 years old
+          userToUpdatePreferences.setMinAge(user.getMinAge());
+          userToUpdatePreferences.setMaxAge(user.getMaxAge());
+      }
+      if(!Objects.isNull(user.getGenderPreferences()) && !user.getGenderPreferences().isEmpty()){
+          userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
+      }
+  }
+
   /**
    * Checks if a username is available
    * @param userInput: String
@@ -263,7 +305,7 @@ public class UserService {
    * Create a Match between two users. Also, it removes any likes from each others
    * @param user: User
    * @param otherUser: User
-   * @return: created Match
+   * @return : created Match
    */
   public Match createMatch(User user, User otherUser) {
 
@@ -327,7 +369,7 @@ public class UserService {
   /**
    * Get the current black cards of a user: automatically delete old black cards that are older than some time period
    * @param userId: userId from the user from whom we want to get the current black cards
-   * @return: a list of black cards - can be empty
+   * @return : a list of black cards - can be empty
    */
   public List<BlackCard> getCurrentBlackCards(Long userId) {
     User user = getUserById(userId);
