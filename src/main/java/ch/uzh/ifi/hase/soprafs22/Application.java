@@ -29,7 +29,8 @@ public class Application {
     System.out.println("Starting application...");
     SpringApplication.run(Application.class, args);
   }
-/*
+
+  /*
     @Bean
     public CommandLineRunner demoData(UserRepository userRepository) {
         return (args -> {
