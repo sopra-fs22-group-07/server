@@ -80,7 +80,6 @@ public class ChatController {
 
     List<Message> messagesFromChat = chatService.getMessagesFromChat(chatId, from, to);
 
-    // return the black cards
       List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
 
       // map the messages
@@ -116,7 +115,7 @@ public class ChatController {
                                   @PathVariable(value = "chatId") long chatId) {
         userService.checkSpecificAccess(token, userId); // 404, 409
 
-        List<Message> unreadMessages = chatService.getUnreadMessages(chatId);
+        List<Message> unreadMessages = chatService.getUnreadMessages(chatId, userId);
         // return the black cards
         List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
 

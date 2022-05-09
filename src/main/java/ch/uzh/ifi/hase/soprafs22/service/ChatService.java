@@ -84,7 +84,7 @@ public class ChatService {
      * @param chatId: id of chat
      * @return List with all unread messages
      */
-    public List<Message> getUnreadMessages(long chatId) {
+    public List<Message> getUnreadMessages(long chatId, long userId) {
         Chat chat = chatRepository.findById(chatId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS)
         );
@@ -93,10 +93,13 @@ public class ChatService {
 
         for(Message msg : chat.getMessages(0, chat.size())){
             // if no message, add null
-            if(msg.isRead()){
+            if(msg.isRead() && msg.getFromUserId()!=userId){
                 break;
             }
-            unreadMessages.add(msg);
+            if(msg.getFromUserId()!=userId){
+                unreadMessages.add(msg);
+            }
+
         }
         return unreadMessages;
     }
