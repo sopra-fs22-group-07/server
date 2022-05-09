@@ -55,7 +55,7 @@ public class UserService {
     this.gameService = gameService;
   }
 
-  public List<User> getUsers() {
+    public List<User> getUsers() {
     return this.userRepository.findAll();
   }
 

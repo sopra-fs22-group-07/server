@@ -46,7 +46,6 @@ class UserServiceTest {
   @BeforeEach
   public void setup() {
     MockitoAnnotations.openMocks(this);
-
     // given
     testUser = new User();
     testUser.setId(1L);
