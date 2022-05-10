@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 
@@ -15,12 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
+@TestPropertySource(
+        locations = "application-integrationtest.properties")
 class UserRepositoryIntegrationTest {
 
   @Autowired
   private UserRepository userRepository;
 
-  /*
+
   @Test
   void findByName_success() {
     // given
@@ -30,6 +33,8 @@ class UserRepositoryIntegrationTest {
     user.setStatus(UserStatus.OFFLINE);
     user.setToken("1");
     user.setPassword("1234");
+
+    userRepository.saveAndFlush(user);
 
 
     // when
@@ -41,5 +46,5 @@ class UserRepositoryIntegrationTest {
     assertEquals(found.getUsername(), user.getUsername());
     assertEquals(found.getToken(), user.getToken());
     assertEquals(found.getStatus(), user.getStatus());
-  }*/
+  }
 }
