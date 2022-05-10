@@ -16,7 +16,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and game.userId <> :userId " +
             "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)" +
             "and game not in (select g from Game g join User u on g.userId=u.id where u.age < (select u.minAge from User u where u.id = :userId))" +
-            "and game not in (select g from Game g join User u on g.userId=u.id where u.age > (select u.maxAge from User u where u.id = :userId))")
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.age > (select u.maxAge from User u where u.id = :userId))" +
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.minAge >= (select u.age from User u where u.id = :userId))"+
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.maxAge <= (select u.age from User u where u.id = :userId))")
     Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable, @Param("userId") long userId);
 
     @Query("select count (g) from Game g where g.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
