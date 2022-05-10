@@ -39,8 +39,8 @@ public class Chat implements Serializable {
       return Collections.emptyList();
     }
     // adjust toIndex for not triggering IndexOutOfBoundsException
-    if (toIndex >= size) {
-      toIndex = size - 1;
+    if (toIndex > size) {
+      toIndex = size;
     }
     // now, fromIndex must be < size, and toIndex too.
     return messages.subList(fromIndex, toIndex);

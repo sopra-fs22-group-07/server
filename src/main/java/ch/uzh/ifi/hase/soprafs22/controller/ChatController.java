@@ -92,10 +92,10 @@ public class ChatController {
   }
 
 
-  @PutMapping("/users/{userId}/chats/{chatId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PostMapping("/users/{userId}/chats/{chatId}")
+  @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public void receiveMessage(@RequestHeader(value = "authorization", required = false) String token,
+  public ChatMessageGetDTO createMessage(@RequestHeader(value = "authorization", required = false) String token,
                              @PathVariable(value = "userId") long userId,
                              @PathVariable(value = "chatId") long chatId,
                              @RequestBody ChatMessagePutDTO chatMessagePutDTO) {
@@ -103,8 +103,8 @@ public class ChatController {
       // add message to chat
     Message message = DTOMapper.INSTANCE.convertChatMessagePutDTOToEntity(chatMessagePutDTO);
 
-    chatService.addMessageToChat(chatId, message);
-
+    Message msg = chatService.addMessageToChat(chatId, message);
+    return DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(msg);
   }
 
     @GetMapping("/users/{userId}/chats/{chatId}/newMsgs")
@@ -124,7 +124,6 @@ public class ChatController {
             chatMessageGetDTOList.add(DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(message));
         }
 
-
         return new ResponseEntity<>(chatMessageGetDTOList, null, HttpStatus.OK);
 
     }
@@ -134,15 +133,12 @@ public class ChatController {
     @ResponseBody
     public void readMessages(@RequestHeader(value = "authorization", required = false) String token,
                                   @PathVariable(value = "userId") long userId,
-                                  @PathVariable(value = "chatId") long chatId,
-                                  @RequestParam(value = "read", required = false) boolean read) {
+                                  @PathVariable(value = "chatId") long chatId) {
         userService.checkSpecificAccess(token, userId); // 404, 409
 
         // Set all to read
-        if(read){
-            chatService.setMessagesOfRead(userId, chatId);
-        }
 
+      chatService.setMessagesOfRead(chatId, userId);
     }
 
     @GetMapping("/users/{userId}/chats/{chatId}/size")

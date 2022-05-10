@@ -68,15 +68,24 @@ public class ChatService {
      * @param chatId: chat, where message gets added
      * @param message: massage to add
      */
-    public void addMessageToChat(Long chatId, Message message) {
+    public Message addMessageToChat(Long chatId, Message message) {
+
+        // First, create a proper message (with generated id!)
+        Message msg = new Message();
+        msg.setFromUserId(message.getFromUserId());
+        msg.setContent(message.getContent());
+        msg.setMessageType(message.getMessageType());
+        msg.setToUserId(message.getToUserId());
+
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS)
         );
 
-        chat.pushMessage(message);
-        messageRepository.saveAndFlush(message);
+        chat.pushMessage(msg);
+        messageRepository.saveAndFlush(msg);
         chatRepository.saveAndFlush(chat);
+        return msg;
     }
 
     /**
