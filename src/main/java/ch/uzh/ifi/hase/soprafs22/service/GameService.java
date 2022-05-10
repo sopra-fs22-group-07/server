@@ -1,6 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
-import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
@@ -215,12 +215,13 @@ public class GameService {
   /**
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
-   * @param userId: userId of the caller
+   * @param userId: id of user that wants the game
    * @return Game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
-  public Game getGameFromRandomUser(Long userId) {
+  public Game getGameFromRandomUser(long userId) {
     // count the possible games
+
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
 
     if(numOfGames==0){
