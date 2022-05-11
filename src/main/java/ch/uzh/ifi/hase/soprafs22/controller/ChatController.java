@@ -54,12 +54,14 @@ public class ChatController {
       Iterator<User> matchedUser = usersMatched.iterator();
       Iterator<Message> message = msg.iterator();
       Iterator<Long> chatId = chatIds.iterator();
+      Iterator<Match> match = matches.iterator();
 
-      while (matchedUser.hasNext() && message.hasNext() && chatId.hasNext()) {
+      while (matchedUser.hasNext() && message.hasNext() && chatId.hasNext() && match.hasNext()) {
           ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
           chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(matchedUser.next()));
           chatOverViewGetDTO.setMessage(message.next());
           chatOverViewGetDTO.setChatId(chatId.next());
+          chatOverViewGetDTO.setMatchCreationDate(match.next().getCreationDate());
           chatOverViewGetDTOList.add(chatOverViewGetDTO);
       }
 

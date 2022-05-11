@@ -17,7 +17,7 @@ public class Message implements Serializable {
   @Column(nullable = false)
   private MessageType messageType;
 
-  @Column(nullable = false)
+  @Column(nullable = false, length = 1500)
   private String content;
 
   @Column(nullable = false)
