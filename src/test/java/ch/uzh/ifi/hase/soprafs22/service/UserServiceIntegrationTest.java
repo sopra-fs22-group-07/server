@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
