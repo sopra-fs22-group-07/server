@@ -36,7 +36,17 @@ public interface DTOMapper {
   @Mapping(source = "status", target = "status")
   @Mapping(source = "birthday", target = "birthday")
   @Mapping(source = "gender", target = "gender")
+  @Mapping(source = "minAge", target = "minAge")
+  @Mapping(source = "maxAge", target = "maxAge")
+  @Mapping(source = "genderPreferences", target = "genderPreferences")
   UserGetDTO convertEntityToUserGetDTO(User user);
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "username", target = "username")
+  @Mapping(source = "minAge", target = "minAge")
+  @Mapping(source = "maxAge", target = "maxAge")
+  @Mapping(source = "genderPreferences", target = "genderPreferences")
+  User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
   @Mapping(source = "id", target = "id")
   @Mapping(source = "name", target = "name")
@@ -52,11 +62,6 @@ public interface DTOMapper {
   @Mapping(source = "likedByUsers", target = "likedByUsers")
   @Mapping(source = "matches", target = "matchIds")
   UserGetDetailsDTO convertEntityToUserGetDetailsDTO(User user);
-
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "birthday", target = "birthday")
-  User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
   @Mapping(source = "id", target = "id")
   @Mapping(source = "text", target = "text")

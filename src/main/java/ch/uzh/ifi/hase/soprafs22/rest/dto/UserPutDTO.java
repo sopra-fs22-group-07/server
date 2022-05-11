@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.rest.dto;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 
 import java.util.Date;
+import java.util.Set;
 
 public class UserPutDTO {
 
@@ -10,6 +11,9 @@ public class UserPutDTO {
   private String username;
   private Date birthday;
   private Gender gender;
+  private int minAge;
+  private int maxAge;
+  private Set<Gender> genderPreferences;
 
   public String getUsername() {
     return username;
@@ -42,4 +46,28 @@ public class UserPutDTO {
   public void setGender(Gender gender) {
     this.gender = gender;
   }
+
+  public int getMinAge() {
+        return minAge;
+    }
+
+  public void setMinAge(int minAge) {
+        this.minAge = minAge;
+    }
+
+  public int getMaxAge() {
+        return maxAge;
+    }
+
+  public void setMaxAge(int maxAge) {
+        this.maxAge = maxAge;
+    }
+
+  public Set<Gender> getGenderPreferences() {
+        return genderPreferences;
+    }
+
+  public void setGenderPreferences(Set<Gender> genderPreferences) {
+        this.genderPreferences = genderPreferences;
+    }
 }

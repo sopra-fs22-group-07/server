@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
@@ -36,31 +37,43 @@ public class UserService {
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
   private final ChatRepository chatRepository;
+  private final GameService gameService;
+  private boolean areInstantiatedDemoUsers = false;
 
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
+                     @Qualifier("gameService") GameService gameService,
+                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
                      @Qualifier("MatchRepository") MatchRepository matchRepository,
                      @Qualifier("ChatRepository")ChatRepository chatRepository) {
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
+    this.gameService = gameService;
     this.chatRepository = chatRepository;
   }
 
-  public List<User> getUsers() {
+    public List<User> getUsers() {
     return this.userRepository.findAll();
   }
 
   /**
    * Creates and saves a new user
    * @param newUser: User that shall be created
-   * @return: user that was created
+   * @return user that was created
    */
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
+    newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
+    Set<Gender> genderPreferences = new TreeSet<>();
+    genderPreferences.add(Gender.MALE);
+    genderPreferences.add(Gender.FEMALE);
+    genderPreferences.add(Gender.OTHER);
+    newUser.setGenderPreferences(genderPreferences);
 
     checkIfUserExists(newUser);
 
@@ -73,10 +86,32 @@ public class UserService {
     return newUser;
   }
 
+    private long getAgeInMilliSeconds(Date birthday) {
+        return new Date().getTime() - birthday.getTime();
+    }
+
+    private int getAge(Date birthday) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        int currentYear = c.get(Calendar.YEAR);
+        c.setTime(birthday);
+        int birthYear = c.get(Calendar.YEAR);
+        return currentYear - birthYear;
+    }
+
+    private int findMinAgeDefault(Date userBirthday){
+        long age = getAgeInMilliSeconds(userBirthday);
+        return age - 3 * Time.ONE_YEAR < 18 * Time.ONE_YEAR ? 18 : getAge(userBirthday) - 3;
+    }
+
+    private int findMaxAgeDefault(Date userBirthday) {
+        return getAge(userBirthday) + 3;
+    }
+
   /**
    * logout the user, sets the status to offline
    * @param user: User to be logged out
-   * @return: User that was logged out
+   * @return : User that was logged out
    */
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
@@ -197,6 +232,19 @@ public class UserService {
     return userToBeUpdated;
   }
 
+  public void updatePreferences(User user){
+      //Getting the correct user (404 and 409 should be check by specific access already)
+      User userToUpdatePreferences = getUserById(user.getId());
+      //Update User Preferences
+      if(user.getMinAge()>= 18 && user.getMinAge() <= user.getMaxAge()){ //they can both be 22 for instance. If you only want people that are 22 years old
+          userToUpdatePreferences.setMinAge(user.getMinAge());
+          userToUpdatePreferences.setMaxAge(user.getMaxAge());
+      }
+      if(!Objects.isNull(user.getGenderPreferences()) && !user.getGenderPreferences().isEmpty()){
+          userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
+      }
+  }
+
   /**
    * Checks if a username is available
    * @param userInput: String
@@ -257,11 +305,11 @@ public class UserService {
    * Create a Match between two users. Also, it removes any likes from each others
    * @param user: User
    * @param otherUser: User
-   * @return: created Match
+   * @return : created Match
    */
   public Match createMatch(User user, User otherUser) {
 
-      // first, delete likes
+    // first, delete likes
     user.removeLikeFromUser(otherUser);
     otherUser.removeLikeFromUser(user);
 
@@ -327,7 +375,7 @@ public class UserService {
   /**
    * Get the current black cards of a user: automatically delete old black cards that are older than some time period
    * @param userId: userId from the user from whom we want to get the current black cards
-   * @return: a list of black cards - can be empty
+   * @return : a list of black cards - can be empty
    */
   public List<BlackCard> getCurrentBlackCards(Long userId) {
     User user = getUserById(userId);
@@ -579,6 +627,66 @@ public class UserService {
     // return list of users
     return users;
   }
+
+
+  // instantiate demo users
+  public void instantiateDemoUsers() {
+
+    if (areInstantiatedDemoUsers) {
+      // throw exception if demo users are already instantiated
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Demo users are already instantiated");
+
+    } else {
+
+      log.info("Instantiating demo users...");
+
+      // ======= create demo users =======
+      User demoUser1 = new User();
+      demoUser1.setUsername("demoUser1");
+      demoUser1.setPassword("demoUser1");
+      demoUser1.setName("Demo User 1");
+      demoUser1.setGender(Gender.MALE);
+      demoUser1 = createUser(demoUser1);
+
+      User demoUser2 = new User();
+      demoUser2.setUsername("demoUser2");
+      demoUser2.setPassword("demoUser2");
+      demoUser2.setName("Demo User 2");
+      demoUser2.setGender(Gender.FEMALE);
+      demoUser2 = createUser(demoUser2);
+
+      User demoUser3 = new User();
+      demoUser3.setUsername("demoUser3");
+      demoUser3.setPassword("demoUser3");
+      demoUser3.setName("Demo User 3");
+      demoUser3.setGender(Gender.OTHER);
+      demoUser3 = createUser(demoUser3);
+
+
+      // ======= create active games =======
+      BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
+      Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
+      Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
+      Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
+
+
+      // ======= create likes and matches =======
+      Match demoMatch1 = createMatch(demoUser1, demoUser2);
+      setMatch(demoMatch1);
+
+      // TODO: find reason for this
+      // the following code breaks (as far as I can tell between the 2 calls)
+      // Match demoMatch2 = createMatch(demoUser1, demoUser3);
+      // setMatch(demoMatch2);
+
+      areInstantiatedDemoUsers = true;
+      log.info("Demo users instantiated.");
+
+    }
+  }
+
 
   /**
    * Gets the black card of a user, but throws 404 if the user has no active game or no black card selected yet

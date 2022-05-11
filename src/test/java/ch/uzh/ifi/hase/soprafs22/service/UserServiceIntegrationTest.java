@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -11,8 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @WebAppConfiguration
 @SpringBootTest
+@TestPropertySource(
+        locations = "application-integrationtest.properties")
 class UserServiceIntegrationTest {
 
   @Qualifier("userRepository")
@@ -59,6 +63,7 @@ class UserServiceIntegrationTest {
     testUser.setStatus(UserStatus.OFFLINE);
     testUser.setToken("a");
     testUser.setPassword("1234");
+    testUser.setBirthday(new Date());
 
     // when
     User createdUser = userService.createUser(testUser);
@@ -81,8 +86,10 @@ class UserServiceIntegrationTest {
     testUser.setStatus(UserStatus.ONLINE);
     testUser.setToken("a");
     testUser.setPassword("1234");
+    testUser.setBirthday(new Date());
 
-    User createdUser = userService.createUser(testUser);
+
+      User createdUser = userService.createUser(testUser);
 
     // attempt to create second user with same username
     User testUser2 = new User();
@@ -93,6 +100,7 @@ class UserServiceIntegrationTest {
     testUser2.setStatus(UserStatus.ONLINE);
     testUser2.setToken("b");
     testUser2.setPassword("1234");
+    testUser2.setBirthday(new Date());
 
     // check that an error is thrown
     assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser2));

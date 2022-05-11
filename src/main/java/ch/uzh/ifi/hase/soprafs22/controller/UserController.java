@@ -69,24 +69,24 @@ public class UserController {
     return new ResponseEntity<>(userGetDTO, headers, HttpStatus.CREATED);
   }
 
-    @PostMapping("/users/login")
-    @ResponseBody
-    public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
-        // convert API user to internal representation convertUserPostDTOtoEntity
-        User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+  @PostMapping("/users/login")
+  @ResponseBody
+  public ResponseEntity<UserGetDTO> startSession(@RequestBody UserPostDTO userPostDTO) {
+      // convert API user to internal representation convertUserPostDTOtoEntity
+      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
-        // check username and password, throws UNAUTHORIZED if false
-        User returnUser = userService.doLogin(userInput); // 401
+      // check username and password, throws UNAUTHORIZED if false
+      User returnUser = userService.doLogin(userInput); // 401
 
-        // set header
-        MultiValueMap<String, String> httpHeaders = new HttpHeaders();
-        httpHeaders.set("token", returnUser.getToken());
+      // set header
+      MultiValueMap<String, String> httpHeaders = new HttpHeaders();
+      httpHeaders.set("token", returnUser.getToken());
 
-        UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
+      UserGetDTO returnUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(returnUser);
 
-        // convert internal representation of user back to API
-        return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
-    }
+      // convert internal representation of user back to API
+      return new ResponseEntity<>(returnUserDTO, httpHeaders, HttpStatus.OK);
+  }
 
   @PutMapping("/users/logout/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -187,4 +187,42 @@ public class UserController {
 
       return userGetDTOs;
   }
+
+
+  //TODO: DELETE THIS MAPPING: I AM KEEPING IT IN HERE SO THE USERPAGE WORKS UNTIL THE NEW CHANGES ARE ALSO ADJUSTER IN THE CLIENT
+    @GetMapping("/users/{userId}/preferences")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDTO getUserPreferences(@RequestHeader(value = "authorization", required = false) String token,
+                              @PathVariable(value = "userId") long userId) {
+        userService.checkSpecificAccess(token, userId);
+        User user = userService.getUserById(userId);
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+    }//TODO: DELETE MAPPING ABOVE
+
+    @PutMapping("/users/{userId}/preferences")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void updateUserPreferences(
+            @RequestHeader(value = "authorization", required = false) String token,
+            @PathVariable(value = "userId") long userId,
+            @RequestBody UserPutDTO userPutDTO){
+
+        userService.checkSpecificAccess(token, userId); // 401, 404
+        User user = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
+        //userPreferences is just a user that only has the preferences and user id
+        user.setId(userId);
+
+        userService.updatePreferences(user);
+    }
+
+
+
+  @PostMapping("/users/demo")
+  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseBody
+  public void createDemoUsers(){
+      userService.instantiateDemoUsers();  // throws 400 if the function has been called previously since the server was started
+  }
+
 }
