@@ -596,6 +596,7 @@ public class UserService {
       demoUser1.setPassword("demoUser1");
       demoUser1.setName("Demo User 1");
       demoUser1.setGender(Gender.MALE);
+      demoUser1.setBirthday(new Date());
       demoUser1 = createUser(demoUser1);
 
       User demoUser2 = new User();
@@ -603,6 +604,7 @@ public class UserService {
       demoUser2.setPassword("demoUser2");
       demoUser2.setName("Demo User 2");
       demoUser2.setGender(Gender.FEMALE);
+      demoUser2.setBirthday(new Date());
       demoUser2 = createUser(demoUser2);
 
       User demoUser3 = new User();
@@ -610,6 +612,7 @@ public class UserService {
       demoUser3.setPassword("demoUser3");
       demoUser3.setName("Demo User 3");
       demoUser3.setGender(Gender.OTHER);
+      demoUser3.setBirthday(new Date());
       demoUser3 = createUser(demoUser3);
 
 
@@ -626,10 +629,9 @@ public class UserService {
       Match demoMatch1 = createMatch(demoUser1, demoUser2);
       setMatch(demoMatch1);
 
-      // TODO: find reason for this
-      // the following code breaks (as far as I can tell between the 2 calls)
-      // Match demoMatch2 = createMatch(demoUser1, demoUser3);
-      // setMatch(demoMatch2);
+
+      Match demoMatch2 = createMatch(demoUser1, demoUser3);
+      setMatch(demoMatch2);
 
       areInstantiatedDemoUsers = true;
       log.info("Demo users instantiated.");
