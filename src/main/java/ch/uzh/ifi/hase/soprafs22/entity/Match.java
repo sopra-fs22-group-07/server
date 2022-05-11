@@ -21,7 +21,8 @@ public class Match implements Serializable {
   @OneToOne
   private User user1;
 
-  @OneToOne User user2;
+  @OneToOne
+  private User user2;
 
 
   // GETTERS AND SETTERS
