@@ -45,9 +45,9 @@ public class UserService {
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
                      @Qualifier("gameService") GameService gameService,
-                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
                      @Qualifier("MatchRepository") MatchRepository matchRepository,
                      @Qualifier("ChatRepository")ChatRepository chatRepository) {
+
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
