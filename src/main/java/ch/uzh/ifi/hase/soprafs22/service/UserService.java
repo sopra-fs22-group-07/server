@@ -8,8 +8,6 @@ import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
-
-// import org.h2.command.ddl.CreateDomain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +36,6 @@ public class UserService {
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
   private final GameService gameService;
-  // private final GameRepository gameRepository;
-  // // adding cardService in order to force SpringBoot to initialize it before the userService (even though cardService is not used directly in this file). This allows the userService to add cards to the demo users.
-  // private final CardService cardService;
   private boolean areInstantiatedDemoUsers = false;
 
 
@@ -55,7 +50,7 @@ public class UserService {
     this.gameService = gameService;
   }
 
-  public List<User> getUsers() {
+    public List<User> getUsers() {
     return this.userRepository.findAll();
   }
 
