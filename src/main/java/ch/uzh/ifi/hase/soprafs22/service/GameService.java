@@ -215,13 +215,12 @@ public class GameService {
   /**
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
-   * @param userId: id of user that wants the game
+   * @param userId: userId of the caller
    * @return Game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
-  public Game getGameFromRandomUser(long userId) {
+  public Game getGameFromRandomUser(Long userId) {
     // count the possible games
-
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
 
     if(numOfGames==0){
