@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -33,6 +34,9 @@ class UserServiceTest {
 
   @Mock
   private MatchRepository matchRepository;
+
+  @Mock
+  private ChatRepository chatRepository;
 
   @InjectMocks
   private UserService userService;
@@ -90,6 +94,10 @@ class UserServiceTest {
     // when -> any object is being saved in the userRepository -> return the dummy
     // testUser
     Mockito.when(userRepository.save(Mockito.any())).thenReturn(testUser);
+
+    // given Chat
+    Chat chat = new Chat();
+    Mockito.when(chatRepository.save(Mockito.any())).thenReturn(chat);
   }
 
   @Test
@@ -395,6 +403,7 @@ class UserServiceTest {
         assertEquals(WhiteCardList, testUser.getUserWhiteCards());
     }
 
+
     @Test
     void createMatch_success(){
         Match isMatch = userService.createMatch(testUser, otherUser);
@@ -456,6 +465,7 @@ class UserServiceTest {
         userService.updateActiveGameIfNecessary(testUser.getId());
         assertEquals(testGame, testUser.getActiveGame());
     }
+
 
     @Test
     void setMatch(){
@@ -535,6 +545,7 @@ class UserServiceTest {
         assertTrue(userService.isWhiteCardBelongingToUser(testWhiteCard, testUser.getId()));//should still be there
         assertFalse(userService.isWhiteCardBelongingToUser(deleteCard, testUser.getId())); //should be deleted now
     }
+
 
     @Test
     void doesMatchExist_true(){
