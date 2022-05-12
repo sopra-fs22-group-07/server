@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 public interface GameRepository extends JpaRepository<Game, Long> {
     Game findById(long id);
 
+
+    //Has to check both directions because user only wants to see cards from people that user is interested in and that are interested in user
     @Query("select game from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
             "and game.userId <> :userId " +
             "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)" +
