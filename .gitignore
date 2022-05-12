@@ -42,3 +42,7 @@ local.properties
 .context.json
 .vscode/launch.json
 bin/main/application.properties
+
+# Data
+../data
+../data/myDB.mv.db

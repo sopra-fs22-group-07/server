@@ -30,9 +30,13 @@ public class CardService {
     public CardService(@Qualifier("BlackCardRepository") BlackCardRepository blackCardRepository, @Qualifier("WhiteCardRepository") WhiteCardRepository whiteCardRepository) {
         this.blackCardRepository = blackCardRepository;
         this.whiteCardRepository = whiteCardRepository;
+        if(blackCardRepository.count()==0){
+            // load the data
+            this.loadCardData();
+        }else{
+            log.info("cards already in db");
+        }
 
-        // load the data
-        this.loadCardData();
     }
 
     // read the data from the data folder

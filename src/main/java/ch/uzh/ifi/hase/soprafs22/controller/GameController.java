@@ -20,6 +20,7 @@ import java.util.List;
  * The controller will receive the request and delegate the execution to the
  * GameService and UserService and finally return the result.
  */
+
 @RestController
 public class GameController {
 
