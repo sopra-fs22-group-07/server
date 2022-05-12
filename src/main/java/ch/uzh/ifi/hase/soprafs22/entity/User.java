@@ -28,6 +28,7 @@ public class User implements Serializable {
 
     @Id
     @GeneratedValue
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -66,7 +67,7 @@ public class User implements Serializable {
     @OneToMany
     private List<Game> pastGames = new ArrayList<>();
 
-    @OneToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<WhiteCard> userWhiteCards = new ArrayList<>();
 
     @OneToOne
