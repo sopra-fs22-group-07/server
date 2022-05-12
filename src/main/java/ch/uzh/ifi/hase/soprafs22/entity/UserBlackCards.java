@@ -11,9 +11,10 @@ public class UserBlackCards implements Serializable {
 
   @Id
   @GeneratedValue
+  @Column(name = "user_black_cards_id")
   private Long id;
 
-  @OneToMany
+  @ManyToMany(cascade = CascadeType.ALL)
   private List<BlackCard> blackCards;
 
   @Column
