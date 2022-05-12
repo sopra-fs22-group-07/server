@@ -65,6 +65,7 @@ public class UserService {
     newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
     newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
     Set<Gender> genderPreferences = new TreeSet<>();
+    newUser.setAge(getAge(newUser.getBirthday()));
     genderPreferences.add(Gender.MALE);
     genderPreferences.add(Gender.FEMALE);
     genderPreferences.add(Gender.OTHER);
