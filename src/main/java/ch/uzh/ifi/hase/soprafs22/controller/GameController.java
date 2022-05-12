@@ -269,4 +269,23 @@ public class GameController {
     BlackCard blackCard = userService.getCurrentBlackCard(userId);
     return DTOMapper.INSTANCE.convertEntityToCardGetDTO(blackCard);
   }
+
+    /**
+     * Gets the current black card of a user or throws status exception
+     * @param token: token of the user
+     * @param userId: userId of the user
+     * @return: GameGetDTo
+     */
+    @GetMapping("/users/{userId}/games/activeGame")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public GameGetDTO getActiveGame(@RequestHeader(value = "authorization", required = false) String token,
+                                    @PathVariable(value = "userId") Long userId) {
+        userService.checkSpecificAccess(token, userId);
+        // first, check if active game is older than 24 hours.
+        userService.updateActiveGameIfNecessary(userId);
+
+        Game activeGame = userService.getActiveGame(userId);
+        return DTOMapper.INSTANCE.convertEntityToGameGetDTO(activeGame);
+    }
 }
