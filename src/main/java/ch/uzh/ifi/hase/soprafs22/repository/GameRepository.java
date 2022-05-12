@@ -12,14 +12,24 @@ import org.springframework.stereotype.Repository;
 public interface GameRepository extends JpaRepository<Game, Long> {
     Game findById(long id);
 
-    @Query("select g from Game g where g.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
-            "and g.userId <> :userId " +
-            "and g not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)")
+    @Query("select game from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
+            "and game.userId <> :userId " +
+            "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)" +
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.age < (select u.minAge from User u where u.id = :userId))" +
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.age > (select u.maxAge from User u where u.id = :userId))" +
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.minAge > (select u.age from User u where u.id = :userId))"+
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.maxAge < (select u.age from User u where u.id = :userId))" +
+            "and game in(select g from Game g, User u1, User u2 where u1.id =:userId and u2.gender member of u1.genderPreferences and u1.gender member of u2.genderPreferences and u2.id = g.userId)")
     Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable, @Param("userId") long userId);
 
     @Query("select count (g) from Game g where g.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
             "and g.userId <> :userId " +
-            "and g not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)")
+            "and g not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)"+
+            "and g not in (select g from Game g join User u on g.userId=u.id where u.age < (select u.minAge from User u where u.id = :userId))" +
+            "and g not in (select g from Game g join User u on g.userId=u.id where u.age > (select u.maxAge from User u where u.id = :userId))" +
+            "and g not in (select g from Game g join User u on g.userId=u.id where u.minAge > (select u.age from User u where u.id = :userId))"+
+            "and g not in (select g from Game g join User u on g.userId=u.id where u.maxAge < (select u.age from User u where u.id = :userId))"+
+            "and g in(select g from Game g, User u1, User u2 where u1.id =:userId and u2.gender member of u1.genderPreferences and u1.gender member of u2.genderPreferences and u2.id = g.userId)")
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId);
 
 }

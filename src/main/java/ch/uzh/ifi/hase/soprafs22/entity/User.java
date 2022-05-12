@@ -52,6 +52,9 @@ public class User implements Serializable {
     private Date birthday;
 
     @Column
+    private int age;
+
+    @Column
     private int minAge;
 
     @Column
@@ -194,6 +197,8 @@ public class User implements Serializable {
 
     public void setMaxAge(int maxAge){this.maxAge = maxAge;}
 
+    public void setAge(int age){this.age = age;}
 
+    public int getAge(){return age;}
 
 }
