@@ -649,9 +649,19 @@ public class UserService {
     User user = getUserById(userId);
     // check if user has active game, or a black card chosen respectively
     if (user.getActiveGame() == null || user.getActiveGame().getBlackCard() == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No black card selected");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No black card");
     }
     // else return the black card
     return user.getActiveGame().getBlackCard();
   }
+
+    public Game getActiveGame(Long userId) {
+        User user = getUserById(userId);
+        // check if user has active game, or a black card chosen respectively
+        if (user.getActiveGame() == null || user.getActiveGame().getBlackCard() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active game");
+        }
+        // else return the black card
+        return user.getActiveGame();
+    }
 }
