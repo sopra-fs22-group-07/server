@@ -18,9 +18,12 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and game.userId <> :userId " +
             "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)" +
             "and game not in (select g from Game g join User u on g.userId=u.id where u.age < (select u.minAge from User u where u.id = :userId))" +
-            "and game not in (select g from Game g join User u on g.userId=u.id where u.age > (select u.maxAge from User u where u.id = :userId))" +
-            "and game not in (select g from Game g join User u on g.userId=u.id where u.minAge > (select u.age from User u where u.id = :userId))"+
-            "and game not in (select g from Game g join User u on g.userId=u.id where u.maxAge < (select u.age from User u where u.id = :userId))" +
+            "and game not in (select g from Game g join User u on g.userId=u.id where u.age > (select u.maxAge from User u where u.id = :userId) " +
+            "and u.minAge > (select u.age from User u where u.id = :userId) " +
+            "and u.maxAge < (select u.age from User u where u.id = :userId) " +
+            "and u.maxAge < (select u.age from User u where u.id = :userId))" +
+            //"and game not in (select g from Game g join User u on g.userId=u.id where u.minAge > (select u.age from User u where u.id = :userId))"+
+            //"and game not in (select g from Game g join User u on g.userId=u.id where u.maxAge < (select u.age from User u where u.id = :userId))" +
             "and game in(select g from Game g, User u1, User u2 where u1.id =:userId and u2.gender member of u1.genderPreferences and u1.gender member of u2.genderPreferences and u2.id = g.userId)")
     Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable, @Param("userId") long userId);
 

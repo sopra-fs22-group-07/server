@@ -95,8 +95,8 @@ public class UserService {
         Calendar now = Calendar.getInstance();
         now.setTimeInMillis(currentTime);
         years = now.get(Calendar.YEAR) - birthDayMili.get(Calendar.YEAR);
-        int currMonth = now.get(Calendar.MONTH) + 1;
-        int birthMonth = birthDayMili.get(Calendar.MONTH) + 1;
+        int currMonth = now.get(Calendar.MONTH);
+        int birthMonth = birthDayMili.get(Calendar.MONTH);
         months = currMonth - birthMonth;
         if (months < 0)
         {
@@ -188,6 +188,7 @@ public class UserService {
                     "Your Username or password is incorrect");
         }
         userByUsername.setStatus(UserStatus.ONLINE);
+        userByUsername.setAge(getAge(userByUsername.getBirthday())); //Updates Age of User whenever is logged in
         userRepository.saveAndFlush(userByUsername);
         return userByUsername;
     }
