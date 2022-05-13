@@ -271,7 +271,7 @@ public class GameController {
   }
 
     /**
-     * Gets the current black card of a user or throws status exception
+     * Gets the active game of a user or throws status exception
      * @param token: token of the user
      * @param userId: userId of the user
      * @return: GameGetDTo
