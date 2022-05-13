@@ -216,6 +216,31 @@ public class UserController {
         userService.updatePreferences(user);
     }
 
+    @PutMapping("/users/{userId}/matches/{otherUserId}/block")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseBody
+    public void blockUser(
+            @RequestHeader(value = "authorization", required = false) String token,
+            @PathVariable(value = "userId") long userId,
+            @PathVariable(value = "otherUserId") long otherUserId
+    ) {
+      userService.checkSpecificAccess(token, userId); // 401, 404
+      userService.deleteMatchBetweenUsers(userId, otherUserId);
+      userService.blockUser(userId, otherUserId);
+    }
+
+  @DeleteMapping("/users/{userId}/matches/{otherUserId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseBody
+  public void deleteMatch(
+          @RequestHeader(value = "authorization", required = false) String token,
+          @PathVariable(value = "userId") long userId,
+          @PathVariable(value = "otherUserId") long otherUserId
+  ) {
+    userService.checkSpecificAccess(token, userId); // 401, 404
+    userService.deleteMatchBetweenUsers(userId, otherUserId);
+  }
+
 
 
   @PostMapping("/users/demo")

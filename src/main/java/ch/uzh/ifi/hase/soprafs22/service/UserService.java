@@ -39,6 +39,7 @@ public class UserService {
   private final ChatRepository chatRepository;
   private final GameService gameService;
   private boolean areInstantiatedDemoUsers = false;
+  private static final String UNIQUE_VIOLATION = "Uniqueness Violation Occurred";
 
 
   @Autowired
@@ -537,17 +538,12 @@ public class UserService {
    * @return boolean: true if a Match already exists, false otherwise.
    */
   public boolean doesMatchExist(User user, User otherUser) {
-    // it is enough to iterate through the matches of one user
-    for(long matchId: user.getMatches()){
-      Match match = matchRepository.findByMatchId(matchId);
-      // get users from match
-      Pair<User, User> userPair = match.getUserPair();
-      // compare users with users from match
-      if (userPair.equals(new Pair<>(user, otherUser))) {
-        return true;
-      }
+    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    if (count > 1) {
+      log.error(UNIQUE_VIOLATION);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
     }
-    return false;
+    return count == 1;
   }
 
     /**
@@ -718,4 +714,47 @@ public class UserService {
       }
       return chatIds;
     }
+
+  public void deleteMatchBetweenUsers(long userId, long otherUserId) {
+    User user = getUserById(userId);
+    User otherUser = getUserById(otherUserId);
+
+    // count and check match
+    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    if (count < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There exists no Match between the two users");
+    }
+    else if (count > 1) {
+      log.error(UNIQUE_VIOLATION);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
+    }
+    // get match
+    Match match = matchRepository.getMatchByUserPair(user, otherUser);
+    long matchId = match.getMatchId();
+
+    // remove match from user
+    user.removeMatch(matchId);
+    otherUser.removeMatch(matchId);
+
+    userRepository.saveAndFlush(user);
+    userRepository.saveAndFlush(otherUser);
+
+    // remove users from match
+    matchRepository.delete(match);
+    matchRepository.flush();
+  }
+
+  public void blockUser(long userId, long otherUserId) {
+    // because it is easier to check in one direction, we make the block in both direction, that is, both users block each
+    // other. This works only because blocking is irreversible. Must be taken care of if blocking user should become reversible.
+
+    User user = getUserById(userId);
+    User otherUser = getUserById(otherUserId);
+
+    user.addBlockedUsers(otherUser);
+    otherUser.addBlockedUsers(user);
+
+    userRepository.saveAndFlush(user);
+    userRepository.saveAndFlush(otherUser);
+  }
 }
