@@ -706,6 +706,22 @@ public class UserService {
   }
 
     /**
+     * Gets the active game of a user, but throws 404 if the user has no active game or no black card selected yet
+     * @param userId: UserID of the user that we want the current black card of
+     * @return activeGame (or 404)
+     */
+
+    public Game getActiveGame(Long userId) {
+        User user = getUserById(userId);
+        // check if user has active game, or a black card chosen respectively
+        if (user.getActiveGame() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active game");
+        }
+        // else return the active game
+        return user.getActiveGame();
+    }
+
+    /**
      * get id of chat
      * @param matches List of matches
      * @return ids of the chats
