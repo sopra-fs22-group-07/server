@@ -1,12 +1,17 @@
 package ch.uzh.ifi.hase.soprafs22.repository;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
+import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Set;
 
 @Repository("gameRepository")
 public interface GameRepository extends JpaRepository<Game, Long> {
@@ -21,8 +26,10 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and  u.age > (select u.maxAge from User u where u.id = :userId) " +
             "and u.minAge > (select u.age from User u where u.id = :userId) " +
             "and u.maxAge < (select u.age from User u where u.id = :userId)) " +
-            "and game in(select g from Game g, User u1, User u2 where u1.id =:userId and u2.gender member of u1.genderPreferences and u1.gender member of u2.genderPreferences and u2.id = g.userId)")
-    Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable, @Param("userId") long userId);
+            "and game in(select g from Game g, User u, User u2 where u.id = g.userId and :gender member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = :userId)") //We cannot pass genderPreferences as it is a set but should be a list i think
+    Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable,
+                                                            @Param("userId") long userId,
+                                                            @Param("gender") Gender gender);
 
     @Query("select count (g) from Game g where g.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
             "and g.userId <> :userId " +
