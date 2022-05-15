@@ -552,11 +552,13 @@ class UserServiceTest {
         Match testMatch =  userService.createMatch(testUser, otherUser);
         testMatch.setMatchId(222L);
 
-        Mockito.when(matchRepository.findByMatchId(222L)).thenReturn(testMatch);
-        userService.setMatch(testMatch);
+        Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(1);
+      Mockito.when(matchRepository.countMatchByUserPair(otherUser, testUser)).thenReturn(1);
+
+      userService.setMatch(testMatch);
         //both users should now have the testMatch, so it should exist
-        assertTrue(userService.doesMatchExist(testUser, otherUser));
-        assertTrue(userService.doesMatchExist(otherUser, testUser));
+        assertTrue(userService.doesMatchExist(testUser, otherUser), "expected a match between testUser and otherUser");
+        assertTrue(userService.doesMatchExist(otherUser, testUser), "expected a match between otherUser and testUser");
 
         //case multiple matches exist
         User thirdUser = new User();
@@ -564,10 +566,12 @@ class UserServiceTest {
         Match otherMatch = userService.createMatch(testUser, thirdUser);
         otherMatch.setMatchId(223L);
 
-        Mockito.when(matchRepository.findByMatchId(223L)).thenReturn(otherMatch);
-        userService.setMatch(otherMatch);
-        assertTrue(userService.doesMatchExist(testUser, thirdUser));
-        assertTrue(userService.doesMatchExist(thirdUser,testUser));
+        Mockito.when(matchRepository.countMatchByUserPair(thirdUser, testUser)).thenReturn(1);
+      Mockito.when(matchRepository.countMatchByUserPair(testUser, thirdUser)).thenReturn(1);
+
+      userService.setMatch(otherMatch);
+        assertTrue(userService.doesMatchExist(testUser, thirdUser), "expected a match between testUser and thirdUser");
+        assertTrue(userService.doesMatchExist(thirdUser,testUser), "expected a match between thirdUser and otherUser");
     }
 
     @Test
