@@ -215,17 +215,34 @@ public class GameService {
     return card;
   }
 
+    /**
+     * Calculates the Dates for Age preferences
+     * @param preference : in of age
+     * @return the ages in date form
+     */
+  private Date calculateAgePreferencesToDate(int preference){
+      Date today = new Date();
+
+      // Convert Date to Calendar
+      Calendar c = Calendar.getInstance();
+      c.setTime(today);
+      c.add(Calendar.YEAR, -preference);
+      return c.getTime();
+  }
+
   /**
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
-   * @param userId: userId of the caller
+   * @param user: user that makes the call
    * @return Game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
   public Game getGameFromRandomUser(User user) {
 
+    Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
+    Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
     // count the possible games
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId());
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user.getGender(), minAgeDate, maxAgeDate);
 
 
 
@@ -240,7 +257,7 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user.getGender(), user.getGenderPreferences());
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user.getGender(), minAgeDate, maxAgeDate);
 
     // return the game
     return somePage.getContent().get(0);

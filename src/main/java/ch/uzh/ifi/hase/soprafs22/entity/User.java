@@ -60,9 +60,6 @@ public class User implements Serializable {
     @Column
     private Gender gender;
 
-    @Column
-    private int age;
-
     @OneToOne
     private Game activeGame;
 
@@ -95,9 +92,6 @@ public class User implements Serializable {
 
     public String getName() {return name;}
     public void setName(String name) {this.name = name;}
-
-    public int getAge() {return age;}
-    public void setAge(int age){this.age=age;}
 
     public String getToken() {return token;}
     public void setToken(String token) {this.token = token;}

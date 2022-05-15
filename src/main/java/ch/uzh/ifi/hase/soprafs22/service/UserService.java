@@ -65,7 +65,6 @@ public class UserService {
     newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
     newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
     Set<Gender> genderPreferences = new TreeSet<>();
-    newUser.setAge(getAge(newUser.getBirthday()));
     genderPreferences.add(Gender.MALE);
     genderPreferences.add(Gender.FEMALE);
     genderPreferences.add(Gender.OTHER);
@@ -188,7 +187,6 @@ public class UserService {
                     "Your Username or password is incorrect");
         }
         userByUsername.setStatus(UserStatus.ONLINE);
-        userByUsername.setAge(getAge(userByUsername.getBirthday())); //Updates Age of User whenever is logged in
         userRepository.saveAndFlush(userByUsername);
         return userByUsername;
     }
