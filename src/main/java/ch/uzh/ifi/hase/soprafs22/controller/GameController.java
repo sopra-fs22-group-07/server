@@ -107,8 +107,10 @@ public class GameController {
 
     userService.checkSpecificAccess(token, id);
 
+    User user = userService.getUserById(id);
+
     // Get 'random' game
-    Game game = gameService.getGameFromRandomUser(id);
+    Game game = gameService.getGameFromRandomUser(id, user);
 
     // return it
     CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();

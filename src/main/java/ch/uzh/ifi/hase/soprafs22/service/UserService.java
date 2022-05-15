@@ -363,7 +363,7 @@ public class UserService {
     // calculate how old the active game is
     long diffTime = new Date().getTime() - activeGame.getCreationTime().getTime();
     // case the game is older than one Day, put it to the past games
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > Time.ONE_MINUTE) {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();
@@ -387,7 +387,7 @@ public class UserService {
     }
     // check if cards are older than one day, return empty list if so, else return the cards (that are younger than one day)
     long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > Time.ONE_MINUTE) {
       // update black cards
       user.setUserBlackCards(null);
       userRepository.saveAndFlush(user);
