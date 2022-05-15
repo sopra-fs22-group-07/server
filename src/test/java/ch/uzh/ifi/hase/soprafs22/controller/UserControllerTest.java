@@ -540,7 +540,8 @@ class UserControllerTest {
     user.setToken("token");
     otherUser.setId(2L);
 
-    given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+    //given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong());
 
     mockMvc.perform(delete("/users/" + user.getId()+ "/matches/"+otherUser.getId()).contentType(MediaType.APPLICATION_JSON)
             .header("authorization", user.getToken()))
@@ -574,7 +575,8 @@ class UserControllerTest {
     user.setToken("token");
     otherUser.setId(2L);
 
-    given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+    //given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong());
 
     mockMvc.perform(put("/users/"+ user.getId()+"/matches/"+otherUser.getId()+"/block")
                     .contentType(MediaType.APPLICATION_JSON)
