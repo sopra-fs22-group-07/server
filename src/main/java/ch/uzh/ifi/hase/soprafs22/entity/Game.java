@@ -28,8 +28,9 @@ public class Game implements Serializable {
   @GeneratedValue
   private Long id;
 
-  @Column
-  private Long userId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name="user_id")
+  private User user;
 
   @Column
   private GameStatus gameStatus;
@@ -48,8 +49,8 @@ public class Game implements Serializable {
   public void setId(long id){this.id=id;}
   public Long getId(){return this.id;}
 
-  public void setUserId(long userId){this.userId=userId;}
-  public Long getUserId(){return this.userId;}
+  public void setUser(User user){this.user=user;}
+  public User getUser(){return this.user;}
 
   public void setBlackCard(BlackCard card){this.blackCard=card;}
   public BlackCard getBlackCard(){return this.blackCard;}

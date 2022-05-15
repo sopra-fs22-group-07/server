@@ -65,7 +65,7 @@ public class User implements Serializable {
     // @OneToOne
     // private Game activeGame;
 
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private List<Game> games = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
