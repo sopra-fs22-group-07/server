@@ -117,7 +117,7 @@ public class User implements Serializable {
     public void setGender(Gender gender){this.gender = gender; }
 
     public Game getActiveGame() {
-        if(this.games.get(0).getGameStatus()== GameStatus.ACTIVE){
+        if(!this.games.isEmpty() && this.games.get(0).getGameStatus()== GameStatus.ACTIVE){
             return  this.games.get(0);
         }
             return null;
@@ -126,7 +126,7 @@ public class User implements Serializable {
     public void setActiveGame(Game activeGame) {this.games.add(activeGame);}
 
     public List<Game> getPastGames() {
-        if(this.games.get(0).getGameStatus()== GameStatus.INACTIVE){
+        if(!this.games.isEmpty() && this.games.get(0).getGameStatus()== GameStatus.INACTIVE){
             return games.subList(1,-1);
         }
         return games;

@@ -86,7 +86,7 @@ class GameControllerTest {
         otherUser.setPassword("otherPassword");
         game.setId(111L);
         game.setBlackCard(blackCard);
-        game.setUserId(user.getId());
+        game.setUser(user);
         bCards.add(blackCard);
         wCards.add(whiteCard1);
         wCards.add(whiteCard2);

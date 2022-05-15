@@ -1,9 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.Play;
+import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.web.WebAppConfiguration;
+
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,6 +43,7 @@ class GameServiceIntegrationTest {
     private GameService gameService;
 
     private BlackCard testBlackCard;
+    private User testUser;
 
     @BeforeEach
     public void setup() {
@@ -47,6 +52,14 @@ class GameServiceIntegrationTest {
         testBlackCard = new BlackCard();
         testBlackCard.setText("gap");
         testBlackCard.setId(1L);
+
+        testUser = new User();
+        testUser.setId(1L);
+        testUser.setName("testName");
+        testUser.setUsername("testUsername");
+        testUser.setPassword("1234");
+        testUser.setGender(Gender.OTHER);
+        testUser.setBirthday(new Date());
     }
 
     @Test
@@ -58,15 +71,15 @@ class GameServiceIntegrationTest {
         Long testUserId = 2L;
 
         testGame.setBlackCard(testBlackCard);
-        testGame.setUserId(testUserId);
+        testGame.setUser(testUser);
         testGame.setGameStatus(GameStatus.ACTIVE);
 
         // when
-        Game createdGame = gameService.createGame(testBlackCard, testUserId);
+        Game createdGame = gameService.createGame(testBlackCard, testUser);
 
         // then
         assertEquals(testGame.getBlackCard(), createdGame.getBlackCard());
-        assertEquals(testGame.getUserId(), createdGame.getUserId());
+        assertEquals(testGame.getUser(), createdGame.getUser());
         assertEquals(GameStatus.ACTIVE, createdGame.getGameStatus());
     }
 
@@ -79,7 +92,7 @@ class GameServiceIntegrationTest {
         Game testGame = new Game();
         Long testUserId = 2L;
         testGame.setBlackCard(testBlackCard);
-        testGame.setUserId(testUserId);
+        testGame.setUser(testUser);
         testGame.setGameStatus(GameStatus.ACTIVE);
         testGame.setId(1L);
 
