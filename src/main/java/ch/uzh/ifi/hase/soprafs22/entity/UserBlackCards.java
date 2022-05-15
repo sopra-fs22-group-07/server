@@ -14,7 +14,7 @@ public class UserBlackCards implements Serializable {
   @Column(name = "user_black_cards_id")
   private Long id;
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   private List<BlackCard> blackCards;
 
   @Column

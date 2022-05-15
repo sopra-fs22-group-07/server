@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 
@@ -61,11 +62,11 @@ public class User implements Serializable {
     @Column
     private Gender gender;
 
-    @OneToOne
-    private Game activeGame;
+    // @OneToOne
+    // private Game activeGame;
 
     @OneToMany
-    private List<Game> pastGames = new ArrayList<>();
+    private List<Game> games = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
     private List<WhiteCard> userWhiteCards = new ArrayList<>();
@@ -115,10 +116,21 @@ public class User implements Serializable {
     public Gender getGender(){return this.gender; }
     public void setGender(Gender gender){this.gender = gender; }
 
-    public Game getActiveGame() {return activeGame;}
-    public void setActiveGame(Game activeGame) {this.activeGame = activeGame;}
+    public Game getActiveGame() {
+        if(this.games.get(0).getGameStatus()== GameStatus.ACTIVE){
+            return  this.games.get(0);
+        }
+            return null;
+    }
 
-    public List<Game> getPastGames() {return pastGames;}
+    public void setActiveGame(Game activeGame) {this.games.add(activeGame);}
+
+    public List<Game> getPastGames() {
+        if(this.games.get(0).getGameStatus()== GameStatus.INACTIVE){
+            return games.subList(1,-1);
+        }
+        return games;
+    }
 
     public Set<Long> getMatches() {return matches;}
 
@@ -142,7 +154,7 @@ public class User implements Serializable {
 
 
     public void addGame(Game game){
-        this.pastGames.add(game);
+        this.games.add(game);
     }
 
     // move active game to past games
@@ -153,7 +165,7 @@ public class User implements Serializable {
     }
 
     public void deletePastGame(Game game) {
-        this.pastGames.remove(game);
+        this.games.remove(game);
     }
 
 
