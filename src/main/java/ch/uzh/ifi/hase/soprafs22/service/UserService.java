@@ -715,7 +715,7 @@ public class UserService {
       return chatIds;
     }
 
-  public void deleteMatchBetweenUsers(long userId, long otherUserId) {
+  public Match deleteMatchBetweenUsers(long userId, long otherUserId) {
     User user = getUserById(userId);
     User otherUser = getUserById(otherUserId);
 
@@ -742,6 +742,7 @@ public class UserService {
     // remove users from match
     matchRepository.delete(match);
     matchRepository.flush();
+    return null;
   }
 
   public void blockUser(long userId, long otherUserId) {

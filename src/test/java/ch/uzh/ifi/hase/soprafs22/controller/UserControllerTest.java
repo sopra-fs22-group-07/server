@@ -2,6 +2,8 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs22.entity.Match;
+import ch.uzh.ifi.hase.soprafs22.entity.Pair;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
@@ -510,6 +512,74 @@ class UserControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.available", is(false)))
             .andExpect(jsonPath("$.username", is("taken")));
+  }
+
+  @Test
+  void test_unmatch_user_success() throws Exception {
+    User user = new User();
+    User otherUser = new User();
+
+    user.setId(1L);
+    user.setToken("token");
+    otherUser.setId(2L);
+
+    Match match = new Match();
+    match.setUserPair(new Pair<>(user, otherUser));
+
+    mockMvc.perform(delete("/users/" + user.getId()+ "/matches/"+otherUser.getId()).contentType(MediaType.APPLICATION_JSON)
+            .header("authorization", user.getToken()))
+            .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void test_unmatch_user_no_match() throws Exception {
+    User user = new User();
+    User otherUser = new User();
+
+    user.setId(1L);
+    user.setToken("token");
+    otherUser.setId(2L);
+
+    given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    mockMvc.perform(delete("/users/" + user.getId()+ "/matches/"+otherUser.getId()).contentType(MediaType.APPLICATION_JSON)
+            .header("authorization", user.getToken()))
+            .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void test_block_user_success() throws Exception {
+    User user = new User();
+    User otherUser = new User();
+
+    user.setId(1L);
+    user.setToken("token");
+    otherUser.setId(2L);
+
+    Match match = new Match();
+    match.setUserPair(new Pair<>(user, otherUser));
+
+    mockMvc.perform(put("/users/"+ user.getId()+"/matches/"+otherUser.getId()+"/block")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("authorization", user.getToken()))
+            .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void test_block_user_no_match() throws Exception {
+    User user = new User();
+    User otherUser = new User();
+
+    user.setId(1L);
+    user.setToken("token");
+    otherUser.setId(2L);
+
+    given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    mockMvc.perform(put("/users/"+ user.getId()+"/matches/"+otherUser.getId()+"/block")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("authorization", user.getToken()))
+            .andExpect(status().isNotFound());
   }
 
 
