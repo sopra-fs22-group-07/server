@@ -44,5 +44,5 @@ local.properties
 bin/main/application.properties
 
 # Data
-../data
-../data/myDB.mv.db
+/data
+/data/myDB.mv.db

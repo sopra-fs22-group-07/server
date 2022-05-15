@@ -15,14 +15,15 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(name = "CARD")
+// we want one table per subclass, not everything in one table:
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class Card implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
   @Id
-  // @GeneratedValue(strategy = GenerationType.IDENTITY)
   @GeneratedValue
+  @Column(name = "card_id")
   private Long id;
 
   @Column(nullable = false, length = 255)

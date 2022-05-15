@@ -2,6 +2,8 @@ package ch.uzh.ifi.hase.soprafs22.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.*;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessageGetDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -78,5 +80,20 @@ public interface DTOMapper {
 
   @Mapping(source = "gameId", target = "id")
   Game convertGameIDPostDTOToEntity(GameIDPostDTO gameIDPostDTO);
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "messageType", target = "messageType")
+  @Mapping(source = "content", target = "content")
+  @Mapping(source = "fromUserId", target = "from")
+  @Mapping(source = "toUserId", target = "to")
+  @Mapping(source = "creationDate", target = "creationDate")
+  @Mapping(source = "read", target = "read")
+  ChatMessageGetDTO convertMessageToChatMessageGetDTO(Message message);
+
+  @Mapping(source = "messageType", target = "messageType")
+  @Mapping(source = "content", target = "content")
+  @Mapping(source = "fromUserId", target = "fromUserId")
+  @Mapping(source = "toUserId", target = "toUserId")
+  Message convertChatMessagePutDTOToEntity(ChatMessagePutDTO chatMessagePutDTO);
 
 }

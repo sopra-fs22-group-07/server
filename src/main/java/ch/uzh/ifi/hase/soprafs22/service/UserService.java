@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -35,6 +36,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
+  private final ChatRepository chatRepository;
   private final GameService gameService;
   private boolean areInstantiatedDemoUsers = false;
 
@@ -43,11 +45,14 @@ public class UserService {
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
                      @Qualifier("gameService") GameService gameService,
-                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
+                     @Qualifier("MatchRepository") MatchRepository matchRepository,
+                     @Qualifier("ChatRepository")ChatRepository chatRepository) {
+
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
     this.gameService = gameService;
+    this.chatRepository = chatRepository;
   }
 
     public List<User> getUsers() {
@@ -333,6 +338,12 @@ public class UserService {
     // Yes, it would be absolutely possible to do without the Pair class...
     Pair<User, User> pair = new Pair<>(user, otherUser);
     match.setUserPair(pair);
+
+    Chat chat = new Chat();
+    chatRepository.saveAndFlush(chat);
+
+    // new Chat gets added
+    match.setChat(chat);
     matchRepository.saveAndFlush(match);
 
     return match;
@@ -559,6 +570,45 @@ public class UserService {
     return false;
   }
 
+    /**
+     * get matches of a user
+     * @param user: user from which the matches are taken
+     * @return List of Matches
+     */
+    public List<Match> getMatches(User user){
+        Set<Long> matchesOfUser = user.getMatches();
+        List<Match> matches = new ArrayList<>();
+        for(Long matchId : matchesOfUser){
+            matches.add(matchRepository.getOne(matchId));
+        }
+
+        return matches;
+    }
+
+    /**
+     * Get all users which match with the known user
+     * @param user: known user
+     * @param matches: all matches from suer
+     * @return list of users which mach with known user
+     */
+    public List<User> getUsersFromMatches(User user, List<Match> matches) {
+        List<User> matchedUsers = new ArrayList<>();
+
+        // map the users to the matches
+        for (Match match : matches){
+            Pair<User,User> users = match.getUserPair();
+            // add other user (by comparing it with the user, which is known)
+            if(user.equals(users.getObj1())){
+                matchedUsers.add(users.getObj2());
+            }else{
+                matchedUsers.add(users.getObj1());
+            }
+        }
+
+        return matchedUsers;
+    }
+
+
   /**
    * Deletes a User from Repo By the USer id
    * @param userId: userId of a user
@@ -635,23 +685,103 @@ public class UserService {
       demoUser3.setBirthday(new Date());
       demoUser3 = createUser(demoUser3);
 
+      User demoUser4 = new User();
+      demoUser4.setUsername("demoUser4");
+      demoUser4.setPassword("demoUser4");
+      demoUser4.setName("Demo User 4");
+      demoUser4.setGender(Gender.OTHER);
+      demoUser4.setBirthday(new Date());
+      demoUser4 = createUser(demoUser4);
+
+      User demoUser5 = new User();
+      demoUser5.setUsername("demoUser5");
+      demoUser5.setPassword("demoUser5");
+      demoUser5.setName("Demo User 5");
+      demoUser5.setGender(Gender.OTHER);
+      demoUser5.setBirthday(new Date());
+      demoUser5 = createUser(demoUser5);
+
+      User demoUser6 = new User();
+      demoUser6.setUsername("demoUser6");
+      demoUser6.setPassword("demoUser6");
+      demoUser6.setName("Demo User 6");
+      demoUser6.setGender(Gender.OTHER);
+      demoUser6.setBirthday(new Date());
+      demoUser6 = createUser(demoUser6);
+
+      User demoUser7 = new User();
+      demoUser7.setUsername("demoUser7");
+      demoUser7.setPassword("demoUser7");
+      demoUser7.setName("Demo User 7");
+      demoUser7.setGender(Gender.OTHER);
+      demoUser7.setBirthday(new Date());
+      demoUser7 = createUser(demoUser7);
+
+      User demoUser8 = new User();
+      demoUser8.setUsername("demoUser8");
+      demoUser8.setPassword("demoUser8");
+      demoUser8.setName("Demo User 8");
+      demoUser8.setGender(Gender.OTHER);
+      demoUser8.setBirthday(new Date());
+      demoUser8 = createUser(demoUser8);
+
+      User demoUser9 = new User();
+      demoUser9.setUsername("demoUser9");
+      demoUser9.setPassword("demoUser9");
+      demoUser9.setName("Demo User 9");
+      demoUser9.setGender(Gender.OTHER);
+      demoUser9.setBirthday(new Date());
+      demoUser9 = createUser(demoUser9);
+
 
       // ======= create active games =======
       BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard4 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard5 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard6 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard7 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard8 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard9 = gameService.getNRandomBlackCards(1).get(0);
       Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
       Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
       Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
+      Game game4 = gameService.createGame(blackCard4, demoUser4.getId());
+      Game game5 = gameService.createGame(blackCard5, demoUser5.getId());
+      Game game6 = gameService.createGame(blackCard6, demoUser6.getId());
+      Game game7 = gameService.createGame(blackCard7, demoUser7.getId());
+      Game game8 = gameService.createGame(blackCard8, demoUser8.getId());
+      Game game9 = gameService.createGame(blackCard9, demoUser9.getId());
 
 
       // ======= create likes and matches =======
       Match demoMatch1 = createMatch(demoUser1, demoUser2);
       setMatch(demoMatch1);
 
-
       Match demoMatch2 = createMatch(demoUser1, demoUser3);
       setMatch(demoMatch2);
+
+      Match demoMatch3 = createMatch(demoUser1, demoUser4);
+      setMatch(demoMatch3);
+
+      Match demoMatch4 = createMatch(demoUser1, demoUser5);
+      setMatch(demoMatch4);
+
+      Match demoMatch5 = createMatch(demoUser2, demoUser3);
+      setMatch(demoMatch5);
+
+      Match demoMatch6 = createMatch(demoUser2, demoUser6);
+      setMatch(demoMatch6);
+
+      Match demoMatch7 = createMatch(demoUser2, demoUser7);
+      setMatch(demoMatch7);
+
+      Match demoMatch8 = createMatch(demoUser3, demoUser8);
+      setMatch(demoMatch8);
+
+      Match demoMatch9 = createMatch(demoUser3, demoUser9);
+      setMatch(demoMatch9);
 
       areInstantiatedDemoUsers = true;
       log.info("Demo users instantiated.");
@@ -674,4 +804,34 @@ public class UserService {
     // else return the black card
     return user.getActiveGame().getBlackCard();
   }
+
+    /**
+     * Gets the active game of a user, but throws 404 if the user has no active game or no black card selected yet
+     * @param userId: UserID of the user that we want the current black card of
+     * @return activeGame (or 404)
+     */
+
+    public Game getActiveGame(Long userId) {
+        User user = getUserById(userId);
+        // check if user has active game, or a black card chosen respectively
+        if (user.getActiveGame() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active game");
+        }
+        // else return the active game
+        return user.getActiveGame();
+    }
+
+    /**
+     * get id of chat
+     * @param matches List of matches
+     * @return ids of the chats
+     */
+    public List<Long> getChatIds(List<Match> matches) {
+        List<Long> chatIds = new ArrayList<>();
+      for(Match match: matches){
+          Chat chat = match.getChat();
+          chatIds.add(chat.getId());
+      }
+      return chatIds;
+    }
 }
