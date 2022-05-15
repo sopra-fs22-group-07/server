@@ -93,14 +93,14 @@ public class GameService {
     /**
      * Create a Game
      * @param blackCard Black card of the Game
-     * @param userId userId from user who creates the game
+     * @param user userId from user who creates the game
      * @return the created game
      */
-    public Game createGame(BlackCard blackCard, long userId) {
+    public Game createGame(BlackCard blackCard, User user) {
       // create new game with certain blackCard
       Game game = new Game();
       game.setBlackCard(blackCard);
-      game.setUserId(userId);
+      game.setUser(user);
       game.setGameStatus(GameStatus.ACTIVE);
 
       // save the game

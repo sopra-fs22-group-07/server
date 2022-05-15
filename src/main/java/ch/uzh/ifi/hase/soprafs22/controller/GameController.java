@@ -84,9 +84,9 @@ public class GameController {
 
       // make sure that black card is in user's current black cards (which the user gets assigned when he retrieves some blackCards)
       userService.checkBlackCard(id, blackCard); // 403
-
+        User user = userService.getUserById(id);
       // create game with game service
-      Game game = gameService.createGame(blackCard, id);
+      Game game = gameService.createGame(blackCard, user);
 
       // add game to user
       userService.addGame(id, game);

@@ -489,7 +489,7 @@ public class UserService {
    * @return boolean, true if game belongs to user
    */
   public boolean isGameBelongingToUser(Game game, User user) {
-    return Objects.equals(game.getUserId(), user.getId());
+    return Objects.equals(game.getUser(), user.getId());
   }
 
   /**
@@ -720,15 +720,15 @@ public class UserService {
       BlackCard blackCard7 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard8 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard9 = gameService.getNRandomBlackCards(1).get(0);
-      Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
-      Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
-      Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
-      Game game4 = gameService.createGame(blackCard4, demoUser4.getId());
-      Game game5 = gameService.createGame(blackCard5, demoUser5.getId());
-      Game game6 = gameService.createGame(blackCard6, demoUser6.getId());
-      Game game7 = gameService.createGame(blackCard7, demoUser7.getId());
-      Game game8 = gameService.createGame(blackCard8, demoUser8.getId());
-      Game game9 = gameService.createGame(blackCard9, demoUser9.getId());
+      Game game1 = gameService.createGame(blackCard1, demoUser1);
+      Game game2 = gameService.createGame(blackCard2, demoUser2);
+      Game game3 = gameService.createGame(blackCard3, demoUser3);
+      Game game4 = gameService.createGame(blackCard4, demoUser4);
+      Game game5 = gameService.createGame(blackCard5, demoUser5);
+      Game game6 = gameService.createGame(blackCard6, demoUser6);
+      Game game7 = gameService.createGame(blackCard7, demoUser7);
+      Game game8 = gameService.createGame(blackCard8, demoUser8);
+      Game game9 = gameService.createGame(blackCard9, demoUser9);
 
 
       // ======= create likes and matches =======
