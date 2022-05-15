@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +42,7 @@ class GameServiceTest {
     private GameService gameService;
 
     private Game testGame;
+    private User testUser;
 
     private BlackCard testBlackCard;
 
@@ -51,6 +53,13 @@ class GameServiceTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        testUser = new User();
+        testUser.setId(1L);
+        testUser.setName("testName");
+        testUser.setUsername("testUsername");
+        testUser.setPassword("1234");
+        testUser.setGender(Gender.OTHER);
+        testUser.setBirthday(new Date());
 
         // given active Game
         testGame = new Game();
@@ -58,7 +67,7 @@ class GameServiceTest {
         testBlackCard.setText("gap");
         testBlackCard.setId(1L);
         testGame.setId(1L);
-        testGame.setUserId(1L);
+        testGame.setUser(testUser);
         testGame.setBlackCard(testBlackCard);
         testGame.setCreationTime(new Date());
         testGame.setGameStatus(GameStatus.ACTIVE);
@@ -160,7 +169,7 @@ class GameServiceTest {
         Game pastGame = new Game();
         BlackCard bc = new BlackCard();
         pastGame.setId(2L);
-        pastGame.setUserId(2L);
+        pastGame.setUser(testUser);
         pastGame.setBlackCard(bc);
         pastGame.setCreationTime(new Date());
         pastGame.setGameStatus(GameStatus.INACTIVE);
@@ -200,7 +209,7 @@ class GameServiceTest {
 
     @Test
     void createGame_success() {
-        Game game = gameService.createGame(testBlackCard, 1L);
+        Game game = gameService.createGame(testBlackCard, testUser);
 
         // test if game is equal to testGame (expected, actual)
         assertEquals(testGame.getId(), game.getId());

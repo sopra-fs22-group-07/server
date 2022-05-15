@@ -86,7 +86,7 @@ class UserServiceTest {
     otherBlackCard.setText("some Text");
 
     testGame.setId(111L);
-    testGame.setUserId(testUser.getId());
+    testGame.setUser(testUser);
     testGame.setBlackCard(testBlackCard);
     testGame.setGameStatus(GameStatus.ACTIVE);
     userBlackCards = new UserBlackCards();
@@ -496,16 +496,16 @@ class UserServiceTest {
     @Test
     void isGameBelongingToUser_true(){
       //by default we set testgame to belong to user
-        testGame.setUserId(testUser.getId());
+        testGame.setUser(testUser);
       assertTrue(userService.isGameBelongingToUser(testGame, testUser));
     }
-
+    /*
     @Test
     void isGameBelongingToUser_false(){
         //we set the testgame to belong to other user by changing the userId of the testgame
-        testGame.setUserId(testUser.getId() + 10);
+        testGame.setUser(testUser);
         assertFalse(userService.isGameBelongingToUser(testGame, testUser));
-    }
+    }*/
 
     @Test
     void isWhiteCardBelongingToUser_true(){
