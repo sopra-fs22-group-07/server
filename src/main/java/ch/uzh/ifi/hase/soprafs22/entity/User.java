@@ -82,6 +82,9 @@ public class User implements Serializable {
     @ElementCollection
     private Set<Long> matches = new TreeSet<>();
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<User> blockedUsers = new HashSet<>();
+
 
     // GETTERS AND SETTERS
 
@@ -196,5 +199,11 @@ public class User implements Serializable {
     public void setMaxAge(int maxAge){this.maxAge = maxAge;}
 
 
+    public Set<User> getBlockedUsers() {
+        return blockedUsers;
+    }
 
+    public void addBlockedUsers(User userToBlock) {
+        this.blockedUsers.add(userToBlock);
+    }
 }

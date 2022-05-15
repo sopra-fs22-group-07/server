@@ -552,11 +552,13 @@ class UserServiceTest {
         Match testMatch =  userService.createMatch(testUser, otherUser);
         testMatch.setMatchId(222L);
 
-        Mockito.when(matchRepository.findByMatchId(222L)).thenReturn(testMatch);
-        userService.setMatch(testMatch);
+        Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(1);
+      Mockito.when(matchRepository.countMatchByUserPair(otherUser, testUser)).thenReturn(1);
+
+      userService.setMatch(testMatch);
         //both users should now have the testMatch, so it should exist
-        assertTrue(userService.doesMatchExist(testUser, otherUser));
-        assertTrue(userService.doesMatchExist(otherUser, testUser));
+        assertTrue(userService.doesMatchExist(testUser, otherUser), "expected a match between testUser and otherUser");
+        assertTrue(userService.doesMatchExist(otherUser, testUser), "expected a match between otherUser and testUser");
 
         //case multiple matches exist
         User thirdUser = new User();
@@ -564,10 +566,12 @@ class UserServiceTest {
         Match otherMatch = userService.createMatch(testUser, thirdUser);
         otherMatch.setMatchId(223L);
 
-        Mockito.when(matchRepository.findByMatchId(223L)).thenReturn(otherMatch);
-        userService.setMatch(otherMatch);
-        assertTrue(userService.doesMatchExist(testUser, thirdUser));
-        assertTrue(userService.doesMatchExist(thirdUser,testUser));
+        Mockito.when(matchRepository.countMatchByUserPair(thirdUser, testUser)).thenReturn(1);
+      Mockito.when(matchRepository.countMatchByUserPair(testUser, thirdUser)).thenReturn(1);
+
+      userService.setMatch(otherMatch);
+        assertTrue(userService.doesMatchExist(testUser, thirdUser), "expected a match between testUser and thirdUser");
+        assertTrue(userService.doesMatchExist(thirdUser,testUser), "expected a match between thirdUser and otherUser");
     }
 
     @Test
@@ -754,8 +758,92 @@ class UserServiceTest {
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
 
-    @Test
-    void deleteUser_test(){
-      assertDoesNotThrow(()-> userService.deleteUser(1L));
+  @Test
+  void deleteUser_test(){
+    assertDoesNotThrow(()-> userService.deleteUser(1L));
+  }
+
+  @Test
+  void unmatch_success() {
+    Match match = new Match();
+    match.setMatchId(500);
+    match.setUserPair(new Pair<>(testUser, otherUser));
+
+    Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(1);
+    Mockito.when(matchRepository.getMatchByUserPair(Mockito.any(), Mockito.any())).thenReturn(match);
+
+    assertTrue(userService.doesMatchExist(testUser, otherUser));
+
+    userService.deleteMatchBetweenUsers(testUser.getId(), otherUser.getId());
+
+    Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(0);
+
+    assertFalse(userService.doesMatchExist(testUser, otherUser));
+  }
+
+  @Test
+  void unmatch_fail() {
+    Match match = new Match();
+    match.setMatchId(500);
+    match.setUserPair(new Pair<>(testUser, otherUser));
+
+    Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(0);
+    Mockito.when(matchRepository.getMatchByUserPair(Mockito.any(), Mockito.any())).thenReturn(match);
+
+    assertFalse(userService.doesMatchExist(testUser, otherUser));
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class,
+            () -> userService.deleteMatchBetweenUsers(testUser.getId(), otherUser.getId()));
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+  }
+
+  @Test
+  void unmatch_fail_BIGERROR() {
+    Match match = new Match();
+    match.setMatchId(500);
+    match.setUserPair(new Pair<>(testUser, otherUser));
+
+    Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(2);
+    Mockito.when(matchRepository.getMatchByUserPair(Mockito.any(), Mockito.any())).thenReturn(match);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class,
+            () -> userService.deleteMatchBetweenUsers(testUser.getId(), otherUser.getId()));
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+  }
+
+  @Test
+  void block_user_success() {
+    Match match = new Match();
+    match.setMatchId(500);
+    match.setUserPair(new Pair<>(testUser, otherUser));
+
+    Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
+    Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
+    Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(1);
+    Mockito.when(matchRepository.getMatchByUserPair(Mockito.any(), Mockito.any())).thenReturn(match);
+
+
+    assertTrue(userService.doesMatchExist(testUser, otherUser));
+
+    userService.blockUser(testUser.getId(), otherUser.getId());
+
+    Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(0);
+
+    assertFalse(userService.doesMatchExist(testUser, otherUser));
+
+    if (!testUser.getBlockedUsers().contains(otherUser)){
+      fail("Expected otherUser to be in testUsers block list");
     }
+    if (!otherUser.getBlockedUsers().contains(testUser)){
+      fail("Expected testUser to be in otherUsers block list");
+    }
+
+  }
+
 }
