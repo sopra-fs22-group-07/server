@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.Play;
 import ch.uzh.ifi.hase.soprafs22.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +43,15 @@ class GameServiceIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        gameRepository.deleteAll();
-        playRepository.deleteAll();
         testBlackCard = new BlackCard();
         testBlackCard.setText("gap");
         testBlackCard.setId(1L);
+    }
+
+    @AfterEach
+    public void tearDown(){
+        gameRepository.deleteAll();
+        playRepository.deleteAll();
     }
 
     @Test
@@ -94,6 +99,4 @@ class GameServiceIntegrationTest {
         assertTrue(testGame.getPlays().contains(testPlay));
         assertEquals(testPlay.getGameId(), testGame.getId());
     }
-
-
 }
