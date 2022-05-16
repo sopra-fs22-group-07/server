@@ -28,7 +28,7 @@ public class Game implements Serializable {
   @GeneratedValue
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name="user_id")
   private User user;
 
@@ -74,4 +74,5 @@ public class Game implements Serializable {
 
   public GameStatus getGameStatus() {return gameStatus;}
   public void setGameStatus(GameStatus gameStatus) {this.gameStatus = gameStatus;}
+
 }

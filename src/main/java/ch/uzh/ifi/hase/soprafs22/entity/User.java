@@ -65,7 +65,8 @@ public class User implements Serializable {
     // @OneToOne
     // private Game activeGame;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",
+    cascade = CascadeType.ALL)
     private List<Game> games = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -123,7 +124,9 @@ public class User implements Serializable {
             return null;
     }
 
-    public void setActiveGame(Game activeGame) {this.games.add(activeGame);}
+    public void setActiveGame(Game activeGame) {
+        activeGame.setGameStatus(GameStatus.ACTIVE);
+        this.games.add(0, activeGame);}
 
     public List<Game> getPastGames() {
         if(!this.games.isEmpty() && this.games.get(0).getGameStatus()== GameStatus.INACTIVE){
@@ -152,16 +155,19 @@ public class User implements Serializable {
         return this.gender.toString();
     }
 
-
+/*
     public void addGame(Game game){
         this.games.add(game);
     }
-
+*/
     // move active game to past games
     public void flushGameToPastGames(){
         Game game = this.getActiveGame();
-        this.setActiveGame(null);
-        this.addGame(game);
+        if(!(game==null)){
+            game.setGameStatus(GameStatus.INACTIVE);
+        }
+        // this.setActiveGame(null);
+        // this.addGame(game);
     }
 
     public void deletePastGame(Game game) {
