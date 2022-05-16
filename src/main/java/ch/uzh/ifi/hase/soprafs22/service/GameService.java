@@ -241,4 +241,7 @@ public class GameService {
   }
 
 
+    public void saveGame(Game activeGame) {
+      gameRepository.saveAndFlush(activeGame);
+    }
 }

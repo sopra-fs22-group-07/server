@@ -369,6 +369,7 @@ public class UserService {
       user.flushGameToPastGames();
       // TODO: 12.04.2022 SaveAndFlush GameRepository here? (IDE doesn't complain until now)
       userRepository.saveAndFlush(user);
+      gameService.saveGame(activeGame);
     }
     // case the active game is not older than 24 hours, just return
   }
