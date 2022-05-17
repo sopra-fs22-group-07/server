@@ -50,7 +50,7 @@ class GameServiceTest {
     private WhiteCard testWhiteCard;
 
     private Play testPlay;
-/*
+
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
@@ -154,9 +154,10 @@ class GameServiceTest {
     @Test
     void getGame_returnActiveGame_success() {
 
-        List<Game> pastGame = new ArrayList<>();
+        List<Game> games = new ArrayList<>();
+        games.add(testGame);
 
-        Game  game = gameService.getGame(testGame, pastGame);
+        Game  game = gameService.getGame(games);
         assertEquals(testGame.getId(), game.getId());
         assertEquals(testGame.getCreationTime(), game.getCreationTime());
         assertEquals(testGame.getGameStatus(), game.getGameStatus());
@@ -165,7 +166,7 @@ class GameServiceTest {
 
     @Test
     void getGame_returnPastGame_success() {
-        List<Game> pastGames = new ArrayList<>();
+        List<Game> games = new ArrayList<>();
 
         Game pastGame = new Game();
         BlackCard bc = new BlackCard();
@@ -175,9 +176,10 @@ class GameServiceTest {
         pastGame.setCreationTime(new Date());
         pastGame.setGameStatus(GameStatus.INACTIVE);
 
-        pastGames.add(pastGame);
+        games.add(pastGame);
+        games.add(testGame);
 
-        Game game = gameService.getGame(testGame, pastGames);
+        Game game = gameService.getGame(games);
         assertEquals(pastGame.getId(), game.getId());
         assertEquals(pastGame.getCreationTime(), game.getCreationTime());
         assertEquals(pastGame.getGameStatus(), game.getGameStatus());
@@ -317,12 +319,12 @@ class GameServiceTest {
         Page<Game> somePage = new PageImpl<>(games);
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L)).thenReturn(101L);
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L, testUser)).thenReturn(101L);
         Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class),
-                eq(1L), Mockito.any(isA(User.class)))).thenReturn(somePage);
+                eq(1L), Mockito.any())).thenReturn(somePage);
 
         // test
-        Game game = gameService.getGameFromRandomUser(1L);
+        Game game = gameService.getGameFromRandomUser(1L, testUser);
         // test if game is equal to testGame
         assertEquals(testGame.getId(), game.getId());
         assertEquals(testGame.getCreationTime(), game.getCreationTime());
@@ -334,13 +336,13 @@ class GameServiceTest {
     void getGameFromRandomUser_throwNotFound() {
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L)).thenReturn(0L);
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L, testUser)).thenReturn(0L);
 
         // test
         // expect exception
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            gameService.getGameFromRandomUser(1L);
+            gameService.getGameFromRandomUser(1L, testUser);
         });
         assertEquals("404 NOT_FOUND \"There is no black card of another user left\"", exception.getMessage());
-    }*/
+    }
 }
