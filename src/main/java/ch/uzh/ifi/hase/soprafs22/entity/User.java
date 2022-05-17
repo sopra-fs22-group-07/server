@@ -3,6 +3,10 @@ package ch.uzh.ifi.hase.soprafs22.entity;
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,6 +27,9 @@ import java.util.*;
 
 @Entity
 @Table(name = "USER")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -67,6 +74,7 @@ public class User implements Serializable {
 
     @OneToMany(mappedBy = "user",
     cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Game> games = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -118,19 +126,19 @@ public class User implements Serializable {
     public void setGender(Gender gender){this.gender = gender; }
 
     public Game getActiveGame() {
-        if(!this.games.isEmpty() && this.games.get(0).getGameStatus()== GameStatus.ACTIVE){
-            return  this.games.get(0);
+        if(!this.games.isEmpty() && this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE){
+            return  this.games.get(games.size() - 1);
         }
             return null;
     }
 
     public void setActiveGame(Game activeGame) {
         activeGame.setGameStatus(GameStatus.ACTIVE);
-        this.games.add(0, activeGame);}
+        this.games.add(activeGame);}
 
     public List<Game> getPastGames() {
-        if(!this.games.isEmpty() && this.games.get(0).getGameStatus()== GameStatus.INACTIVE){
-            return games.subList(1,-1);
+        if(!this.games.isEmpty() && this.games.get(games.size() - 1).getGameStatus()== GameStatus.INACTIVE){
+            return games.subList(0, games.size() - 2); // without active game
         }
         return games;
     }

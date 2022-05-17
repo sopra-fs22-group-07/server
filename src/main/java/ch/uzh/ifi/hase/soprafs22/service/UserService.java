@@ -363,7 +363,7 @@ public class UserService {
     // calculate how old the active game is
     long diffTime = new Date().getTime() - activeGame.getCreationTime().getTime();
     // case the game is older than one Day, put it to the past games
-    if(diffTime > Time.ONE_MINUTE*10) {
+    if(diffTime > Time.ONE_MINUTE) {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();

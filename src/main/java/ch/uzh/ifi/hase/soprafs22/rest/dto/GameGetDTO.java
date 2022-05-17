@@ -10,7 +10,7 @@ import java.util.List;
 
 public class GameGetDTO {
 
-    private long gameId;
+    private Long gameId;
     private List<Play> plays;
     private User user;
     private BlackCard blackCard;
@@ -52,11 +52,11 @@ public class GameGetDTO {
         this.gameStatus = gameStatus;
     }
 
-    public long getGameId() {
+    public Long getGameId() {
         return gameId;
     }
 
-    public void setGameId(long gameId) {
-        this.gameId = gameId;
+    public void setGameId(Long id) {
+        this.gameId = id;
     }
 }
