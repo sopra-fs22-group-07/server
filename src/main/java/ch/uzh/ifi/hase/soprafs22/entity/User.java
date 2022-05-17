@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -68,9 +67,6 @@ public class User implements Serializable {
 
     @Column
     private Gender gender;
-
-    // @OneToOne
-    // private Game activeGame;
 
     @OneToMany(mappedBy = "user",
     cascade = CascadeType.ALL)
@@ -137,10 +133,14 @@ public class User implements Serializable {
         this.games.add(activeGame);}
 
     public List<Game> getPastGames() {
-        if(!this.games.isEmpty() && this.games.get(games.size() - 1).getGameStatus()== GameStatus.INACTIVE){
+        if(!this.games.isEmpty() && this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE){
             return games.subList(0, games.size() - 2); // without active game
         }
-        return games;
+        return this.games;
+    }
+
+    public List<Game> getGames(){
+        return this.games;
     }
 
     public Set<Long> getMatches() {return matches;}
@@ -163,19 +163,12 @@ public class User implements Serializable {
         return this.gender.toString();
     }
 
-/*
-    public void addGame(Game game){
-        this.games.add(game);
-    }
-*/
     // move active game to past games
     public void flushGameToPastGames(){
         Game game = this.getActiveGame();
         if(!(game==null)){
             game.setGameStatus(GameStatus.INACTIVE);
         }
-        // this.setActiveGame(null);
-        // this.addGame(game);
     }
 
     public void deletePastGame(Game game) {
@@ -223,7 +216,6 @@ public class User implements Serializable {
     public int getMaxAge(){return maxAge;}
 
     public void setMaxAge(int maxAge){this.maxAge = maxAge;}
-
 
     public Set<User> getBlockedUsers() {
         return blockedUsers;

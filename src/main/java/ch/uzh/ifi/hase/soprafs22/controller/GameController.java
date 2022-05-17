@@ -156,7 +156,7 @@ public class GameController {
 
     User user = userService.getUserById(id);
     // get one game (first get the old ones)
-    Game game = gameService.getGame(user.getActiveGame(), user.getPastGames());
+    Game game = gameService.getGame(user.getGames());
     return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
   }
 

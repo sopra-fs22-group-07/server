@@ -44,7 +44,7 @@ class GameServiceIntegrationTest {
 
     private BlackCard testBlackCard;
     private User testUser;
-    /*
+
 
     @BeforeEach
     public void setup() {
@@ -107,7 +107,6 @@ class GameServiceIntegrationTest {
         // then
         assertTrue(testGame.getPlays().contains(testPlay));
         assertEquals(testPlay.getGameId(), testGame.getId());
-    }*/
-
+    }
 
 }

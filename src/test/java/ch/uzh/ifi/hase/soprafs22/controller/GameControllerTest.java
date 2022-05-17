@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
@@ -44,6 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * This tests if the GameController works.
  */
 @WebMvcTest(GameController.class)
+@TestPropertySource(
+        locations = "application-integrationtest.properties")
 class GameControllerTest {
     WhiteCard whiteCard1 = new WhiteCard();
     WhiteCard whiteCard2 = new WhiteCard();
@@ -66,8 +70,6 @@ class GameControllerTest {
     @MockBean
     private UserService userService;
 
-    /*
-
     @BeforeEach
     void before() {
         whiteCard1.setId(1L);
@@ -75,7 +77,6 @@ class GameControllerTest {
         whiteCard2.setId(2L);
         whiteCard2.setText("card 2");
         blackCard.setId(3L);
-        //blackCard.setNrOfBlanks(1);
         blackCard.setText("black");
         user.setId(11L);
         user.setUsername("username");
@@ -89,6 +90,7 @@ class GameControllerTest {
         game.setId(111L);
         game.setBlackCard(blackCard);
         game.setUser(user);
+        game.setGameStatus(GameStatus.ACTIVE);
         bCards.add(blackCard);
         wCards.add(whiteCard1);
         wCards.add(whiteCard2);
@@ -149,8 +151,10 @@ class GameControllerTest {
         mockMvc.perform(postRequest).andExpect(status().isCreated());
     }
 
+
     @Test
     void givenBlackCards_whenGetBlackCardFromRandomUser() throws Exception {
+        given(userService.getUserById(isA(Long.class))).willReturn(user);
         given(gameService.getGameFromRandomUser(isA(Long.class), isA(User.class))).willReturn(game);
 
         // when
@@ -182,10 +186,11 @@ class GameControllerTest {
                 .andExpect(jsonPath("$[1].text", is(whiteCard2.getText())));
     }
 
+    /*
     @Test
     void givenGame_whenGetGame() throws Exception {
         given(userService.getUserById(user.getId())).willReturn(user);
-        given(gameService.getGame(Mockito.any(),Mockito.anyList())).willReturn(game);
+        given(gameService.getGame(Mockito.anyList())).willReturn(game);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/vote", user.getId())
@@ -198,7 +203,7 @@ class GameControllerTest {
                 .andExpect(jsonPath("$.blackCard.id",is(3)))
                 .andExpect(jsonPath("$.blackCard.text",is(blackCard.getText())))
                 .andExpect(jsonPath("$.userId", is(11)));
-    }
+    }*/
 
     @Test
     void givenSecondLike_whenVoteCard() throws Exception {
@@ -397,7 +402,7 @@ class GameControllerTest {
 
         // then
         mockMvc.perform(getRequest).andExpect(status().isNotFound());
-    }*/
+    }
 
     /**
      * Helper Method to convert PostDTOs into a JSON string such that the input

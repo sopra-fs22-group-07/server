@@ -363,13 +363,12 @@ public class UserService {
     // calculate how old the active game is
     long diffTime = new Date().getTime() - activeGame.getCreationTime().getTime();
     // case the game is older than one Day, put it to the past games
-    if(diffTime > Time.ONE_MINUTE) {
+    if(diffTime > Time.ONE_DAY) {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();
       // TODO: 12.04.2022 SaveAndFlush GameRepository here? (IDE doesn't complain until now)
       userRepository.saveAndFlush(user);
-      // gameService.saveGame(activeGame);
     }
     // case the active game is not older than 24 hours, just return
   }
@@ -388,7 +387,7 @@ public class UserService {
     }
     // check if cards are older than one day, return empty list if so, else return the cards (that are younger than one day)
     long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
-    if(diffTime > Time.ONE_MINUTE) {
+    if(diffTime > Time.ONE_DAY) {
       // update black cards
       user.setUserBlackCards(null);
       userRepository.saveAndFlush(user);

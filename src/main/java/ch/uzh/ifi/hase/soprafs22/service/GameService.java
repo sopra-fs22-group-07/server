@@ -72,8 +72,9 @@ public class GameService {
     /**
      * @return the oldest Game
      */
-    public Game getGame(Game activeGame, List<Game> pastGames) {
-        return pastGames.isEmpty() ? activeGame : pastGames.get(0);
+    public Game getGame(List<Game> games) {
+        // TODO: control if null or error should be given back
+        return games.isEmpty() ? null : games.get(0);
     }
 
   /**
