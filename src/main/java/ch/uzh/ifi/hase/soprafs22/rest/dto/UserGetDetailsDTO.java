@@ -79,7 +79,6 @@ public class UserGetDetailsDTO {
 
   public void setGender(Gender gender){this.gender = gender; }
 
-
     public void setActiveGame(Game activeGame) {
         activeGame.setGameStatus(GameStatus.ACTIVE);
         this.games.add(activeGame);}
