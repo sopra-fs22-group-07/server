@@ -133,8 +133,14 @@ public class User implements Serializable {
         this.games.add(activeGame);}
 
     public List<Game> getPastGames() {
-        if(!this.games.isEmpty() && this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE){
-            return games.subList(0, games.size() - 2); // without active game
+        if((!this.games.isEmpty()) &&
+                (this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE)){
+            if(games.size()==1){
+                return Collections.emptyList(); // empty list without active game
+            }else{
+                return games.subList(0, games.size() - 2); // list without active game
+            }
+
         }
         return this.games;
     }

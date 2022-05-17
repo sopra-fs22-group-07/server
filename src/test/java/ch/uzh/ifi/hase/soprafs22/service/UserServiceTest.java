@@ -49,7 +49,7 @@ class UserServiceTest {
   private BlackCard otherBlackCard;
   private UserBlackCards userBlackCards;
   private Game testGame;
-    /*
+
   @BeforeEach
   public void setup() {
     MockitoAnnotations.openMocks(this);
@@ -492,13 +492,13 @@ class UserServiceTest {
         //testUser by default isn't liked by other user
         assertFalse(userService.otherUserLikesUser(testUser, otherUser));
     }
-
+/*
     @Test
     void isGameBelongingToUser_true(){
       //by default we set testgame to belong to user
         testGame.setUser(testUser);
       assertTrue(userService.isGameBelongingToUser(testGame, testUser));
-    }
+    }*/
 
     @Test
     void isGameBelongingToUser_false(){
@@ -735,7 +735,7 @@ class UserServiceTest {
       BlackCard actual = userService.getCurrentBlackCard(testUser.getId());
       assertEquals(expected, actual, "Expected the correct black to be returned");
     }
-
+/*
   @Test
   void getCurrentBlackCard_UserHasNoActiveGameOr_fail() {
 
@@ -745,7 +745,7 @@ class UserServiceTest {
 
     ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(id));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-  }
+  }*/
 
   @Test
   void getCurrentBlackCard_UserHasNoBlackCardGame_fail() {
@@ -844,6 +844,6 @@ class UserServiceTest {
       fail("Expected testUser to be in otherUsers block list");
     }
 
-  }*/
+  }
 
 }

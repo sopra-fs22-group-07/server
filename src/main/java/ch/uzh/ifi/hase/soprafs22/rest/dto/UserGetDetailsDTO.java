@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
@@ -17,8 +18,7 @@ public class UserGetDetailsDTO {
   private Date birthday;
   private Gender gender;
   private Date creationDate;
-  private Game activeGame;
-  private List<Game> pastGames;
+  private List<Game> games;
   private UserBlackCards userBlackCards;
   private List<WhiteCard> userWhiteCards;
   private Set<Long> likedByUsers;
@@ -79,20 +79,30 @@ public class UserGetDetailsDTO {
 
   public void setGender(Gender gender){this.gender = gender; }
 
-  public Game getActiveGame() {
-    return activeGame;
-  }
 
-  public void setActiveGame(Game activeGame) {
-    this.activeGame = activeGame;
-  }
+    public void setActiveGame(Game activeGame) {
+        activeGame.setGameStatus(GameStatus.ACTIVE);
+        this.games.add(activeGame);}
 
-  public List<Game> getPastGames() {
-    return pastGames;
-  }
+    public List<Game> getPastGames() {
+        if((!this.games.isEmpty()) &&
+                (this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE)){
+            if(games.size()==1){
+                return Collections.emptyList(); // empty list without active game
+            }else{
+                return games.subList(0, games.size() - 2); // list without active game
+            }
+
+        }
+        return this.games;
+    }
+
+    public List<Game> getGames(){
+        return this.games;
+    }
 
   public void setPastGames(List<Game> pastGames) {
-    this.pastGames = pastGames;
+    this.games.addAll(pastGames);
   }
 
   public Set<Long> getLikedByUsers() {
