@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
@@ -58,12 +59,13 @@ class UserServiceIntegrationTest {
     assertNull(userRepository.findByUsername("testUsername"));
 
     User testUser = new User();
-    testUser.setName("testName");
-    testUser.setUsername("testUsername");
-    testUser.setStatus(UserStatus.OFFLINE);
-    testUser.setToken("a");
-    testUser.setPassword("1234");
-    testUser.setBirthday(new Date());
+
+      testUser.setId(11L);
+      testUser.setUsername("username");
+      testUser.setName("name");
+      testUser.setPassword("password");
+      testUser.setToken("1234");
+      testUser.setGender(Gender.FEMALE);
 
     // when
     User createdUser = userService.createUser(testUser);
@@ -89,7 +91,7 @@ class UserServiceIntegrationTest {
     testUser.setBirthday(new Date());
 
 
-      User createdUser = userService.createUser(testUser);
+    User createdUser = userService.createUser(testUser);
 
     // attempt to create second user with same username
     User testUser2 = new User();
