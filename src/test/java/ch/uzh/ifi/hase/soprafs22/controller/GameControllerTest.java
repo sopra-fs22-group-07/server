@@ -397,6 +397,32 @@ class GameControllerTest {
         mockMvc.perform(getRequest).andExpect(status().isNotFound());
     }
 
+    @Test
+    void getActiveGame_givenActive() throws Exception {
+        given(userService.getActiveGame(user.getId())).willReturn(game);
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/activeGame", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isOk())
+                .andExpect(jsonPath("$.gameId", is(game.getId().intValue())))
+                .andExpect(jsonPath("$.blackCard.text", is(game.getBlackCard().getText())));
+
+    }
+
+    @Test
+    void getActiveGame_givenNoActive() throws Exception {
+        given(userService.getActiveGame(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/activeGame", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+
+    }
+
     /**
      * Helper Method to convert PostDTOs into a JSON string such that the input
      * can be processed
