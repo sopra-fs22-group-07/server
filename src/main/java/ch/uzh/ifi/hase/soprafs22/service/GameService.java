@@ -228,7 +228,8 @@ public class GameService {
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
     // count the possible games
     // Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId, user);
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user, user.getGender(), minAgeDate, maxAgeDate);
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
+            user.getGender(), minAgeDate, maxAgeDate);
 
 
 
@@ -243,8 +244,9 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    // Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId, user);
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user, user.getId(), user.getGender(), minAgeDate, maxAgeDate);
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId, user,
+        user.getGender(), minAgeDate, maxAgeDate);
+    // Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user, user.getId(), user.getGender(), minAgeDate, maxAgeDate);
 
     // return the game
     return somePage.getContent().get(0);
