@@ -10,6 +10,7 @@ import ch.uzh.ifi.hase.soprafs22.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +45,9 @@ class GameServiceIntegrationTest {
     @Autowired
     private PlayRepository playRepository;
 
+    @Mock
+    private BlackCardRepository cardRepository;
+
     @Autowired
     private GameService gameService;
 
@@ -62,17 +66,20 @@ class GameServiceIntegrationTest {
 
         testBlackCard = new BlackCard();
         testBlackCard.setText("gap");
-        testBlackCard.setId(2L);
+        testBlackCard.setId(1L);
 
         testUser = new User();
-        testUser.setId(1L);
-        testUser.setName("testName");
-        testUser.setUsername("testUsername");
-        testUser.setPassword("1234");
-        testUser.setGender(Gender.OTHER);
+
+        testUser.setUsername("username");
+        testUser.setName("name");
+        testUser.setPassword("password");
+        testUser.setToken("1234");
+        testUser.setGender(Gender.FEMALE);
         testUser.setBirthday(new Date());
 
         User createdUser = userService.createUser(testUser);
+
+        Mockito.when(cardRepository.saveAndFlush(Mockito.any())).thenReturn(testBlackCard);
     }
 
     @Test

@@ -60,12 +60,12 @@ class UserServiceIntegrationTest {
 
     User testUser = new User();
 
-      testUser.setId(11L);
       testUser.setUsername("username");
       testUser.setName("name");
       testUser.setPassword("password");
       testUser.setToken("1234");
       testUser.setGender(Gender.FEMALE);
+      testUser.setBirthday(new Date());
 
     // when
     User createdUser = userService.createUser(testUser);
