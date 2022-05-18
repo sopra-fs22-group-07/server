@@ -54,19 +54,15 @@ public class GameService {
    */
   // See solution from https://stackoverflow.com/a/52409343/17532411
   public List<BlackCard> getNRandomBlackCards(int numOfCards) {
-
-    // get 8 random cards from the blackCardRepository
-    int totalRecords = (int) blackCardRepository.count();
-
-    Page<BlackCard> somePage = blackCardRepository.findAll(getPageRequest(totalRecords, numOfCards));
-    List<BlackCard> cards;
-    if ( somePage.getTotalElements() > 0){
-      cards = new ArrayList<>(somePage.getContent());
-    } else {
-      cards = new ArrayList<>();
-    }
-    Collections.shuffle(cards);
-    return cards;
+      List<Long> blackCardIds= blackCardRepository.getAllIds();
+      List<BlackCard> blackCards = new ArrayList<>();
+      for(int n = 0; n<numOfCards; n++){
+          int randomInt = rand.nextInt(blackCardIds.size());
+          long cardId = blackCardIds.get(randomInt);
+          blackCards.add(getBlackCardById(cardId));
+      }
+      Collections.shuffle(blackCards);
+      return blackCards;
   }
 
     /**
@@ -147,27 +143,15 @@ public class GameService {
    */
   // Implementation identical to getNRandomBlackCards(): https://stackoverflow.com/a/52409343/17532411
   public List<WhiteCard> getNRandomWhiteCards(int numOfCards) {
-    int totalRecords = (int) whiteCardRepository.count();
-
-    Page<WhiteCard> somePage = whiteCardRepository.findAll(getPageRequest(totalRecords, numOfCards));
-    List<WhiteCard> cards;
-    if ( somePage.getTotalElements() > 0){
-      cards = new ArrayList<>(somePage.getContent());
-    } else {
-      cards = new ArrayList<>();
+    List<Long> whiteCardIds= whiteCardRepository.getAllIds();
+    List<WhiteCard> whiteCards = new ArrayList<>();
+    for(int n = 0; n<numOfCards; n++){
+        int randomInt = rand.nextInt(whiteCardIds.size());
+        long cardId = whiteCardIds.get(randomInt);
+        whiteCards.add(getWhiteCardById(cardId));
     }
-    Collections.shuffle(cards);
-    return cards;
-  }
-
-  // extract some duplicate code (from getNRandomCards) : https://stackoverflow.com/a/52409343/17532411
-  public static PageRequest getPageRequest(int totalRecords, int numOfCards){
-    int totalPages =
-            (totalRecords % numOfCards == 0)
-                    ? (totalRecords / numOfCards)
-                    : ((totalRecords / numOfCards) + 1);
-    int pageIndex = rand.nextInt(totalPages);
-    return PageRequest.of(pageIndex, numOfCards);
+    Collections.shuffle(whiteCards);
+    return whiteCards;
   }
 
   /**
