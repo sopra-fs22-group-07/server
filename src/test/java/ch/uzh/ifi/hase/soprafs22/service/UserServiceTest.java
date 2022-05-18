@@ -505,7 +505,7 @@ class UserServiceTest {
     void isGameBelongingToUser_false(){
         //we set the testgame to belong to other user by changing the userId of the testgame
         testGame.setUser(testUser);
-        assertFalse(userService.isGameBelongingToUser(testGame, testUser));
+        assertFalse(userService.isGameBelongingToUser(testGame, otherUser));
     }
 
     @Test
