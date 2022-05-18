@@ -489,7 +489,7 @@ public class UserService {
    * @return boolean, true if game belongs to user
    */
   public boolean isGameBelongingToUser(Game game, User user) {
-    return Objects.equals(game.getUser(), user.getId());
+    return Objects.equals(game.getUser().getId(), user.getId());
   }
 
   /**
