@@ -107,8 +107,10 @@ public class GameController {
 
     userService.checkSpecificAccess(token, id);
 
+    User user = userService.getUserById(id); //getting the user to pass later, has to be done here as in gameService we can't access userService (infinite loop)
+
     // Get 'random' game
-    Game game = gameService.getGameFromRandomUser(id);
+    Game game = gameService.getGameFromRandomUser(user);
 
     // return it
     CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();
