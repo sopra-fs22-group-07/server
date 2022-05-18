@@ -92,12 +92,32 @@ public class UserService {
     }
 
     private int getAge(Date birthday) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        int currentYear = c.get(Calendar.YEAR);
-        c.setTime(birthday);
-        int birthYear = c.get(Calendar.YEAR);
-        return currentYear - birthYear;
+        int years;
+        int months;
+        Calendar birthDayMili = Calendar.getInstance();
+        birthDayMili.setTimeInMillis(birthday.getTime());
+        long currentTime = System.currentTimeMillis();
+        Calendar now = Calendar.getInstance();
+        now.setTimeInMillis(currentTime);
+        years = now.get(Calendar.YEAR) - birthDayMili.get(Calendar.YEAR);
+        int currMonth = now.get(Calendar.MONTH);
+        int birthMonth = birthDayMili.get(Calendar.MONTH);
+        months = currMonth - birthMonth;
+        if (months < 0)
+        {
+            years--;
+            months = 12 - birthMonth + currMonth;
+            if (now.get(Calendar.DATE) < birthDayMili.get(Calendar.DATE))
+                months--;
+        } else if (months == 0 && now.get(Calendar.DATE) < birthDayMili.get(Calendar.DATE))
+        {
+            years--;
+            months = 11;
+        }
+        if (months == 12) {
+            years++;
+        }
+        return years;
     }
 
     private int findMinAgeDefault(Date userBirthday){

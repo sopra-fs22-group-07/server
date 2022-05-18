@@ -253,9 +253,8 @@ class UserControllerTest {
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername("usernameNew");
     userPutDTO.setBirthday(new Date(0));
-    userPutDTO.setId(userToBeUpdated.getId());
 
-    given(userService.getUserById(userPutDTO.getId())).willReturn(userToBeUpdated);
+    given(userService.getUserById(userToBeUpdated.getId())).willReturn(userToBeUpdated);
 
     MockHttpServletRequestBuilder putRequest = put("/users/{id}", userToBeUpdated.getId())
             .contentType(MediaType.APPLICATION_JSON)
@@ -277,7 +276,6 @@ class UserControllerTest {
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername("usernameNew");
     userPutDTO.setBirthday(new Date(0));
-    userPutDTO.setId(2L);
 
     given(userService.getUserById(user.getId())).willReturn(user);
     given(userService.updateUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -303,9 +301,8 @@ class UserControllerTest {
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername(userToBeUpdated.getUsername());
     userPutDTO.setBirthday(new Date(0));
-    userPutDTO.setId(userToBeUpdated.getId());
 
-    given(userService.getUserById(userPutDTO.getId())).willReturn(userToBeUpdated);
+    given(userService.getUserById(userToBeUpdated.getId())).willReturn(userToBeUpdated);
     MockHttpServletRequestBuilder putRequest = put("/users/1")
             .contentType(MediaType.APPLICATION_JSON)
             .content(asJsonString(userPutDTO))
@@ -327,7 +324,6 @@ class UserControllerTest {
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername("usernameNew");
     userPutDTO.setBirthday(new Date(0));
-    userPutDTO.setId(user.getId());
 
     given(userService.updateUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -352,7 +348,6 @@ class UserControllerTest {
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername(user.getUsername());
     userPutDTO.setBirthday(new Date(0));
-    userPutDTO.setId(user2.getId());
 
     given(userService.updateUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT));
 
