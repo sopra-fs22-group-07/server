@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
@@ -83,6 +84,7 @@ class GameControllerTest {
         user.setName("name");
         user.setPassword("password");
         user.setToken(token);
+        user.setGender(Gender.FEMALE);
         otherUser.setId(22L);
         otherUser.setUsername("otherUsername");
         otherUser.setName("otherName");
@@ -151,7 +153,6 @@ class GameControllerTest {
         mockMvc.perform(postRequest).andExpect(status().isCreated());
     }
 
-
     @Test
     void givenBlackCards_whenGetBlackCardFromRandomUser() throws Exception {
         given(userService.getUserById(isA(Long.class))).willReturn(user);
@@ -186,7 +187,6 @@ class GameControllerTest {
                 .andExpect(jsonPath("$[1].text", is(whiteCard2.getText())));
     }
 
-    /*
     @Test
     void givenGame_whenGetGame() throws Exception {
         given(userService.getUserById(user.getId())).willReturn(user);
@@ -202,8 +202,8 @@ class GameControllerTest {
                 .andExpect(jsonPath("$.gameId",is(111)))
                 .andExpect(jsonPath("$.blackCard.id",is(3)))
                 .andExpect(jsonPath("$.blackCard.text",is(blackCard.getText())))
-                .andExpect(jsonPath("$.userId", is(11)));
-    }*/
+                .andExpect(jsonPath("$.user.id", is(11)));
+    }
 
     @Test
     void givenSecondLike_whenVoteCard() throws Exception {
