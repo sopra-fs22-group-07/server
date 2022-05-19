@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
 import ch.uzh.ifi.hase.soprafs22.service.ChatService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import ch.uzh.ifi.hase.soprafs22.testHelpers.ChatFiller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ChatController.class)
-class ChatControllerTest {
+class ChatControllerTest extends ChatFiller {
 
     User user1;
     User user2;
@@ -293,51 +294,9 @@ class ChatControllerTest {
         mockMvc.perform(getRequest).andExpect(status().isNotFound());
     }
 
-    private User fillUser(Long userID, String token) {
-        User user = new User();
-        user.setId(userID);
-        user.setToken(token);
-        return user;
-    }
-
-    private Message fillMessage(Long fromID, Long toID, String content, boolean read) {
-        Message message = fillMessage(fromID, toID, content);
-        message.setRead(read);
-        return message;
-    }
-    private Message fillMessage(Long fromID, Long toID, String content){
-        Message message = new Message();
-        message.setFromUserId(fromID);
-        message.setToUserId(toID);
-        message.setContent(content);
-        return message;
-    }
-
     private void readExistingChat(){
         messages.get(0).setRead(true);
         messages.get(1).setRead(true);
-    }
-
-    private Chat fillChat(long chatID, List<Message> messages) {
-        Chat chat = new Chat();
-        chat.setId(chatID);
-        fillChat(chat, messages);
-        return chat;
-    }
-    private void fillChat(Chat chat, List<Message> messages) {
-        for (Message message : messages) {
-            chat.pushMessage(message);
-        }
-    }
-
-    private Match fillAndAddMatch(Long matchID, Pair<User, User> userPair, Chat chat) {
-        Match match = new Match();
-        match.setMatchId(matchID);
-        match.setUserPair(userPair);
-        match.setChat(chat);
-        userPair.getObj1().addMatch(matchID);
-        userPair.getObj2().addMatch(matchID);
-        return match;
     }
 
     private ChatMessagePutDTO fillDTOFromMessage(Message message) {
