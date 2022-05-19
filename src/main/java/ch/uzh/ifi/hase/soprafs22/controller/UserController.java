@@ -188,18 +188,6 @@ public class UserController {
       return userGetDTOs;
   }
 
-
-  //TODO: DELETE THIS MAPPING: I AM KEEPING IT IN HERE SO THE USERPAGE WORKS UNTIL THE NEW CHANGES ARE ALSO ADJUSTER IN THE CLIENT
-    @GetMapping("/users/{userId}/preferences")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public UserGetDTO getUserPreferences(@RequestHeader(value = "authorization", required = false) String token,
-                              @PathVariable(value = "userId") long userId) {
-        userService.checkSpecificAccess(token, userId);
-        User user = userService.getUserById(userId);
-        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-    }//TODO: DELETE MAPPING ABOVE
-
     @PutMapping("/users/{userId}/preferences")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
@@ -207,7 +195,6 @@ public class UserController {
             @RequestHeader(value = "authorization", required = false) String token,
             @PathVariable(value = "userId") long userId,
             @RequestBody UserPutDTO userPutDTO){
-
         userService.checkSpecificAccess(token, userId); // 401, 404
         User user = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
         //userPreferences is just a user that only has the preferences and user id

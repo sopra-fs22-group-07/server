@@ -12,6 +12,7 @@ public class UserPutDTO {
   private Gender gender;
   private int minAge;
   private int maxAge;
+  private int maxRange;
   private Set<Gender> genderPreferences;
 
   public String getUsername() {
@@ -53,6 +54,10 @@ public class UserPutDTO {
   public void setMaxAge(int maxAge) {
         this.maxAge = maxAge;
     }
+
+  public int getMaxRange(){return maxRange;}
+
+  public void setMaxRange(int maxRange){this.maxRange = maxRange;}
 
   public Set<Gender> getGenderPreferences() {
         return genderPreferences;
