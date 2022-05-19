@@ -15,18 +15,7 @@ import java.util.Date;
 @Repository("gameRepository")
 public interface GameRepository extends JpaRepository<Game, Long> {
     Game findById(long id);
-/*
-    @Query("select g from Game g where g.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
-            "and g.user <> :user " +
-            "and g not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)")
-    Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable, @Param("userId") long userId, @Param("user") User user);
 
-    @Query("select count (g) from Game g where g.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
-            "and g.user <> :user " +
-            "and g not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)")
-    Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId, @Param("user") User user);
-
- */
     //Has to check both directions because user only wants to see cards from people that user is interested in and that are interested in user
     @Query("select game from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
             "and game.user <> :user " +
