@@ -34,6 +34,9 @@ class ChatServiceTest extends ChatFiller {
     @Mock
     private ChatRepository chatRepository;
 
+    @Mock
+    private MessageRepository messageRepository;
+
     @InjectMocks
     private ChatService chatService;
 
