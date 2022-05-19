@@ -288,6 +288,8 @@ public class GameController {
         userService.updateActiveGameIfNecessary(userId);
 
         Game activeGame = userService.getActiveGame(userId);
-        return DTOMapper.INSTANCE.convertEntityToGameGetDTO(activeGame);
+        GameGetDTO gameGetDTO = DTOMapper.INSTANCE.convertEntityToGameGetDTO(activeGame);
+        gameGetDTO.setGameDuration(UserService.getGameDuration());
+        return gameGetDTO;
     }
 }
