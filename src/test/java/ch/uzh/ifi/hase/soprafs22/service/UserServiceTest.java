@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs22.testHelpers.UserFiller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestPropertySource(
         locations = "application-integrationtest.properties")
-class UserServiceTest {
+class UserServiceTest extends UserFiller {
 
   @Mock
   private UserRepository userRepository;
@@ -54,20 +55,12 @@ class UserServiceTest {
   public void setup() {
     MockitoAnnotations.openMocks(this);
     // given
-    testUser = new User();
-    testUser.setId(1L);
-    testUser.setName("testName");
-    testUser.setUsername("testUsername");
-    testUser.setPassword("1234");
+    testUser = fillUser(1L, "testName", "testUsername", "1234");
     testUser.setGender(Gender.OTHER);
     testUser.setBirthday(new Date());
 
     //other user for matching etc
-    otherUser = new User();
-    otherUser.setId(2L);
-    otherUser.setName("otherUser");
-    otherUser.setUsername("testOtherUsername");
-    otherUser.setPassword("1234");
+    otherUser = fillUser(2L, "otherUser", "testOtherUsername", "1234");
     otherUser.setGender(Gender.OTHER);
 
     //give; white card for testing
@@ -77,7 +70,6 @@ class UserServiceTest {
     testWhiteCards = new ArrayList<>();
     testWhiteCards.add(testWhiteCard);
 
-    testGame = new Game();
     testBlackCard = new BlackCard();
     testBlackCard.setText("GapText");
     testBlackCard.setId(22L);
@@ -85,6 +77,7 @@ class UserServiceTest {
     otherBlackCard.setId(33L);
     otherBlackCard.setText("some Text");
 
+    testGame = new Game();
     testGame.setId(111L);
     testGame.setUserId(testUser.getId());
     testGame.setBlackCard(testBlackCard);
@@ -164,11 +157,7 @@ class UserServiceTest {
   @Test
   void loginUser_success() {
       // given
-      User inputUser = new User();
-      inputUser.setId(testUser.getId());
-      inputUser.setName("testName");
-      inputUser.setUsername("testUsername");
-      inputUser.setPassword("1234");
+      User inputUser = fillUser(testUser.getId(), "testName", "testUsername", "1234");
 
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
@@ -186,11 +175,7 @@ class UserServiceTest {
   void loginUser_error() {
       // given -> a first user has already been created
       userService.createUser(testUser);
-      User inputUser = new User();
-      inputUser.setId(testUser.getId());
-      inputUser.setName("testName");
-      inputUser.setUsername("testUsername");
-      inputUser.setPassword("abcd");
+      User inputUser = fillUser(testUser.getId(), "testName", "testUsername", "abcd");
 
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
@@ -258,11 +243,7 @@ class UserServiceTest {
     @Test
     void updateUser_Conflict(){ //Test what happens when user tries to change username to a name that already is taken
         //Second user, that has the newUsername, that testUser wants
-        User conflictUser = new User();
-        conflictUser.setId(2L);
-        conflictUser.setName("conflictName");
-        conflictUser.setUsername("newUsername");
-        conflictUser.setPassword("1234");
+        User conflictUser = fillUser(2L, "conflictName", "newUsername", "1234");
         conflictUser.setGender(Gender.OTHER);
 
         userService.createUser(testUser);
@@ -577,11 +558,7 @@ class UserServiceTest {
     @Test
     void doesMatchExist_false(){
         // given
-        User testUser2 = new User();
-        testUser2.setId(3L);
-        testUser2.setName("testName");
-        testUser2.setUsername("testUsername3");
-        testUser2.setPassword("1234");
+        User testUser2 = fillUser(3L, "testName", "testUsername3", "1234");
         testUser2.setGender(Gender.OTHER);
 
         Match testMatch = userService.createMatch(otherUser, testUser2);
@@ -788,6 +765,8 @@ class UserServiceTest {
     Match match = new Match();
     match.setMatchId(500);
     match.setUserPair(new Pair<>(testUser, otherUser));
+    Long id = testUser.getId();
+    Long otherId = otherUser.getId();
 
     Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
     Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
@@ -797,7 +776,7 @@ class UserServiceTest {
     assertFalse(userService.doesMatchExist(testUser, otherUser));
 
     ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> userService.deleteMatchBetweenUsers(testUser.getId(), otherUser.getId()));
+            () -> userService.deleteMatchBetweenUsers(id, otherId));
     assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
@@ -806,6 +785,8 @@ class UserServiceTest {
     Match match = new Match();
     match.setMatchId(500);
     match.setUserPair(new Pair<>(testUser, otherUser));
+    Long id = testUser.getId();
+    Long otherId = otherUser.getId();
 
     Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
     Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
@@ -813,7 +794,7 @@ class UserServiceTest {
     Mockito.when(matchRepository.getMatchByUserPair(Mockito.any(), Mockito.any())).thenReturn(match);
 
     ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> userService.deleteMatchBetweenUsers(testUser.getId(), otherUser.getId()));
+            () -> userService.deleteMatchBetweenUsers(id, otherId));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
   }
 
@@ -843,7 +824,12 @@ class UserServiceTest {
     if (!otherUser.getBlockedUsers().contains(testUser)){
       fail("Expected testUser to be in otherUsers block list");
     }
-
   }
 
+  @Test
+  void agePreferenceCalculationsTest() {
+      //Todo: create user with birthday 2nd Jan
+      //Todo: create user with birthday 30th Dez
+      testUser.setBirthday(new Date());
+  }
 }
