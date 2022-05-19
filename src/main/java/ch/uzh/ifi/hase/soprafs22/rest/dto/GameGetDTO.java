@@ -3,17 +3,19 @@ package ch.uzh.ifi.hase.soprafs22.rest.dto;
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.BlackCard;
 import ch.uzh.ifi.hase.soprafs22.entity.Play;
+import ch.uzh.ifi.hase.soprafs22.entity.User;
 
 import java.util.Date;
 import java.util.List;
 
 public class GameGetDTO {
 
-    private long gameId;
+    private Long gameId;
     private List<Play> plays;
-    private Long userId;
+    private User user;
     private BlackCard blackCard;
     private Date creationDate;
+    private Long gameDuration;
     private GameStatus gameStatus;
 
 
@@ -24,8 +26,8 @@ public class GameGetDTO {
         this.plays = plays;
     }
 
-    public Long getUserId(){return userId;}
-    public void setUserId(Long userId){this.userId = userId;}
+    public User getUser(){return user;}
+    public void setUser(User user){this.user = user;}
 
     public BlackCard getBlackCard() {
         return blackCard;
@@ -51,11 +53,19 @@ public class GameGetDTO {
         this.gameStatus = gameStatus;
     }
 
-    public long getGameId() {
+    public Long getGameId() {
         return gameId;
     }
 
-    public void setGameId(long gameId) {
-        this.gameId = gameId;
+    public void setGameId(Long id) {
+        this.gameId = id;
+    }
+
+    public Long getGameDuration() {
+        return gameDuration;
+    }
+
+    public void setGameDuration(Long gameDuration) {
+        this.gameDuration = gameDuration;
     }
 }

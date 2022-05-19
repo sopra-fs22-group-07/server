@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
+import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
@@ -79,7 +80,7 @@ class UserServiceTest extends UserFiller {
 
     testGame = new Game();
     testGame.setId(111L);
-    testGame.setUserId(testUser.getId());
+    testGame.setUser(testUser);
     testGame.setBlackCard(testBlackCard);
     testGame.setGameStatus(GameStatus.ACTIVE);
     userBlackCards = new UserBlackCards();
@@ -477,15 +478,15 @@ class UserServiceTest extends UserFiller {
     @Test
     void isGameBelongingToUser_true(){
       //by default we set testgame to belong to user
-        testGame.setUserId(testUser.getId());
+        testGame.setUser(testUser);
       assertTrue(userService.isGameBelongingToUser(testGame, testUser));
     }
 
     @Test
     void isGameBelongingToUser_false(){
         //we set the testgame to belong to other user by changing the userId of the testgame
-        testGame.setUserId(testUser.getId() + 10);
-        assertFalse(userService.isGameBelongingToUser(testGame, testUser));
+        testGame.setUser(testUser);
+        assertFalse(userService.isGameBelongingToUser(testGame, otherUser));
     }
 
     @Test
@@ -715,9 +716,9 @@ class UserServiceTest extends UserFiller {
 
   @Test
   void getCurrentBlackCard_UserHasNoActiveGameOr_fail() {
-
     Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
-    testUser.setActiveGame(null);
+    Date pastDue = new Date(new Date().getTime() - Time.ONE_YEAR);
+    testGame.setCreationTime(pastDue);
     Long id = testUser.getId();
 
     ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getCurrentBlackCard(id));
@@ -765,8 +766,8 @@ class UserServiceTest extends UserFiller {
     Match match = new Match();
     match.setMatchId(500);
     match.setUserPair(new Pair<>(testUser, otherUser));
-    Long id = testUser.getId();
-    Long otherId = otherUser.getId();
+    Long selfID = testUser.getId();
+    Long otherID = otherUser.getId();
 
     Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
     Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
@@ -776,7 +777,7 @@ class UserServiceTest extends UserFiller {
     assertFalse(userService.doesMatchExist(testUser, otherUser));
 
     ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> userService.deleteMatchBetweenUsers(id, otherId));
+            () -> userService.deleteMatchBetweenUsers(selfID, otherID));
     assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
@@ -785,8 +786,8 @@ class UserServiceTest extends UserFiller {
     Match match = new Match();
     match.setMatchId(500);
     match.setUserPair(new Pair<>(testUser, otherUser));
-    Long id = testUser.getId();
-    Long otherId = otherUser.getId();
+    Long selfID = testUser.getId();
+    Long otherID = otherUser.getId();
 
     Mockito.when(userRepository.findById(otherUser.getId().longValue())).thenReturn(otherUser);
     Mockito.when(userRepository.findById(testUser.getId().longValue())).thenReturn(testUser);
@@ -794,7 +795,7 @@ class UserServiceTest extends UserFiller {
     Mockito.when(matchRepository.getMatchByUserPair(Mockito.any(), Mockito.any())).thenReturn(match);
 
     ResponseStatusException e = assertThrows(ResponseStatusException.class,
-            () -> userService.deleteMatchBetweenUsers(id, otherId));
+            () -> userService.deleteMatchBetweenUsers(selfID, otherID));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
   }
 

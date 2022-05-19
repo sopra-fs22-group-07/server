@@ -84,9 +84,9 @@ public class GameController {
 
       // make sure that black card is in user's current black cards (which the user gets assigned when he retrieves some blackCards)
       userService.checkBlackCard(id, blackCard); // 403
-
+        User user = userService.getUserById(id);
       // create game with game service
-      Game game = gameService.createGame(blackCard, id);
+      Game game = gameService.createGame(blackCard, user);
 
       // add game to user
       userService.addGame(id, game);
@@ -107,7 +107,7 @@ public class GameController {
 
     userService.checkSpecificAccess(token, id);
 
-    User user = userService.getUserById(id); //getting the user to pass later, has to be done here as in gameService we can't access userService (infinite loop)
+    User user = userService.getUserById(id);
 
     // Get 'random' game
     Game game = gameService.getGameFromRandomUser(user);
@@ -156,7 +156,7 @@ public class GameController {
 
     User user = userService.getUserById(id);
     // get one game (first get the old ones)
-    Game game = gameService.getGame(user.getActiveGame(), user.getPastGames());
+    Game game = gameService.getGame(user.getGames());
     return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
   }
 
@@ -288,6 +288,8 @@ public class GameController {
         userService.updateActiveGameIfNecessary(userId);
 
         Game activeGame = userService.getActiveGame(userId);
-        return DTOMapper.INSTANCE.convertEntityToGameGetDTO(activeGame);
+        GameGetDTO gameGetDTO = DTOMapper.INSTANCE.convertEntityToGameGetDTO(activeGame);
+        gameGetDTO.setGameDuration(UserService.getGameDuration());
+        return gameGetDTO;
     }
 }
