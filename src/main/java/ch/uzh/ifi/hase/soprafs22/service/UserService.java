@@ -265,7 +265,7 @@ public class UserService {
       if(!Objects.isNull(user.getGenderPreferences()) && !user.getGenderPreferences().isEmpty()){
           userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
       }
-      if(user.getMaxRange()>1 && user.getMaxRange() < 20010){
+      if(user.getMaxRange()>=1 && user.getMaxRange() < 20010){
           userToUpdatePreferences.setMaxRange(user.getMaxRange());
       }
   }
