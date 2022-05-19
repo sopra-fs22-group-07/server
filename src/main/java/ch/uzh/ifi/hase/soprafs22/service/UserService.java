@@ -298,7 +298,7 @@ public class UserService {
     public void addGame(Long userId, Game game) {
         // get user
         User user = getUserById(userId);
-        user.setActiveGame(game);
+        user.addGame(game);
         // saves the given entity but data is only persisted in the database once
         // flush() is called
         userRepository.saveAndFlush(user);

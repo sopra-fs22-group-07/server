@@ -110,7 +110,7 @@ public class GameController {
     User user = userService.getUserById(id);
 
     // Get 'random' game
-    Game game = gameService.getGameFromRandomUser(id, user);
+    Game game = gameService.getGameFromRandomUser(user);
 
     // return it
     CardAndGameIdGetDTO cardAndGameIdGetDTO = new CardAndGameIdGetDTO();

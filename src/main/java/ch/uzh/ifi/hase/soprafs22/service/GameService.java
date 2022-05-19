@@ -72,7 +72,6 @@ public class GameService {
      * @return the oldest Game
      */
     public Game getGame(List<Game> games) {
-        // TODO: control if null or error should be given back
         return games.isEmpty() ? null : games.get(0);
     }
 
@@ -218,20 +217,17 @@ public class GameService {
   /**
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
-   * @param userId: userId of the caller
+   * @param user: user of the caller
    * @return Game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
-  public Game getGameFromRandomUser(Long userId, User user) {
+  public Game getGameFromRandomUser(User user) {
 
     Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
     // count the possible games
-    // Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId, user);
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
             user.getGender(), minAgeDate, maxAgeDate);
-
-
 
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -244,9 +240,8 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId, user,
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
         user.getGender(), minAgeDate, maxAgeDate);
-    // Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user, user.getId(), user.getGender(), minAgeDate, maxAgeDate);
 
     // return the game
     return somePage.getContent().get(0);

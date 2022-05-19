@@ -128,6 +128,10 @@ public class User implements Serializable {
             return null;
     }
 
+    public void addGame(Game game){
+        this.games.add(game);
+    }
+
     public void setActiveGame(Game activeGame) {
         activeGame.setGameStatus(GameStatus.ACTIVE);
         this.games.add(activeGame);}
@@ -172,7 +176,7 @@ public class User implements Serializable {
     // move active game to past games
     public void flushGameToPastGames(){
         Game game = this.getActiveGame();
-        if(!(game==null)){
+        if(game!=null){
             game.setGameStatus(GameStatus.INACTIVE);
         }
     }
