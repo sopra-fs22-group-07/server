@@ -15,6 +15,7 @@ public class GameGetDTO {
     private User user;
     private BlackCard blackCard;
     private Date creationDate;
+    private Long gameDuration;
     private GameStatus gameStatus;
 
 
@@ -58,5 +59,13 @@ public class GameGetDTO {
 
     public void setGameId(Long id) {
         this.gameId = id;
+    }
+
+    public Long getGameDuration() {
+        return gameDuration;
+    }
+
+    public void setGameDuration(Long gameDuration) {
+        this.gameDuration = gameDuration;
     }
 }

@@ -40,6 +40,7 @@ public class UserService {
   private final GameService gameService;
   private boolean areInstantiatedDemoUsers = false;
   private static final String UNIQUE_VIOLATION = "Uniqueness Violation Occurred";
+  private static final Long GAME_DURATION = Time.ONE_DAY;
 
 
   @Autowired
@@ -58,6 +59,10 @@ public class UserService {
 
     public List<User> getUsers() {
     return this.userRepository.findAll();
+  }
+
+  public static Long getGameDuration() {
+    return GAME_DURATION;
   }
 
   /**
@@ -383,7 +388,7 @@ public class UserService {
     // calculate how old the active game is
     long diffTime = new Date().getTime() - activeGame.getCreationTime().getTime();
     // case the game is older than one Day, put it to the past games
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > GAME_DURATION) {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();
@@ -407,7 +412,7 @@ public class UserService {
     }
     // check if cards are older than one day, return empty list if so, else return the cards (that are younger than one day)
     long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > GAME_DURATION) {
       // update black cards
       user.setUserBlackCards(null);
       userRepository.saveAndFlush(user);
