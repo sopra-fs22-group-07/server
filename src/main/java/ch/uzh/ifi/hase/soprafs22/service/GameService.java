@@ -71,8 +71,8 @@ public class GameService {
     /**
      * @return the oldest Game
      */
-    public Game getGame(Game activeGame, List<Game> pastGames) {
-        return pastGames.isEmpty() ? activeGame : pastGames.get(0);
+    public Game getGame(List<Game> games) {
+        return games.isEmpty() ? null : games.get(0);
     }
 
   /**
@@ -92,14 +92,14 @@ public class GameService {
     /**
      * Create a Game
      * @param blackCard Black card of the Game
-     * @param userId userId from user who creates the game
+     * @param user userId from user who creates the game
      * @return the created game
      */
-    public Game createGame(BlackCard blackCard, long userId) {
+    public Game createGame(BlackCard blackCard, User user) {
       // create new game with certain blackCard
       Game game = new Game();
       game.setBlackCard(blackCard);
-      game.setUserId(userId);
+      game.setUser(user);
       game.setGameStatus(GameStatus.ACTIVE);
 
       // save the game
@@ -217,7 +217,7 @@ public class GameService {
   /**
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
-   * @param user: user that makes the call
+   * @param user: user of the caller
    * @return Game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
@@ -226,9 +226,8 @@ public class GameService {
     Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
     // count the possible games
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user.getGender(), minAgeDate, maxAgeDate);
-
-
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
+            user.getGender(), minAgeDate, maxAgeDate);
 
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -241,11 +240,15 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user.getGender(), minAgeDate, maxAgeDate);
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
+        user.getGender(), minAgeDate, maxAgeDate);
 
     // return the game
     return somePage.getContent().get(0);
   }
 
 
+    public void saveGame(Game activeGame) {
+      gameRepository.saveAndFlush(activeGame);
+    }
 }
