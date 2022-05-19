@@ -147,22 +147,22 @@ class GameControllerTest {
         mockMvc.perform(postRequest).andExpect(status().isCreated());
     }
 
-    /**TODO: Fix Test @Seraina
     @Test
     void givenBlackCards_whenGetBlackCardFromRandomUser() throws Exception {
-        given(gameService.getGameFromRandomUser(isA(Long.class))).willReturn(game);
+        given(userService.getUserById(otherUser.getId())).willReturn(otherUser);
+        given(gameService.getGameFromRandomUser(isA(User.class))).willReturn(game);
 
         // when
-        MockHttpServletRequestBuilder getRequest = get("/users/1/games/blackCards", user.getId())
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/blackCards", otherUser.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("authorization", user.getToken());
+                .header("authorization", "token");
 
         // then
         mockMvc.perform(getRequest).andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameId",is(111)))
                 .andExpect(jsonPath("$.blackCard.id",is(3)))
                 .andExpect(jsonPath("$.blackCard.text",is(blackCard.getText())));
-    }*/
+    }
 
     @Test
     void givenWhiteCards_whenGetWhiteCardsFromUser() throws Exception {
