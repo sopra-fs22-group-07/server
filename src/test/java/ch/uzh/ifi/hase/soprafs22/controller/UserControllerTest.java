@@ -1,11 +1,9 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs22.entity.Match;
-import ch.uzh.ifi.hase.soprafs22.entity.Pair;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
-import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
@@ -30,8 +28,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -513,6 +510,11 @@ class UserControllerTest extends UserFiller {
       WhiteCard whiteCard = new WhiteCard();
       whiteCard.setText("white1");
       user.setUserWhiteCards(List.of(whiteCard, new WhiteCard()));
+      Game testGame = new Game();
+      testGame.setId(33L);
+      testGame.setUser(user);
+      testGame.setBlackCard(new BlackCard());
+      user.setActiveGame(testGame);
 
       doNothing().when(userService).checkSpecificAccess(user.getToken(), user.getId());
       given(userService.getUserById(user.getId())).willReturn(user);
@@ -523,7 +525,9 @@ class UserControllerTest extends UserFiller {
       mockMvc.perform(getRequest).andExpect(status().isOk())
               .andExpect(jsonPath("$.id", is(user.getId().intValue())))
               .andExpect(jsonPath("$.username", is(user.getUsername())))
-              .andExpect(jsonPath("$.userWhiteCards.[0].text", is(whiteCard.getText())));
+              .andExpect(jsonPath("$.userWhiteCards.[0].text", is(whiteCard.getText())))
+              .andExpect(jsonPath("$.games.[0].id", is(testGame.getId().intValue())))
+              .andExpect(jsonPath("$.games.[0].gameStatus", is("ACTIVE")));
   }
 
   @Test
@@ -573,6 +577,25 @@ class UserControllerTest extends UserFiller {
                 .header("authorization", user1.getToken());
         mockMvc.perform(getRequest).andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(user2.getId().intValue())));
+    }
+
+    @Test
+    void updateUserPreferences_success() throws Exception {
+        User user1 = fillUser(1L, "1");
+        HashSet<Gender> genders = new HashSet<>();
+        genders.add(Gender.MALE);
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("1");
+        userPutDTO.setGenderPreferences(genders);
+        userPutDTO.setMaxAge(30);
+        doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
+        doNothing().when(userService).updatePreferences(any(User.class));
+        MockHttpServletRequestBuilder putRequest = put("/users/{userId}/preferences", user1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userPutDTO))
+                .header("authorization", user1.getToken());
+        mockMvc.perform(putRequest).andExpect(status().isNoContent());
+        verify(userService).updatePreferences(any(User.class));
     }
 
   /**
