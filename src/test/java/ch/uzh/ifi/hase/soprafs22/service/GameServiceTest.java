@@ -21,7 +21,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 
 @TestPropertySource(
         locations = "application-integrationtest.properties")
@@ -290,9 +289,7 @@ class GameServiceTest {
         // then
         Mockito.when(blackCardRepository.findById(2L)).thenReturn(null);
         // expect exception
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            gameService.getBlackCardById(2L);
-        });
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> gameService.getBlackCardById(2L));
         assertEquals("404 NOT_FOUND \"black card with cardId 2 does not exist\"", exception.getMessage());
     }
 
@@ -312,9 +309,7 @@ class GameServiceTest {
         // then
         Mockito.when(whiteCardRepository.findById(2L)).thenReturn(null);
         // expect exception
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            gameService.getWhiteCardById(2L);
-        });
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> gameService.getWhiteCardById(2L));
         assertEquals("404 NOT_FOUND \"white card with cardId 2 does not exist\"", exception.getMessage());
     }
 
@@ -349,9 +344,7 @@ class GameServiceTest {
 
         // test
         // expect exception
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            gameService.getGameFromRandomUser(testUser);
-        });
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> gameService.getGameFromRandomUser(testUser));
         assertEquals("404 NOT_FOUND \"There is no black card of another user left\"", exception.getMessage());
     }
 }
