@@ -21,6 +21,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 
 @TestPropertySource(
         locations = "application-integrationtest.properties")
@@ -87,65 +88,70 @@ class GameServiceTest {
         Mockito.when(playRepository.saveAndFlush(Mockito.any())).thenReturn(testPlay);
     }
 
-    /** TODO: @Seraina: fix this test
     @Test
-    void getNRandomBlackCards_success() {
-        List<BlackCard> cards = new ArrayList<>();
-        cards.add(testBlackCard);
-        Page<BlackCard> somePage = new PageImpl<>(cards);
-
+    void getNRandomBlackCards_success_single() {
         // then
-        Mockito.when(blackCardRepository.count()).thenReturn(1L);
-        Mockito.when(blackCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
-
+        Mockito.when(blackCardRepository.getAllIds()).thenReturn(List.of(testBlackCard.getId()));
+        Mockito.when(blackCardRepository.findById(1L)).thenReturn(testBlackCard);
 
         List<BlackCard> randomCards = gameService.getNRandomBlackCards(1);
         assertTrue(randomCards.contains(testBlackCard));
+    }
 
-    }*/
+    @Test
+    void getNRandomBlackCards_success_multiple() {
+        BlackCard secondBlackCard = new BlackCard();
+        secondBlackCard.setId(2L);
+
+        // then
+        Mockito.when(blackCardRepository.getAllIds()).thenReturn(List.of(testBlackCard.getId(), secondBlackCard.getId()));
+        Mockito.when(blackCardRepository.findById(1L)).thenReturn(testBlackCard);
+        Mockito.when(blackCardRepository.findById(2L)).thenReturn(secondBlackCard);
+
+        List<BlackCard> randomCards = gameService.getNRandomBlackCards(2);
+        assertTrue(randomCards.contains(testBlackCard) || randomCards.contains(secondBlackCard));
+        assertEquals(2, randomCards.size());
+    }
 
     @Test
     void getNRandomBlackCards_noCards() {
-        List<BlackCard> cards = new ArrayList<>();
-        Page<BlackCard> somePage = new PageImpl<>(cards);
-
-        // then
-        Mockito.when(blackCardRepository.count()).thenReturn(1L);
-        Mockito.when(blackCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
-
+        Mockito.when(blackCardRepository.getAllIds()).thenReturn(List.of(testBlackCard.getId()));
 
         List<BlackCard> randomCards = gameService.getNRandomBlackCards(0);
         assertTrue(randomCards.isEmpty());
 
     }
 
-    /** TODO: @Seraina: fix this test
     @Test
     void getNRandomWhiteCards_success() {
-        List<WhiteCard> cards = new ArrayList<>();
-        cards.add(testWhiteCard);
-        Page<WhiteCard> somePage = new PageImpl<>(cards);
-
         // then
-        Mockito.when(whiteCardRepository.count()).thenReturn(1L);
-        Mockito.when(whiteCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
-
+        Mockito.when(whiteCardRepository.getAllIds()).thenReturn(List.of(testWhiteCard.getId()));
+        Mockito.when(whiteCardRepository.findById(1L)).thenReturn(testWhiteCard);
 
         List<WhiteCard> randomCards = gameService.getNRandomWhiteCards(1);
-        System.out.println(randomCards.size());
-        assertEquals(1, randomCards.size());
 
-    } */
+        assertEquals(1, randomCards.size());
+        assertTrue(randomCards.contains(testWhiteCard));
+    }
+
+    @Test
+    void getNRandomWhiteCards_success_multiple() {
+        WhiteCard secondWhiteCard = new WhiteCard();
+        secondWhiteCard.setId(2L);
+        // then
+        Mockito.when(whiteCardRepository.getAllIds()).thenReturn(List.of(testWhiteCard.getId(), secondWhiteCard.getId()));
+        Mockito.when(whiteCardRepository.findById(1L)).thenReturn(testWhiteCard);
+        Mockito.when(whiteCardRepository.findById(2L)).thenReturn(secondWhiteCard);
+
+        List<WhiteCard> randomCards = gameService.getNRandomWhiteCards(2);
+
+        assertEquals(2, randomCards.size());
+        assertTrue(randomCards.contains(testWhiteCard) || randomCards.contains(secondWhiteCard));
+    }
 
     @Test
     void getNRandomWhiteCards_noCards() {
-        List<WhiteCard> cards = new ArrayList<>();
-        Page<WhiteCard> somePage = new PageImpl<>(cards);
-
-        // then
-        Mockito.when(whiteCardRepository.count()).thenReturn(1L);
-        Mockito.when(whiteCardRepository.findAll(Mockito.any(PageRequest.class))).thenReturn(somePage);
-
+        Mockito.when(whiteCardRepository.getAllIds()).thenReturn(List.of(testWhiteCard.getId()));
 
         List<WhiteCard> randomCards = gameService.getNRandomWhiteCards(0);
         assertTrue(randomCards.isEmpty());
@@ -154,7 +160,6 @@ class GameServiceTest {
 
     @Test
     void getGame_returnActiveGame_success() {
-
         List<Game> games = new ArrayList<>();
         games.add(testGame);
 

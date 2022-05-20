@@ -55,4 +55,9 @@ class ChatTest {
         Message actual = chat.getFirstMessage();
         assertEquals(message3, actual);
     }
+
+    @Test
+    void getFirstMessage_null() {
+        assertNull(new Chat().getFirstMessage());
+    }
 }
