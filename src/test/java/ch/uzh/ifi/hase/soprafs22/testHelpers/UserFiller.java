@@ -14,16 +14,7 @@ public class UserFiller {
         return user;
     }
 
-    protected User fillUser(Long id, String name, String userName, String password) {
-        User user = new User();
-        user.setId(id);
-        user.setName(name);
-        user.setUsername(userName);
-        user.setPassword(password);
-        return user;
-    }
-
-    protected User fillUserToken(Long id, String token, String userName, String password) {
+    protected User fillUser(Long id, String token, String userName, String password) {
         User user = fillUser(id, token);
         user.setUsername(userName);
         user.setPassword(password);
@@ -31,7 +22,7 @@ public class UserFiller {
     }
 
     protected User fillUser(Long id, String token, String userName, String password, UserStatus status, Date birthday) {
-        User user = fillUserToken(id, token, userName, password);
+        User user = fillUser(id, token, userName, password);
         user.setStatus(status);
         user.setBirthday(birthday);
         return user;

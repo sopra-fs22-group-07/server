@@ -111,8 +111,8 @@ class UserControllerTest extends UserFiller {
   @Test
   void validUser_login() throws Exception {
       // given
-      User user = fillUser(1L, "Test User", "testUsername", "password");
-      user.setToken("1");
+      User user = fillUser(1L, "1", "testUsername", "password");
+      user.setName("Test User");
       user.setStatus(UserStatus.ONLINE);
 
       UserPostDTO userPostDTO = new UserPostDTO();
