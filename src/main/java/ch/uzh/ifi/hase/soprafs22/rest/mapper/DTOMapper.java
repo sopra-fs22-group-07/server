@@ -73,7 +73,7 @@ public interface DTOMapper {
   BlackCard convertGamePostDTOToEntity(CardPostDTO cardPostDTO);
 
   @Mapping(source = "id", target = "gameId")
-  @Mapping(source = "userId", target = "userId")
+  @Mapping(source = "user", target = "user")
   @Mapping(source = "plays", target = "plays")
   @Mapping(source = "blackCard", target = "blackCard")
   @Mapping(source = "gameStatus", target = "gameStatus")

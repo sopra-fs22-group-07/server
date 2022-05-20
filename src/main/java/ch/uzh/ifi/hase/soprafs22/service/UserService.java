@@ -40,6 +40,7 @@ public class UserService {
   private final GameService gameService;
   private boolean areInstantiatedDemoUsers = false;
   private static final String UNIQUE_VIOLATION = "Uniqueness Violation Occurred";
+  private static final Long GAME_DURATION = Time.ONE_DAY;
 
 
   @Autowired
@@ -58,6 +59,10 @@ public class UserService {
 
     public List<User> getUsers() {
     return this.userRepository.findAll();
+  }
+
+  public static Long getGameDuration() {
+    return GAME_DURATION;
   }
 
   /**
@@ -297,7 +302,7 @@ public class UserService {
     public void addGame(Long userId, Game game) {
         // get user
         User user = getUserById(userId);
-        user.setActiveGame(game);
+        user.addGame(game);
         // saves the given entity but data is only persisted in the database once
         // flush() is called
         userRepository.saveAndFlush(user);
@@ -387,7 +392,7 @@ public class UserService {
     // calculate how old the active game is
     long diffTime = new Date().getTime() - activeGame.getCreationTime().getTime();
     // case the game is older than one Day, put it to the past games
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > GAME_DURATION) {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();
@@ -411,7 +416,7 @@ public class UserService {
     }
     // check if cards are older than one day, return empty list if so, else return the cards (that are younger than one day)
     long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > GAME_DURATION) {
       // update black cards
       user.setUserBlackCards(null);
       userRepository.saveAndFlush(user);
@@ -513,7 +518,7 @@ public class UserService {
    * @return boolean, true if game belongs to user
    */
   public boolean isGameBelongingToUser(Game game, User user) {
-    return Objects.equals(game.getUserId(), user.getId());
+    return Objects.equals(game.getUser().getId(), user.getId());
   }
 
   /**
@@ -744,15 +749,15 @@ public class UserService {
       BlackCard blackCard7 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard8 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard9 = gameService.getNRandomBlackCards(1).get(0);
-      Game game1 = gameService.createGame(blackCard1, demoUser1.getId());
-      Game game2 = gameService.createGame(blackCard2, demoUser2.getId());
-      Game game3 = gameService.createGame(blackCard3, demoUser3.getId());
-      Game game4 = gameService.createGame(blackCard4, demoUser4.getId());
-      Game game5 = gameService.createGame(blackCard5, demoUser5.getId());
-      Game game6 = gameService.createGame(blackCard6, demoUser6.getId());
-      Game game7 = gameService.createGame(blackCard7, demoUser7.getId());
-      Game game8 = gameService.createGame(blackCard8, demoUser8.getId());
-      Game game9 = gameService.createGame(blackCard9, demoUser9.getId());
+      Game game1 = gameService.createGame(blackCard1, demoUser1);
+      Game game2 = gameService.createGame(blackCard2, demoUser2);
+      Game game3 = gameService.createGame(blackCard3, demoUser3);
+      Game game4 = gameService.createGame(blackCard4, demoUser4);
+      Game game5 = gameService.createGame(blackCard5, demoUser5);
+      Game game6 = gameService.createGame(blackCard6, demoUser6);
+      Game game7 = gameService.createGame(blackCard7, demoUser7);
+      Game game8 = gameService.createGame(blackCard8, demoUser8);
+      Game game9 = gameService.createGame(blackCard9, demoUser9);
 
 
       // ======= create likes and matches =======

@@ -1,7 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -22,6 +26,9 @@ import java.util.*;
 
 @Entity
 @Table(name = "USER")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -64,11 +71,10 @@ public class User implements Serializable {
     @Column
     private Gender gender;
 
-    @OneToOne
-    private Game activeGame;
-
-    @OneToMany
-    private List<Game> pastGames = new ArrayList<>();
+    @OneToMany(mappedBy = "user",
+    cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Game> games = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
     private List<WhiteCard> userWhiteCards = new ArrayList<>();
@@ -118,10 +124,38 @@ public class User implements Serializable {
     public Gender getGender(){return this.gender; }
     public void setGender(Gender gender){this.gender = gender; }
 
-    public Game getActiveGame() {return activeGame;}
-    public void setActiveGame(Game activeGame) {this.activeGame = activeGame;}
+    public Game getActiveGame() {
+        if(!this.games.isEmpty() && this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE){
+            return  this.games.get(games.size() - 1);
+        }
+            return null;
+    }
 
-    public List<Game> getPastGames() {return pastGames;}
+    public void addGame(Game game){
+        this.games.add(game);
+    }
+
+    public void setActiveGame(Game activeGame) {
+        activeGame.setGameStatus(GameStatus.ACTIVE);
+        this.games.add(activeGame);}
+
+    public List<Game> getPastGames() {
+        if((!this.games.isEmpty()) &&
+                (this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE)){
+            if(games.size()==1){
+                return Collections.emptyList(); // empty list without active game
+            }else{
+                return games.subList(0, games.size() - 2); // list without active game
+            }
+
+        }
+        return this.games;
+    }
+
+    public List<Game> getGames(){
+        return this.games;
+    }
+
     public Set<Long> getMatches() {return matches;}
 
     public List<WhiteCard> getUserWhiteCards() {return userWhiteCards;}
@@ -142,20 +176,16 @@ public class User implements Serializable {
         return this.gender.toString();
     }
 
-
-    public void addGame(Game game){
-        this.pastGames.add(game);
-    }
-
     // move active game to past games
     public void flushGameToPastGames(){
         Game game = this.getActiveGame();
-        this.setActiveGame(null);
-        this.addGame(game);
+        if(game!=null){
+            game.setGameStatus(GameStatus.INACTIVE);
+        }
     }
 
     public void deletePastGame(Game game) {
-        this.pastGames.remove(game);
+        this.games.remove(game);
     }
 
 
