@@ -318,7 +318,6 @@ class GameServiceTest {
         assertEquals("404 NOT_FOUND \"white card with cardId 2 does not exist\"", exception.getMessage());
     }
 
-    /** TODO: Change this test (seraina)
     @Test
     void getGameFromRandomUser_success() {
         List<Game> games = new ArrayList<>();
@@ -326,31 +325,33 @@ class GameServiceTest {
         Page<Game> somePage = new PageImpl<>(games);
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L, testUser)).thenReturn(101L);
-        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class),
-                eq(1L), Mockito.any())).thenReturn(somePage);
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any()))
+                .thenReturn(101L);
+        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class), eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any()))
+                .thenReturn(somePage);
 
         // test
-        Game game = gameService.getGameFromRandomUser(1L, testUser);
+        Game game = gameService.getGameFromRandomUser(testUser);
         // test if game is equal to testGame
         assertEquals(testGame.getId(), game.getId());
         assertEquals(testGame.getCreationTime(), game.getCreationTime());
         assertEquals(testGame.getGameStatus(), game.getGameStatus());
         assertEquals(testGame.getBlackCard(), game.getBlackCard());
-    }*/
+    }
 
-    /** TODO: Change this test @Seraina
+
     @Test
     void getGameFromRandomUser_throwNotFound() {
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(1L, testUser)).thenReturn(0L);
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any()))
+                .thenReturn(0L);
 
         // test
         // expect exception
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            gameService.getGameFromRandomUser(1L, testUser);
+            gameService.getGameFromRandomUser(testUser);
         });
         assertEquals("404 NOT_FOUND \"There is no black card of another user left\"", exception.getMessage());
-    }*/
+    }
 }
