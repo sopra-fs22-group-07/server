@@ -66,6 +66,9 @@ public class User implements Serializable {
     private int maxAge;
 
     @Column
+    private int maxRange;
+
+    @Column
     private Gender gender;
 
     @OneToMany(mappedBy = "user",
@@ -220,12 +223,13 @@ public class User implements Serializable {
     public void setGenderPreferences(Set<Gender> genderPreferences) {this.genderPreferences = genderPreferences;}
 
     public int getMinAge(){return minAge;}
-
     public void setMinAge(int minAge){this.minAge = minAge;}
 
     public int getMaxAge(){return maxAge;}
-
     public void setMaxAge(int maxAge){this.maxAge = maxAge;}
+
+    public int getMaxRange(){return maxRange;}
+    public void setMaxRange(int maxRange){this.maxRange = maxRange;}
 
     public Set<User> getBlockedUsers() {
         return blockedUsers;
