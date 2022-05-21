@@ -203,6 +203,16 @@ public class UserController {
         userService.updatePreferences(user);
     }
 
+    @GetMapping("/users/{userId}/loginStatus")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getLoginStatus(
+            @RequestHeader(value = "authorization", required = true) String token,
+            @PathVariable(value = "userId") long userId){
+        userService.checkSpecificAccess(token, userId); // 401, 404
+        return userService.getLoginStatus(token, userId);
+    }
+
     @PutMapping("/users/{userId}/matches/{otherUserId}/block")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
