@@ -80,6 +80,7 @@ public class UserService {
     genderPreferences.add(Gender.FEMALE);
     genderPreferences.add(Gender.OTHER);
     newUser.setGenderPreferences(genderPreferences);
+    newUser.setMaxRange(10);
 
     checkIfUserExists(newUser);
 
@@ -264,6 +265,9 @@ public class UserService {
       }
       if(!Objects.isNull(user.getGenderPreferences()) && !user.getGenderPreferences().isEmpty()){
           userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
+      }
+      if(user.getMaxRange()>=1 && user.getMaxRange() < 20010){
+          userToUpdatePreferences.setMaxRange(user.getMaxRange());
       }
   }
 

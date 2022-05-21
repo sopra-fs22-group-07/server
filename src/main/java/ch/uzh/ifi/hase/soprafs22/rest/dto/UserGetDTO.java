@@ -17,6 +17,7 @@ public class UserGetDTO {
   private Date creationDate;
   private int minAge;
   private int maxAge;
+  private int maxRange;
   private Set<Gender> genderPreferences;
 
   public Long getId() {
@@ -67,34 +68,37 @@ public class UserGetDTO {
     this.birthday = birthday;
   }
 
-
   public Gender getGender(){
       return this.gender;
   }
 
   public void setGender(Gender gender){this.gender = gender; }
 
-    public int getMinAge() {
+  public int getMinAge() {
         return minAge;
     }
 
-    public void setMinAge(int minAge) {
+  public void setMinAge(int minAge) {
         this.minAge = minAge;
     }
 
-    public int getMaxAge() {
+  public int getMaxAge() {
         return maxAge;
     }
 
-    public void setMaxAge(int maxAge) {
+  public void setMaxAge(int maxAge) {
         this.maxAge = maxAge;
     }
 
-    public Set<Gender> getGenderPreferences() {
+  public int getMaxRange(){return maxRange;}
+
+  public void setMaxRange(int maxRange){this.maxRange = maxRange;}
+
+  public Set<Gender> getGenderPreferences() {
         return genderPreferences;
     }
 
-    public void setGenderPreferences(Set<Gender> genderPreferences) {
+  public void setGenderPreferences(Set<Gender> genderPreferences) {
         this.genderPreferences = genderPreferences;
     }
 }
