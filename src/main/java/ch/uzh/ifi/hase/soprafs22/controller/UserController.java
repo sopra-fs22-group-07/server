@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User Controller
@@ -207,10 +208,15 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getLoginStatus(
+      @RequestHeader Map<String, String> headers,
             @RequestHeader(value = "authorization", required = true) String token,
             @PathVariable(value = "userId") long userId){
-        userService.checkSpecificAccess(token, userId); // 401, 404
-        return userService.getLoginStatus(token, userId);
+
+              // remove "," that gets appended to the token
+              String tokenWithoutComma = token.substring(0, token.length() - 1);
+
+        // userService.checkSpecificAccess(token, userId); // 401, 404
+        return userService.getLoginStatus(tokenWithoutComma, userId);
     }
 
     @PutMapping("/users/{userId}/matches/{otherUserId}/block")
