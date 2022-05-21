@@ -1,6 +1,4 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
-
-import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.TextMessageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
