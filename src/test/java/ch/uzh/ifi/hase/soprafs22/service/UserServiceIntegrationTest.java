@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,11 @@ class UserServiceIntegrationTest {
     testUser.setBirthday(new Date());
 
     userRepository.deleteAll();
+  }
+
+  @AfterEach
+  public void tearDown()  {
+      userRepository.deleteAll();
   }
 
   @Test
