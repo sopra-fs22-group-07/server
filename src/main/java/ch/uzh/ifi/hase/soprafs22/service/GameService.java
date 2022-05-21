@@ -227,7 +227,7 @@ public class GameService {
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
     // count the possible games
     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
-            user.getGender(), minAgeDate, maxAgeDate);
+            user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers());
 
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -241,7 +241,7 @@ public class GameService {
 
     // get the page with the game
     Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
-        user.getGender(), minAgeDate, maxAgeDate);
+        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers());
 
     // return the game
     return somePage.getContent().get(0);
