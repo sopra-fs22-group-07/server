@@ -81,6 +81,8 @@ public class UserService {
     genderPreferences.add(Gender.OTHER);
     newUser.setGenderPreferences(genderPreferences);
     newUser.setMaxRange(10);
+    newUser.setLatitude(0);
+    newUser.setLongitude(0);
 
     checkIfUserExists(newUser);
 
@@ -881,5 +883,12 @@ public class UserService {
 
     userRepository.saveAndFlush(user);
     userRepository.saveAndFlush(otherUser);
+  }
+
+  public void updateLocation(long userId, double latitude, double longitude) {
+    User user = getUserById(userId);
+    user.setLatitude(latitude);
+    user.setLongitude(longitude);
+    userRepository.saveAndFlush(user);
   }
 }
