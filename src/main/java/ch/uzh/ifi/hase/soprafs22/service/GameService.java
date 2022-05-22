@@ -249,9 +249,4 @@ public class GameService {
     // return the game
     return somePage.getContent().get(0);
   }
-
-//TODO: saveGame has no usage.. can it be deleted?
-    public void saveGame(Game activeGame) {
-      gameRepository.saveAndFlush(activeGame);
-    }
 }

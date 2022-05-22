@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -155,6 +156,13 @@ class GameServiceTest {
         List<WhiteCard> randomCards = gameService.getNRandomWhiteCards(0);
         assertTrue(randomCards.isEmpty());
 
+    }
+
+    @Test
+    void getGame_fail() {
+        List<Game> emptyList = new ArrayList<>();
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> gameService.getGame(emptyList));
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
     }
 
     @Test
@@ -320,9 +328,9 @@ class GameServiceTest {
         Page<Game> somePage = new PageImpl<>(games);
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any()))
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any(), eq(testUser.getBlockedUsers())))
                 .thenReturn(101L);
-        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class), eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any()))
+        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class), eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any(), eq(testUser.getBlockedUsers())))
                 .thenReturn(somePage);
 
         // test
@@ -339,7 +347,7 @@ class GameServiceTest {
     void getGameFromRandomUser_throwNotFound() {
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any()))
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any(), eq(testUser.getBlockedUsers())))
                 .thenReturn(0L);
 
         // test

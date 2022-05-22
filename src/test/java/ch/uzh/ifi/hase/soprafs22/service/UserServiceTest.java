@@ -284,6 +284,19 @@ class UserServiceTest {
         userService.updatePreferences(preferences);
         assertEquals(70, user.getMinAge());
         assertEquals(75, user.getMaxAge());
+
+        preferences.setMaxRange(33);
+        userService.updatePreferences(preferences);
+        assertEquals(33, user.getMaxRange());
+
+        // these are out of bound and should not change anything
+        preferences.setMaxRange(0);
+        userService.updatePreferences(preferences);
+        assertEquals(33, user.getMaxRange());
+
+        preferences.setMaxRange(20010);
+        userService.updatePreferences(preferences);
+        assertEquals(33, user.getMaxRange());
     }
 
     @Test
@@ -967,6 +980,30 @@ class UserServiceTest {
         assertEquals(Collections.emptyList(), userService.getChatIds(new ArrayList<>()));
         assertEquals(List.of(88L), userService.getChatIds(List.of(testMatch)));
         assertEquals(List.of(88L, 89L), userService.getChatIds(List.of(testMatch, otherMatch)));
+    }
+
+    @Test
+    void deleteNotNeededPastGamesWithoutPlays_success() {
+      assertDoesNotThrow(() -> userService.deleteNotNeededPastGamesWithoutPlays(testUser));
+
+      Game empty = new Game();
+      testUser.addGame(empty);
+
+      Play play1 = new Play();
+      play1.setCard(testWhiteCard);
+      play1.setUserId(otherUser.getId());
+      testGame.enqueuePlay(play1);
+      testUser.addGame(testGame);
+
+      Game active = new Game();
+      active.setGameStatus(GameStatus.ACTIVE);
+      testUser.addGame(active);
+
+      assertEquals(3, testUser.getGames().size());
+      userService.deleteNotNeededPastGamesWithoutPlays(testUser);
+      assertEquals(2, testUser.getGames().size());
+      assertTrue(testUser.getGames().contains(testGame));
+      assertTrue(testUser.getGames().contains(active));
     }
 
     private User fillUser(Long id, String name, String userName, String password) {
