@@ -466,7 +466,6 @@ class UserControllerTest extends UserFiller {
     User user = fillUser(1L, "token");
     User otherUser = fillUser(2L, "token2");
 
-    //given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
     Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong());
 
     mockMvc.perform(delete("/users/" + user.getId()+ "/matches/"+otherUser.getId()).contentType(MediaType.APPLICATION_JSON)
@@ -493,7 +492,6 @@ class UserControllerTest extends UserFiller {
     User user = fillUser(1L, "token");
     User otherUser = fillUser(2L, "token2");
 
-    //given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
     Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong());
 
     mockMvc.perform(put("/users/"+ user.getId()+"/matches/"+otherUser.getId()+"/block")
