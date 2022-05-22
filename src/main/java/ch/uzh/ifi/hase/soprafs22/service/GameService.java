@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -36,11 +37,14 @@ public class GameService {
 
     private static final SecureRandom rand = new SecureRandom();
 
+
+
     @Autowired
     public GameService(@Qualifier("gameRepository") GameRepository gameRepository,
                        @Qualifier("playRepository") PlayRepository playRepository,
                        @Qualifier("WhiteCardRepository") WhiteCardRepository whiteCardRepository,
                        @Qualifier("BlackCardRepository") BlackCardRepository blackCardRepository) {
+
         this.gameRepository = gameRepository;
         this.playRepository = playRepository;
         this.whiteCardRepository = whiteCardRepository;
@@ -53,26 +57,25 @@ public class GameService {
    */
   // See solution from https://stackoverflow.com/a/52409343/17532411
   public List<BlackCard> getNRandomBlackCards(int numOfCards) {
-
-    // get 8 random cards from the blackCardRepository
-    int totalRecords = (int) blackCardRepository.count();
-
-    Page<BlackCard> somePage = blackCardRepository.findAll(getPageRequest(totalRecords, numOfCards));
-    List<BlackCard> cards;
-    if ( somePage.getTotalElements() > 0){
-      cards = new ArrayList<>(somePage.getContent());
-    } else {
-      cards = new ArrayList<>();
-    }
-    Collections.shuffle(cards);
-    return cards;
+      List<Long> blackCardIds= blackCardRepository.getAllIds();
+      List<BlackCard> blackCards = new ArrayList<>();
+      for(int n = 0; n<numOfCards; n++){
+          int randomInt = rand.nextInt(blackCardIds.size());
+          long cardId = blackCardIds.get(randomInt);
+          blackCards.add(getBlackCardById(cardId));
+      }
+      Collections.shuffle(blackCards);
+      return blackCards;
   }
 
     /**
      * @return the oldest Game
      */
-    public Game getGame(Game activeGame, List<Game> pastGames) {
-        return pastGames.isEmpty() ? activeGame : pastGames.get(0);
+    public Game getGame(List<Game> games) {
+        if (games.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no active game or past game with plays left");
+        }
+        return games.get(0);
     }
 
   /**
@@ -92,14 +95,14 @@ public class GameService {
     /**
      * Create a Game
      * @param blackCard Black card of the Game
-     * @param userId userId from user who creates the game
+     * @param user userId from user who creates the game
      * @return the created game
      */
-    public Game createGame(BlackCard blackCard, long userId) {
+    public Game createGame(BlackCard blackCard, User user) {
       // create new game with certain blackCard
       Game game = new Game();
       game.setBlackCard(blackCard);
-      game.setUserId(userId);
+      game.setUser(user);
       game.setGameStatus(GameStatus.ACTIVE);
 
       // save the game
@@ -146,27 +149,15 @@ public class GameService {
    */
   // Implementation identical to getNRandomBlackCards(): https://stackoverflow.com/a/52409343/17532411
   public List<WhiteCard> getNRandomWhiteCards(int numOfCards) {
-    int totalRecords = (int) whiteCardRepository.count();
-
-    Page<WhiteCard> somePage = whiteCardRepository.findAll(getPageRequest(totalRecords, numOfCards));
-    List<WhiteCard> cards;
-    if ( somePage.getTotalElements() > 0){
-      cards = new ArrayList<>(somePage.getContent());
-    } else {
-      cards = new ArrayList<>();
+    List<Long> whiteCardIds= whiteCardRepository.getAllIds();
+    List<WhiteCard> whiteCards = new ArrayList<>();
+    for(int n = 0; n<numOfCards; n++){
+        int randomInt = rand.nextInt(whiteCardIds.size());
+        long cardId = whiteCardIds.get(randomInt);
+        whiteCards.add(getWhiteCardById(cardId));
     }
-    Collections.shuffle(cards);
-    return cards;
-  }
-
-  // extract some duplicate code (from getNRandomCards) : https://stackoverflow.com/a/52409343/17532411
-  public static PageRequest getPageRequest(int totalRecords, int numOfCards){
-    int totalPages =
-            (totalRecords % numOfCards == 0)
-                    ? (totalRecords / numOfCards)
-                    : ((totalRecords / numOfCards) + 1);
-    int pageIndex = rand.nextInt(totalPages);
-    return PageRequest.of(pageIndex, numOfCards);
+    Collections.shuffle(whiteCards);
+    return whiteCards;
   }
 
   /**
@@ -211,16 +202,35 @@ public class GameService {
     return card;
   }
 
+    /**
+     * Calculates the Dates for Age preferences
+     * @param preference : in of age
+     * @return the ages in date form
+     */
+  private Date calculateAgePreferencesToDate(int preference){
+      Date today = new Date();
+
+      // Convert Date to Calendar
+      Calendar c = Calendar.getInstance();
+      c.setTime(today);
+      c.add(Calendar.YEAR, -preference);
+      return c.getTime();
+  }
+
   /**
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
-   * @param userId: userId of the caller
+   * @param user: user of the caller
    * @return Game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
-  public Game getGameFromRandomUser(Long userId) {
+  public Game getGameFromRandomUser(User user) {
+
+    Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
+    Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
     // count the possible games
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(userId);
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
+            user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers());
 
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -233,7 +243,8 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, userId);
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
+        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers());
 
     // return the game
     return somePage.getContent().get(0);

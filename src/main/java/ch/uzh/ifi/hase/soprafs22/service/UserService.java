@@ -1,9 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserRepository;
@@ -34,29 +36,51 @@ public class UserService {
   private final UserRepository userRepository;
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
+  private final ChatRepository chatRepository;
+  private final GameService gameService;
+  private boolean areInstantiatedDemoUsers = false;
+  private static final String UNIQUE_VIOLATION = "Uniqueness Violation Occurred";
+  private static final Long GAME_DURATION = Time.ONE_DAY;
 
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
-                     @Qualifier("MatchRepository") MatchRepository matchRepository) {
+                     @Qualifier("gameService") GameService gameService,
+                     @Qualifier("MatchRepository") MatchRepository matchRepository,
+                     @Qualifier("ChatRepository")ChatRepository chatRepository) {
+
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
+    this.gameService = gameService;
+    this.chatRepository = chatRepository;
   }
 
-  public List<User> getUsers() {
+    public List<User> getUsers() {
     return this.userRepository.findAll();
+  }
+
+  public static Long getGameDuration() {
+    return GAME_DURATION;
   }
 
   /**
    * Creates and saves a new user
    * @param newUser: User that shall be created
-   * @return: user that was created
+   * @return user that was created
    */
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
+    newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
+    newUser.setMaxAge(findMaxAgeDefault(newUser.getBirthday()));
+    Set<Gender> genderPreferences = new TreeSet<>();
+    genderPreferences.add(Gender.MALE);
+    genderPreferences.add(Gender.FEMALE);
+    genderPreferences.add(Gender.OTHER);
+    newUser.setGenderPreferences(genderPreferences);
+    newUser.setMaxRange(10);
 
     checkIfUserExists(newUser);
 
@@ -69,10 +93,48 @@ public class UserService {
     return newUser;
   }
 
+    private int getAge(Date birthday) {
+        int years;
+        int months;
+        Calendar birthDayMili = Calendar.getInstance();
+        birthDayMili.setTimeInMillis(birthday.getTime());
+        long currentTime = System.currentTimeMillis();
+        Calendar now = Calendar.getInstance();
+        now.setTimeInMillis(currentTime);
+        years = now.get(Calendar.YEAR) - birthDayMili.get(Calendar.YEAR);
+        int currMonth = now.get(Calendar.MONTH);
+        int birthMonth = birthDayMili.get(Calendar.MONTH);
+        months = currMonth - birthMonth;
+        if (months < 0)
+        {
+            years--;
+            months = 12 - birthMonth + currMonth;
+            if (now.get(Calendar.DATE) < birthDayMili.get(Calendar.DATE))
+                months--;
+        } else if (months == 0 && now.get(Calendar.DATE) < birthDayMili.get(Calendar.DATE))
+        {
+            years--;
+            months = 11;
+        }
+        if (months == 12) {
+            years++;
+        }
+        return years;
+    }
+
+    private int findMinAgeDefault(Date userBirthday){
+        int age = getAge(userBirthday);
+        return Math.max(age - 3, 18);
+    }
+
+    private int findMaxAgeDefault(Date userBirthday) {
+        return getAge(userBirthday) + 3;
+    }
+
   /**
    * logout the user, sets the status to offline
    * @param user: User to be logged out
-   * @return: User that was logged out
+   * @return : User that was logged out
    */
   public User logoutUser(User user) {
     User userToBeLoggedOut = getUserById(user.getId());
@@ -193,6 +255,22 @@ public class UserService {
     return userToBeUpdated;
   }
 
+  public void updatePreferences(User user){
+      //Getting the correct user (404 and 409 should be check by specific access already)
+      User userToUpdatePreferences = getUserById(user.getId());
+      //Update User Preferences
+      if(user.getMinAge()>= 18 && user.getMinAge() <= user.getMaxAge()){ //they can both be 22 for instance. If you only want people that are 22 years old
+          userToUpdatePreferences.setMinAge(user.getMinAge());
+          userToUpdatePreferences.setMaxAge(user.getMaxAge());
+      }
+      if(!Objects.isNull(user.getGenderPreferences()) && !user.getGenderPreferences().isEmpty()){
+          userToUpdatePreferences.setGenderPreferences(user.getGenderPreferences());
+      }
+      if(user.getMaxRange()>=1 && user.getMaxRange() < 20010){
+          userToUpdatePreferences.setMaxRange(user.getMaxRange());
+      }
+  }
+
   /**
    * Checks if a username is available
    * @param userInput: String
@@ -220,7 +298,7 @@ public class UserService {
     public void addGame(Long userId, Game game) {
         // get user
         User user = getUserById(userId);
-        user.setActiveGame(game);
+        user.addGame(game);
         // saves the given entity but data is only persisted in the database once
         // flush() is called
         userRepository.saveAndFlush(user);
@@ -253,11 +331,11 @@ public class UserService {
    * Create a Match between two users. Also, it removes any likes from each others
    * @param user: User
    * @param otherUser: User
-   * @return: created Match
+   * @return : created Match
    */
   public Match createMatch(User user, User otherUser) {
 
-      // first, delete likes
+    // first, delete likes
     user.removeLikeFromUser(otherUser);
     otherUser.removeLikeFromUser(user);
 
@@ -266,6 +344,12 @@ public class UserService {
     // Yes, it would be absolutely possible to do without the Pair class...
     Pair<User, User> pair = new Pair<>(user, otherUser);
     match.setUserPair(pair);
+
+    Chat chat = new Chat();
+    chatRepository.saveAndFlush(chat);
+
+    // new Chat gets added
+    match.setChat(chat);
     matchRepository.saveAndFlush(match);
 
     return match;
@@ -304,7 +388,7 @@ public class UserService {
     // calculate how old the active game is
     long diffTime = new Date().getTime() - activeGame.getCreationTime().getTime();
     // case the game is older than one Day, put it to the past games
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > GAME_DURATION) {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();
@@ -317,7 +401,7 @@ public class UserService {
   /**
    * Get the current black cards of a user: automatically delete old black cards that are older than some time period
    * @param userId: userId from the user from whom we want to get the current black cards
-   * @return: a list of black cards - can be empty
+   * @return : a list of black cards - can be empty
    */
   public List<BlackCard> getCurrentBlackCards(Long userId) {
     User user = getUserById(userId);
@@ -328,7 +412,7 @@ public class UserService {
     }
     // check if cards are older than one day, return empty list if so, else return the cards (that are younger than one day)
     long diffTime = new Date().getTime() - userBlackCards.getBlackCardsTimer().getTime();
-    if(diffTime > Time.ONE_DAY) {
+    if(diffTime > GAME_DURATION) {
       // update black cards
       user.setUserBlackCards(null);
       userRepository.saveAndFlush(user);
@@ -430,7 +514,7 @@ public class UserService {
    * @return boolean, true if game belongs to user
    */
   public boolean isGameBelongingToUser(Game game, User user) {
-    return Objects.equals(game.getUserId(), user.getId());
+    return Objects.equals(game.getUser().getId(), user.getId());
   }
 
   /**
@@ -479,18 +563,52 @@ public class UserService {
    * @return boolean: true if a Match already exists, false otherwise.
    */
   public boolean doesMatchExist(User user, User otherUser) {
-    // it is enough to iterate through the matches of one user
-    for(long matchId: user.getMatches()){
-      Match match = matchRepository.findByMatchId(matchId);
-      // get users from match
-      Pair<User, User> userPair = match.getUserPair();
-      // compare users with users from match
-      if (userPair.equals(new Pair<>(user, otherUser))) {
-        return true;
-      }
+    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    if (count > 1) {
+      log.error(UNIQUE_VIOLATION);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
     }
-    return false;
+    return count == 1;
   }
+
+    /**
+     * get matches of a user
+     * @param user: user from which the matches are taken
+     * @return List of Matches
+     */
+    public List<Match> getMatches(User user){
+        Set<Long> matchesOfUser = user.getMatches();
+        List<Match> matches = new ArrayList<>();
+        for(Long matchId : matchesOfUser){
+            matches.add(matchRepository.getOne(matchId));
+        }
+
+        return matches;
+    }
+
+    /**
+     * Get all users which match with the known user
+     * @param user: known user
+     * @param matches: all matches from suer
+     * @return list of users which mach with known user
+     */
+    public List<User> getUsersFromMatches(User user, List<Match> matches) {
+        List<User> matchedUsers = new ArrayList<>();
+
+        // map the users to the matches
+        for (Match match : matches){
+            Pair<User,User> users = match.getUserPair();
+            // add other user (by comparing it with the user, which is known)
+            if(user.equals(users.getObj1())){
+                matchedUsers.add(users.getObj2());
+            }else{
+                matchedUsers.add(users.getObj1());
+            }
+        }
+
+        return matchedUsers;
+    }
+
 
   /**
    * Deletes a User from Repo By the USer id
@@ -531,6 +649,175 @@ public class UserService {
     return users;
   }
 
+
+  // instantiate demo users
+  public void instantiateDemoUsers() {
+
+    if (areInstantiatedDemoUsers) {
+      // throw exception if demo users are already instantiated
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Demo users are already instantiated");
+
+    } else {
+
+      log.info("Instantiating demo users...");
+
+      // ======= create demo users =======
+      User demoUser1 = new User();
+      demoUser1.setUsername("demoUser1");
+      demoUser1.setPassword("demoUser1");
+      demoUser1.setName("Demo User 1");
+      demoUser1.setGender(Gender.MALE);
+      demoUser1.setBirthday(new Date());
+      demoUser1.setMaxAge(30);
+      demoUser1.setMinAge(18);
+      demoUser1.setMaxRange(30);
+      demoUser1 = createUser(demoUser1);
+
+      User demoUser2 = new User();
+      demoUser2.setUsername("demoUser2");
+      demoUser2.setPassword("demoUser2");
+      demoUser2.setName("Demo User 2");
+      demoUser2.setGender(Gender.FEMALE);
+      demoUser2.setBirthday(new Date());
+      demoUser2.setMaxAge(30);
+      demoUser2.setMinAge(18);
+      demoUser2.setMaxRange(30);
+      demoUser2 = createUser(demoUser2);
+
+      User demoUser3 = new User();
+      demoUser3.setUsername("demoUser3");
+      demoUser3.setPassword("demoUser3");
+      demoUser3.setName("Demo User 3");
+      demoUser3.setGender(Gender.OTHER);
+      demoUser3.setBirthday(new Date());
+      demoUser3.setMaxAge(30);
+      demoUser3.setMinAge(18);
+      demoUser3.setMaxRange(30);
+      demoUser3 = createUser(demoUser3);
+
+      User demoUser4 = new User();
+      demoUser4.setUsername("demoUser4");
+      demoUser4.setPassword("demoUser4");
+      demoUser4.setName("Demo User 4");
+      demoUser4.setGender(Gender.OTHER);
+      demoUser4.setBirthday(new Date());
+      demoUser4.setMaxAge(30);
+      demoUser4.setMinAge(18);
+      demoUser4.setMaxRange(30);
+      demoUser4 = createUser(demoUser4);
+
+      User demoUser5 = new User();
+      demoUser5.setUsername("demoUser5");
+      demoUser5.setPassword("demoUser5");
+      demoUser5.setName("Demo User 5");
+      demoUser5.setGender(Gender.OTHER);
+      demoUser5.setBirthday(new Date());
+      demoUser5.setMaxAge(30);
+      demoUser5.setMinAge(18);
+      demoUser5.setMaxRange(30);
+      demoUser5 = createUser(demoUser5);
+
+      User demoUser6 = new User();
+      demoUser6.setUsername("demoUser6");
+      demoUser6.setPassword("demoUser6");
+      demoUser6.setName("Demo User 6");
+      demoUser6.setGender(Gender.OTHER);
+      demoUser6.setBirthday(new Date());
+      demoUser6.setMaxAge(30);
+      demoUser6.setMinAge(18);
+      demoUser6.setMaxRange(30);
+      demoUser6 = createUser(demoUser6);
+
+      User demoUser7 = new User();
+      demoUser7.setUsername("demoUser7");
+      demoUser7.setPassword("demoUser7");
+      demoUser7.setName("Demo User 7");
+      demoUser7.setGender(Gender.OTHER);
+      demoUser7.setBirthday(new Date());
+      demoUser7.setMaxAge(30);
+      demoUser7.setMinAge(18);
+      demoUser7.setMaxRange(30);
+      demoUser7 = createUser(demoUser7);
+
+      User demoUser8 = new User();
+      demoUser8.setUsername("demoUser8");
+      demoUser8.setPassword("demoUser8");
+      demoUser8.setName("Demo User 8");
+      demoUser8.setGender(Gender.OTHER);
+      demoUser8.setBirthday(new Date());
+      demoUser8.setMaxAge(30);
+      demoUser8.setMinAge(18);
+      demoUser8.setMaxRange(30);
+      demoUser8 = createUser(demoUser8);
+
+      User demoUser9 = new User();
+      demoUser9.setUsername("demoUser9");
+      demoUser9.setPassword("demoUser9");
+      demoUser9.setName("Demo User 9");
+      demoUser9.setGender(Gender.OTHER);
+      demoUser9.setBirthday(new Date());
+      demoUser9.setMaxAge(30);
+      demoUser9.setMinAge(18);
+      demoUser9.setMaxRange(30);
+      demoUser9 = createUser(demoUser9);
+
+
+      // ======= create active games =======
+      BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard4 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard5 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard6 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard7 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard8 = gameService.getNRandomBlackCards(1).get(0);
+      BlackCard blackCard9 = gameService.getNRandomBlackCards(1).get(0);
+      Game game1 = gameService.createGame(blackCard1, demoUser1);
+      Game game2 = gameService.createGame(blackCard2, demoUser2);
+      Game game3 = gameService.createGame(blackCard3, demoUser3);
+      Game game4 = gameService.createGame(blackCard4, demoUser4);
+      Game game5 = gameService.createGame(blackCard5, demoUser5);
+      Game game6 = gameService.createGame(blackCard6, demoUser6);
+      Game game7 = gameService.createGame(blackCard7, demoUser7);
+      Game game8 = gameService.createGame(blackCard8, demoUser8);
+      Game game9 = gameService.createGame(blackCard9, demoUser9);
+
+
+      // ======= create likes and matches =======
+      Match demoMatch1 = createMatch(demoUser1, demoUser2);
+      setMatch(demoMatch1);
+
+      Match demoMatch2 = createMatch(demoUser1, demoUser3);
+      setMatch(demoMatch2);
+
+      Match demoMatch3 = createMatch(demoUser1, demoUser4);
+      setMatch(demoMatch3);
+
+      Match demoMatch4 = createMatch(demoUser1, demoUser5);
+      setMatch(demoMatch4);
+
+      Match demoMatch5 = createMatch(demoUser2, demoUser3);
+      setMatch(demoMatch5);
+
+      Match demoMatch6 = createMatch(demoUser2, demoUser6);
+      setMatch(demoMatch6);
+
+      Match demoMatch7 = createMatch(demoUser2, demoUser7);
+      setMatch(demoMatch7);
+
+      Match demoMatch8 = createMatch(demoUser3, demoUser8);
+      setMatch(demoMatch8);
+
+      Match demoMatch9 = createMatch(demoUser3, demoUser9);
+      setMatch(demoMatch9);
+
+      areInstantiatedDemoUsers = true;
+      log.info("Demo users instantiated.");
+
+    }
+  }
+
+
   /**
    * Gets the black card of a user, but throws 404 if the user has no active game or no black card selected yet
    * @param userId: UserID of the user that we want the current black card of
@@ -545,4 +832,108 @@ public class UserService {
     // else return the black card
     return user.getActiveGame().getBlackCard();
   }
+
+    /**
+     * Gets the active game of a user, but throws 404 if the user has no active game or no black card selected yet
+     * @param userId: UserID of the user that we want the current black card of
+     * @return activeGame (or 404)
+     */
+
+    public Game getActiveGame(Long userId) {
+        User user = getUserById(userId);
+        // check if user has active game, or a black card chosen respectively
+        if (user.getActiveGame() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active game");
+        }
+        // else return the active game
+        return user.getActiveGame();
+    }
+
+    /**
+     * get id of chat
+     * @param matches List of matches
+     * @return ids of the chats
+     */
+    public List<Long> getChatIds(List<Match> matches) {
+        List<Long> chatIds = new ArrayList<>();
+      for(Match match: matches){
+          Chat chat = match.getChat();
+          chatIds.add(chat.getId());
+      }
+      return chatIds;
+    }
+
+  public void deleteMatchBetweenUsers(long userId, long otherUserId) {
+    User user = getUserById(userId);
+    User otherUser = getUserById(otherUserId);
+
+    // count and check match
+    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    if (count < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There exists no Match between the two users");
+    }
+    else if (count > 1) {
+      log.error(UNIQUE_VIOLATION);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
+    }
+    // get match
+    Match match = matchRepository.getMatchByUserPair(user, otherUser);
+    long matchId = match.getMatchId();
+
+    // remove match from user
+    user.removeMatch(matchId);
+    otherUser.removeMatch(matchId);
+
+    userRepository.saveAndFlush(user);
+    userRepository.saveAndFlush(otherUser);
+
+    // remove users from match
+    matchRepository.delete(match);
+    matchRepository.flush();
+  }
+
+  public void blockUser(long userId, long otherUserId) {
+    // because it is easier to check in one direction, we make the block in both direction, that is, both users block each
+    // other. This works only because blocking is irreversible. Must be taken care of if blocking user should become reversible.
+
+    User user = getUserById(userId);
+    User otherUser = getUserById(otherUserId);
+
+    user.addBlockedUsers(otherUser);
+    otherUser.addBlockedUsers(user);
+
+    userRepository.saveAndFlush(user);
+    userRepository.saveAndFlush(otherUser);
+  }
+
+  public String getLoginStatus(String token, long userId) {
+    User user = getUserById(userId);
+
+    if (user.getToken().equals(token) && user.getStatus().equals(UserStatus.ONLINE)) {
+      return "online";
+    }
+    return "offline";
+  }
+
+    /**
+     * recursive function to delete past games without plays on it,
+     * until one with plays on it is reached
+     * @param user user where games have to be deleted
+     */
+    public void deleteNotNeededPastGamesWithoutPlays(User user) {
+        List<Game> games = user.getGames();
+        // if empty list, nothing to delete
+        if(games.isEmpty()){
+            return;
+        }
+        Game oldestGame = games.get(0);
+        // if game is null or has plays or is active, nothing to delete
+        if(oldestGame==null || (!oldestGame.getPlays().isEmpty()) || oldestGame.getGameStatus()==GameStatus.ACTIVE){
+            return;
+        }
+        // delete pastGame without plays
+        user.deletePastGame(oldestGame);
+        deleteNotNeededPastGamesWithoutPlays(user);
+
+    }
 }

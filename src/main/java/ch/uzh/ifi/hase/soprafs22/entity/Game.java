@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -22,16 +25,22 @@ import java.util.List;
 
 @Entity
 @Table(name = "GAME")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Game implements Serializable {
 
   @Id
   @GeneratedValue
   private Long id;
 
-  @Column
-  private Long userId;
+  @ManyToOne
+  @JoinColumn(name="user_id")
+  @JsonBackReference
+  private User user;
 
   @Column
+  @Enumerated(EnumType.STRING)
   private GameStatus gameStatus;
 
   @Column
@@ -46,40 +55,19 @@ public class Game implements Serializable {
   // Getters and Setters
 
   public void setId(long id){this.id=id;}
-
   public Long getId(){return this.id;}
 
-  public void setUserId(long userId){
-      this.userId=userId;
-  }
+  public void setUser(User user){this.user=user;}
+  public User getUser(){return this.user;}
 
-  public Long getUserId(){
-      return this.userId;
-  }
+  public void setBlackCard(BlackCard card){this.blackCard=card;}
+  public BlackCard getBlackCard(){return this.blackCard;}
 
-  public void setBlackCard(BlackCard card){
-        this.blackCard=card;
-  }
+  public void enqueuePlay(Play play){plays.add(play);}
+  public List<Play> getPlays() {return this.plays;}
 
-  public BlackCard getBlackCard(){
-        return this.blackCard;
-  }
-
-  public void enqueuePlay(Play play){
-    plays.add(play);
-  }
-
-  public List<Play> getPlays() {
-      return this.plays;
-    }
-
-  public Date getCreationTime() {
-    return creationTime;
-  }
-
-  public void setCreationTime(Date creationTime) {
-    this.creationTime = creationTime;
-  }
+  public Date getCreationTime() {return creationTime;}
+  public void setCreationTime(Date creationTime) {this.creationTime = creationTime;}
 
   public void deletePlaysFrom(Long userId) {
     // safety net - assuming user has succeeded in inserting multiple plays into this game, we delete them all
@@ -92,11 +80,7 @@ public class Game implements Serializable {
     this.plays.removeAll(toBeRemoved);
   }
 
-  public GameStatus getGameStatus() {
-    return gameStatus;
-  }
+  public GameStatus getGameStatus() {return gameStatus;}
+  public void setGameStatus(GameStatus gameStatus) {this.gameStatus = gameStatus;}
 
-  public void setGameStatus(GameStatus gameStatus) {
-    this.gameStatus = gameStatus;
-  }
 }

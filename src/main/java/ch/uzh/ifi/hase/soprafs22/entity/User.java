@@ -1,7 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -22,12 +26,16 @@ import java.util.*;
 
 @Entity
 @Table(name = "USER")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -52,19 +60,30 @@ public class User implements Serializable {
     private Date birthday;
 
     @Column
+    private int minAge;
+
+    @Column
+    private int maxAge;
+
+    @Column
+    private int maxRange;
+
+    @Column
     private Gender gender;
 
-    @OneToOne
-    private Game activeGame;
+    @OneToMany(mappedBy = "user",
+    cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Game> games = new ArrayList<>();
 
-    @OneToMany
-    private List<Game> pastGames = new ArrayList<>();
-
-    @OneToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<WhiteCard> userWhiteCards = new ArrayList<>();
 
     @OneToOne
     private UserBlackCards userBlackCards;
+
+    @ElementCollection
+    private Set<Gender> genderPreferences = new TreeSet<>();
 
     @ElementCollection
     private Set<Long> likedByUsers = new TreeSet<>();
@@ -72,62 +91,81 @@ public class User implements Serializable {
     @ElementCollection
     private Set<Long> matches = new TreeSet<>();
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<User> blockedUsers = new HashSet<>();
+
 
     // GETTERS AND SETTERS
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getUsername() {return username;}
+    public void setUsername(String username) {this.username = username;}
 
-    public String getUsername() {
-        return username;
-    }
+    public String getName() {return name;}
+    public void setName(String name) {this.name = name;}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getToken() {return token;}
+    public void setToken(String token) {this.token = token;}
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public UserStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(UserStatus status) {
-        this.status = status;
-    }
+    public UserStatus getStatus() {return status;}
+    public void setStatus(UserStatus status) {this.status = status;}
 
     public Date getCreationDate(){return this.creationDate; }
-
     public void setCreationDate(Date creationDate){this.creationDate = creationDate; }
 
     public Date getBirthday(){return this.birthday; }
-
     public void setBirthday(Date birthday){this.birthday = birthday; }
 
     public String getPassword(){return this.password; }
-
     public void setPassword(String password){this.password = password; }
 
     public Gender getGender(){return this.gender; }
+    public void setGender(Gender gender){this.gender = gender; }
+
+    public Game getActiveGame() {
+        if(!this.games.isEmpty() && this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE){
+            return  this.games.get(games.size() - 1);
+        }
+            return null;
+    }
+
+    public void addGame(Game game){
+        this.games.add(game);
+    }
+
+    public void setActiveGame(Game activeGame) {
+        activeGame.setGameStatus(GameStatus.ACTIVE);
+        this.games.add(activeGame);}
+
+    public List<Game> getPastGames() {
+        if((!this.games.isEmpty()) &&
+                (this.games.get(games.size() - 1).getGameStatus()== GameStatus.ACTIVE)){
+            if(games.size()==1){
+                return Collections.emptyList(); // empty list without active game
+            }else{
+                return games.subList(0, games.size() - 2); // list without active game
+            }
+
+        }
+        return this.games;
+    }
+
+    public List<Game> getGames(){
+        return this.games;
+    }
+
+    public Set<Long> getMatches() {return matches;}
+
+    public List<WhiteCard> getUserWhiteCards() {return userWhiteCards;}
+    public void setUserWhiteCards(List<WhiteCard> usersWhiteCards) {this.userWhiteCards = usersWhiteCards;}
+
+    public UserBlackCards getUserBlackCards() {return userBlackCards;}
+    public void setUserBlackCards(UserBlackCards userBlackCards) {this.userBlackCards = userBlackCards;}
+
+
+    // HELPER FUNCTIONS
 
     /**
      * Method for Testing the gender of the user in JSON, as the gender should be
@@ -138,38 +176,18 @@ public class User implements Serializable {
         return this.gender.toString();
     }
 
-    public void setGender(Gender gender){this.gender = gender; }
-
-    public void addGame(Game game){
-        this.pastGames.add(game);
-    }
-
     // move active game to past games
     public void flushGameToPastGames(){
         Game game = this.getActiveGame();
-        this.setActiveGame(null);
-        this.addGame(game);
-    }
-
-    public Game getActiveGame() {
-        return activeGame;
-    }
-
-    public void setActiveGame(Game activeGame) {
-        this.activeGame = activeGame;
-    }
-
-    public List<Game> getPastGames() {
-        return pastGames;
+        if(game!=null){
+            game.setGameStatus(GameStatus.INACTIVE);
+        }
     }
 
     public void deletePastGame(Game game) {
-        this.pastGames.remove(game);
+        this.games.remove(game);
     }
 
-    public Set<Long> getMatches() {
-        return matches;
-    }
 
     public void addMatch(Long matchId) {
         this.matches.add(matchId);
@@ -195,23 +213,29 @@ public class User implements Serializable {
         return this.likedByUsers.contains(user.getId());
     }
 
-    public List<WhiteCard> getUserWhiteCards() {
-        return userWhiteCards;
-    }
-
-    public void setUserWhiteCards(List<WhiteCard> usersWhiteCards) {
-        this.userWhiteCards = usersWhiteCards;
-    }
 
     public void removeWhiteCard(WhiteCard whiteCard) {
         this.userWhiteCards.remove(whiteCard);
     }
 
-    public UserBlackCards getUserBlackCards() {
-        return userBlackCards;
+    public Set<Gender> getGenderPreferences(){return genderPreferences;}
+
+    public void setGenderPreferences(Set<Gender> genderPreferences) {this.genderPreferences = genderPreferences;}
+
+    public int getMinAge(){return minAge;}
+    public void setMinAge(int minAge){this.minAge = minAge;}
+
+    public int getMaxAge(){return maxAge;}
+    public void setMaxAge(int maxAge){this.maxAge = maxAge;}
+
+    public int getMaxRange(){return maxRange;}
+    public void setMaxRange(int maxRange){this.maxRange = maxRange;}
+
+    public Set<User> getBlockedUsers() {
+        return blockedUsers;
     }
 
-    public void setUserBlackCards(UserBlackCards userBlackCards) {
-        this.userBlackCards = userBlackCards;
+    public void addBlockedUsers(User userToBlock) {
+        this.blockedUsers.add(userToBlock);
     }
 }

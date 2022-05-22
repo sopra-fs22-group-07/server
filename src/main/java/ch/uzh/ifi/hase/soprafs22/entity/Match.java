@@ -2,15 +2,13 @@ package ch.uzh.ifi.hase.soprafs22.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * This is the Match Entity, it saves two users into it, and has a unique ID. It receives and returns a Pair of users.
  */
 @Entity
-@Table(name = "Match")
+@Table(name = "MATCH")
 public class Match implements Serializable {
 
   @Id
@@ -20,9 +18,15 @@ public class Match implements Serializable {
   @Column
   private Date creationDate = new Date();
 
-  @OneToMany
-  private List<User> userPair = new ArrayList<>();
+  @OneToOne
+  private User user1;
 
+  @OneToOne
+  private User user2;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "chatId", referencedColumnName = "id")
+  private Chat chat;
 
   // GETTERS AND SETTERS
 
@@ -43,12 +47,18 @@ public class Match implements Serializable {
   }
 
   public void setUserPair(Pair<User, User> userPair) {
-    this.userPair.add(userPair.getObj1());
-    this.userPair.add(userPair.getObj2());
+    this.user1 = userPair.getObj1();
+    this.user2 = userPair.getObj2();
   }
 
   public Pair<User, User> getUserPair() {
-    return new Pair<>(userPair.get(0), userPair.get(1));
+    return new Pair<>(user1, user2);
+  }
+
+  public Chat getChat(){ return  this.chat; }
+
+  public void setChat(Chat chat){
+      this.chat = chat;
   }
 
 }
