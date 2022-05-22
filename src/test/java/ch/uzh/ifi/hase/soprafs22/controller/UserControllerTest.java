@@ -2,12 +2,11 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs22.entity.Match;
-import ch.uzh.ifi.hase.soprafs22.entity.Pair;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import ch.uzh.ifi.hase.soprafs22.testHelpers.UserFiller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -22,13 +21,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * This tests if the UserController works.
  */
 @WebMvcTest(UserController.class)
-class UserControllerTest {
+class UserControllerTest extends UserFiller {
 
   @Autowired
   private MockMvc mockMvc;
@@ -111,12 +109,8 @@ class UserControllerTest {
   @Test
   void validUser_login() throws Exception {
       // given
-      User user = new User();
-      user.setId(1L);
+      User user = fillUser(1L, "1", "testUsername", "password");
       user.setName("Test User");
-      user.setUsername("testUsername");
-      user.setToken("1");
-      user.setPassword("password");
       user.setStatus(UserStatus.ONLINE);
 
       UserPostDTO userPostDTO = new UserPostDTO();
@@ -194,14 +188,11 @@ class UserControllerTest {
   @Test
   void test_get_users_ID_returns_200() throws Exception {
     // given
-    User user = new User();
-    user.setId(1L);
-    user.setToken("69");
-    user.setUsername("Firstname Lastname");
-    user.setPassword("firstname@lastname");
-    user.setStatus(UserStatus.ONLINE);
-    user.setBirthday(new Date(0));
-
+    User user = fillUser(1L, "69", "Firstname Lastname", "firstname@lastname", UserStatus.ONLINE, new Date(0));
+    HashSet<Gender> genders = new HashSet<>();
+    genders.add(Gender.FEMALE);
+    user.setGenderPreferences(genders);
+    user.setMaxAge(30);
 
     // this mocks the UserService -> we define above what the userService should
     // return when getUsers() is called
@@ -218,16 +209,16 @@ class UserControllerTest {
             .andExpect(jsonPath("$.status", is(user.getStatus().toString())))
             .andExpect(jsonPath("$.id", is(user.getId().intValue())))
             .andExpect(jsonPath("$.creationDate", is(parseDate(user.getCreationDate()))))
-            .andExpect(jsonPath("$.birthday", is(parseDate(user.getBirthday()))));
+            .andExpect(jsonPath("$.birthday", is(parseDate(user.getBirthday()))))
+            .andExpect(jsonPath("$.maxAge", is(30)))
+            .andExpect(jsonPath("$.genderPreferences.[0]", is("FEMALE")));
   }
 
 
   @Test
   void test_get_users_ID_returns_404() throws Exception {
     // given
-    User user = new User();
-    user.setId(1L);
-    user.setToken("69");
+    User user = fillUser(1L, "69");
 
     given(userService.getUserById(user.getId())).willReturn(user);
     given(userService.getUserById(3)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -242,13 +233,7 @@ class UserControllerTest {
 
   @Test
   void test_put_users_id_returns_204() throws Exception {
-    User userToBeUpdated = new User();
-    userToBeUpdated.setPassword("password");
-    userToBeUpdated.setUsername("usernameOld");
-    userToBeUpdated.setCreationDate(new Date());
-    userToBeUpdated.setToken("1");
-    userToBeUpdated.setId(1L);
-    userToBeUpdated.setStatus(UserStatus.ONLINE);
+    User userToBeUpdated = fillUser(1L, "1", "usernameOld", "password", UserStatus.ONLINE, new Date());
 
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername("usernameNew");
@@ -269,9 +254,7 @@ class UserControllerTest {
   void test_put_users_id_returns_404() throws Exception {
 
     // given
-    User user = new User();
-    user.setId(1L);
-    user.setToken("69");
+    User user = fillUser(1L, "69");
 
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername("usernameNew");
@@ -291,12 +274,7 @@ class UserControllerTest {
 
   @Test
   void test_put_users_id_returns_204_evenWithOldUsername() throws Exception {
-    User userToBeUpdated = new User();
-    userToBeUpdated.setPassword("password");
-    userToBeUpdated.setUsername("usernameOld");
-    userToBeUpdated.setToken("1");
-    userToBeUpdated.setId(1L);
-    userToBeUpdated.setStatus(UserStatus.ONLINE);
+    User userToBeUpdated = fillUser(1L, "1", "usernameOld", "password", UserStatus.ONLINE, null);
 
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername(userToBeUpdated.getUsername());
@@ -315,9 +293,7 @@ class UserControllerTest {
   @Test
   void test_put_users_id_returns_401() throws Exception {
 
-    User user = new User();
-    user.setId(1L);
-    user.setToken("1");
+    User user = fillUser(1L, "1");
     user.setUsername("username");
     user.setStatus(UserStatus.ONLINE);
 
@@ -335,15 +311,11 @@ class UserControllerTest {
 
   @Test
   void test_put_users_id_returns_409() throws Exception {
-    User user = new User();
-    user.setId(1L);
-    user.setToken("1");
+    User user = fillUser(1L, "1");
     user.setUsername("username");
     user.setStatus(UserStatus.ONLINE);
 
-    User user2 = new User();
-    user2.setId(2L);
-    user2.setToken("2");
+    User user2 = fillUser(2L, "2");
 
     UserPutDTO userPutDTO = new UserPutDTO();
     userPutDTO.setUsername(user.getUsername());
@@ -361,13 +333,7 @@ class UserControllerTest {
 
   @Test
   void test_post_users_login_returns_200() throws Exception {
-    User user = new User();
-    user.setId(1L);
-    user.setToken("1");
-    user.setUsername("username");
-    user.setPassword("password");
-    user.setStatus(UserStatus.ONLINE);
-    user.setBirthday(new Date(0));
+    User user = fillUser(1L, "1", "username", "password", UserStatus.ONLINE, new Date(0));
     user.setGender(Gender.OTHER);
 
     UserPostDTO userPostDTO = new UserPostDTO();
@@ -392,14 +358,6 @@ class UserControllerTest {
 
   @Test
   void test_post_users_login_returns_404() throws Exception {
-    User user = new User();
-    user.setId(1L);
-    user.setToken("1");
-    user.setUsername("username");
-    user.setPassword("password");
-    user.setStatus(UserStatus.ONLINE);
-    user.setBirthday(new Date(0));
-
     UserPostDTO userPostDTO = new UserPostDTO();userPostDTO.setName("Test User");
       userPostDTO.setUsername("testUsername");
       userPostDTO.setPassword("wrongPassword");
@@ -416,16 +374,9 @@ class UserControllerTest {
 
   @Test
   void test_users_logout_id_returns_204() throws Exception {
-    User user = new User();
-    user.setId(1L);
-    user.setToken("1");
-    user.setUsername("username");
-    user.setPassword("password");
-    user.setStatus(UserStatus.ONLINE);
-    user.setBirthday(new Date(0));
+    User user = fillUser(1L, "1", "username", "password", UserStatus.ONLINE, new Date(0));
 
     UserPutDTO userPutDTO = new UserPutDTO();
-
 
     given(userService.logoutUser(Mockito.any())).willThrow(new ResponseStatusException(HttpStatus.NO_CONTENT));
 
@@ -439,13 +390,7 @@ class UserControllerTest {
 
   @Test
   void test_users_logout_id_returns_404() throws Exception {
-    User user = new User();
-    user.setId(1L);
-    user.setToken("1");
-    user.setUsername("username");
-    user.setPassword("password");
-    user.setStatus(UserStatus.ONLINE);
-    user.setBirthday(new Date(0));
+    User user = fillUser(1L, "1", "username", "password", UserStatus.ONLINE, new Date(0));
 
     UserPutDTO userPutDTO = new UserPutDTO();
 
@@ -461,13 +406,7 @@ class UserControllerTest {
 
   @Test
   void test_users_logout_id_returns_401() throws Exception {
-    User user = new User();
-    user.setId(1L);
-    user.setToken("1");
-    user.setUsername("username");
-    user.setPassword("password");
-    user.setStatus(UserStatus.ONLINE);
-    user.setBirthday(new Date(0));
+    User user = fillUser(1L, "1", "username", "password", UserStatus.ONLINE, new Date(0));
 
     UserPutDTO userPutDTO = new UserPutDTO();
 
@@ -511,12 +450,8 @@ class UserControllerTest {
 
   @Test
   void test_unmatch_user_success() throws Exception {
-    User user = new User();
-    User otherUser = new User();
-
-    user.setId(1L);
-    user.setToken("token");
-    otherUser.setId(2L);
+    User user = fillUser(1L, "token");
+      User otherUser = fillUser(2L, "token2");
 
     Match match = new Match();
     match.setUserPair(new Pair<>(user, otherUser));
@@ -528,14 +463,9 @@ class UserControllerTest {
 
   @Test
   void test_unmatch_user_no_match() throws Exception {
-    User user = new User();
-    User otherUser = new User();
+    User user = fillUser(1L, "token");
+    User otherUser = fillUser(2L, "token2");
 
-    user.setId(1L);
-    user.setToken("token");
-    otherUser.setId(2L);
-
-    //given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
     Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong());
 
     mockMvc.perform(delete("/users/" + user.getId()+ "/matches/"+otherUser.getId()).contentType(MediaType.APPLICATION_JSON)
@@ -545,12 +475,8 @@ class UserControllerTest {
 
   @Test
   void test_block_user_success() throws Exception {
-    User user = new User();
-    User otherUser = new User();
-
-    user.setId(1L);
-    user.setToken("token");
-    otherUser.setId(2L);
+    User user = fillUser(1L, "token");
+    User otherUser = fillUser(2L, "token2");
 
     Match match = new Match();
     match.setUserPair(new Pair<>(user, otherUser));
@@ -563,14 +489,9 @@ class UserControllerTest {
 
   @Test
   void test_block_user_no_match() throws Exception {
-    User user = new User();
-    User otherUser = new User();
+    User user = fillUser(1L, "token");
+    User otherUser = fillUser(2L, "token2");
 
-    user.setId(1L);
-    user.setToken("token");
-    otherUser.setId(2L);
-
-    //given(userService.deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
     Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong());
 
     mockMvc.perform(put("/users/"+ user.getId()+"/matches/"+otherUser.getId()+"/block")
@@ -579,6 +500,116 @@ class UserControllerTest {
             .andExpect(status().isNotFound());
   }
 
+  @Test
+  void getUserInDetail_success() throws Exception{
+      User user = fillUser(2L, "2","Uname", "pw", UserStatus.ONLINE, new Date());
+      WhiteCard whiteCard = new WhiteCard();
+      whiteCard.setText("white1");
+      user.setUserWhiteCards(List.of(whiteCard, new WhiteCard()));
+      Game testGame = new Game();
+      testGame.setId(33L);
+      testGame.setUser(user);
+      testGame.setBlackCard(new BlackCard());
+      user.setActiveGame(testGame);
+
+      doNothing().when(userService).checkSpecificAccess(user.getToken(), user.getId());
+      given(userService.getUserById(user.getId())).willReturn(user);
+
+      MockHttpServletRequestBuilder getRequest = get("/users/{userId}/details", user.getId())
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("authorization", user.getToken());
+      mockMvc.perform(getRequest).andExpect(status().isOk())
+              .andExpect(jsonPath("$.id", is(user.getId().intValue())))
+              .andExpect(jsonPath("$.username", is(user.getUsername())))
+              .andExpect(jsonPath("$.userWhiteCards.[0].text", is(whiteCard.getText())))
+              .andExpect(jsonPath("$.games.[0].id", is(testGame.getId().intValue())))
+              .andExpect(jsonPath("$.games.[0].gameStatus", is("ACTIVE")));
+  }
+
+  @Test
+  void getUserInDetail_fail() throws Exception {
+    User user = fillUser(2L, "2","Uname", "pw", UserStatus.ONLINE, new Date());
+    doThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED)).when(userService).checkSpecificAccess(user.getToken(), user.getId());
+    MockHttpServletRequestBuilder getRequest = get("/users/{userId}/details", user.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("authorization", user.getToken());
+    mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).checkSpecificAccess(user.getToken(), user.getId());
+    mockMvc.perform(getRequest).andExpect(status().isNotFound());
+    doNothing().when(userService).checkSpecificAccess(user.getToken(), user.getId());
+    given(userService.getUserById(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+    mockMvc.perform(getRequest).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void deleteUser_success() throws Exception {
+      User user = fillUser(3L, "3");
+      doNothing().when(userService).checkSpecificAccess(user.getToken(), user.getId());
+      doNothing().when(userService).deleteUser(user.getId());
+      MockHttpServletRequestBuilder deleteRequest = delete("/users/{userId}", user.getId())
+              .contentType(MediaType.APPLICATION_JSON)
+              .header("authorization", user.getToken());
+      mockMvc.perform(deleteRequest).andExpect(status().isNoContent());
+  }
+
+    @Test
+    void deleteUser_fail() throws Exception {
+        User user = fillUser(3L, "3");
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).checkSpecificAccess(user.getToken(), user.getId());
+        MockHttpServletRequestBuilder deleteRequest = delete("/users/{userId}", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+        mockMvc.perform(deleteRequest).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getMatches_success_single() throws Exception {
+        User user1 = fillUser(1L, "1");
+        User user2 = fillUser(2L, "2");
+        doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
+        given(userService.getMatchedUsers(user1.getId())).willReturn(List.of(user2));
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/matches", user1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user1.getToken());
+        mockMvc.perform(getRequest).andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].id", is(user2.getId().intValue())));
+    }
+
+    @Test
+    void updateUserPreferences_success() throws Exception {
+        User user1 = fillUser(1L, "1");
+        HashSet<Gender> genders = new HashSet<>();
+        genders.add(Gender.MALE);
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("1");
+        userPutDTO.setGenderPreferences(genders);
+        userPutDTO.setMaxAge(30);
+        doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
+        doNothing().when(userService).updatePreferences(any(User.class));
+        MockHttpServletRequestBuilder putRequest = put("/users/{userId}/preferences", user1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userPutDTO))
+                .header("authorization", user1.getToken());
+        mockMvc.perform(putRequest).andExpect(status().isNoContent());
+        verify(userService).updatePreferences(any(User.class));
+    }
+
+    @Test
+    void getLoginStatus_success() throws Exception {
+        User user1 = fillUser(1L, "1");
+        doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/loginStatus", user1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", "1");
+
+        user1.setStatus(UserStatus.OFFLINE);
+        mockMvc.perform(getRequest).andExpect(status().isOk());
+
+        user1.setStatus(UserStatus.ONLINE);
+        mockMvc.perform(getRequest).andExpect(status().isOk());
+        //TODO: read the returned value
+    }
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

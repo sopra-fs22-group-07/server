@@ -93,10 +93,6 @@ public class UserService {
     return newUser;
   }
 
-    private long getAgeInMilliSeconds(Date birthday) {
-        return new Date().getTime() - birthday.getTime();
-    }
-
     private int getAge(Date birthday) {
         int years;
         int months;
@@ -127,8 +123,8 @@ public class UserService {
     }
 
     private int findMinAgeDefault(Date userBirthday){
-        long age = getAgeInMilliSeconds(userBirthday);
-        return age - 3 * Time.ONE_YEAR < 18 * Time.ONE_YEAR ? 18 : getAge(userBirthday) - 3;
+        int age = getAge(userBirthday);
+        return Math.max(age - 3, 18);
     }
 
     private int findMaxAgeDefault(Date userBirthday) {
@@ -910,7 +906,6 @@ public class UserService {
     userRepository.saveAndFlush(otherUser);
   }
 
-
   public String getLoginStatus(String token, long userId) {
     User user = getUserById(userId);
 
@@ -919,6 +914,7 @@ public class UserService {
     }
     return "offline";
   }
+
     /**
      * recursive function to delete past games without plays on it,
      * until one with plays on it is reached

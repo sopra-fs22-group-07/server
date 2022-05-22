@@ -249,9 +249,4 @@ public class GameService {
     // return the game
     return somePage.getContent().get(0);
   }
-
-
-    public void saveGame(Game activeGame) {
-      gameRepository.saveAndFlush(activeGame);
-    }
 }

@@ -18,7 +18,7 @@ public class UserGetDetailsDTO {
   private Date birthday;
   private Gender gender;
   private Date creationDate;
-  private List<Game> games;
+  private List<Game> games = new ArrayList<>();
   private UserBlackCards userBlackCards;
   private List<WhiteCard> userWhiteCards;
   private Set<Long> likedByUsers;

@@ -131,7 +131,7 @@ public class ChatController {
     }
 
     @PutMapping("/users/{userId}/chats/{chatId}/read")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
     public void readMessages(@RequestHeader(value = "authorization", required = false) String token,
                                   @PathVariable(value = "userId") long userId,

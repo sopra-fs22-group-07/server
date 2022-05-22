@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs22.entity.Game;
 import ch.uzh.ifi.hase.soprafs22.entity.Play;
 import ch.uzh.ifi.hase.soprafs22.entity.User;
 import ch.uzh.ifi.hase.soprafs22.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -60,10 +61,6 @@ class GameServiceIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        userRepository.deleteAll();
-        gameRepository.deleteAll();
-        playRepository.deleteAll();
-
         testBlackCard = new BlackCard();
         testBlackCard.setText("gap");
         testBlackCard.setId(1L);
@@ -82,13 +79,20 @@ class GameServiceIntegrationTest {
         Mockito.when(cardRepository.saveAndFlush(Mockito.any())).thenReturn(testBlackCard);
     }
 
+    @AfterEach
+    public void tearDown(){
+        userRepository.deleteAll();
+        gameRepository.deleteAll();
+        playRepository.deleteAll();
+    }
+
     @Test
     void createGame_validInputs_success() {
         // given
         assertNull(gameRepository.findById(1L));
 
         Game testGame = new Game();
-
+        Long testUserId = 2L;
 
         testGame.setBlackCard(testBlackCard);
         testGame.setUser(testUser);
@@ -110,7 +114,7 @@ class GameServiceIntegrationTest {
 
         // Test Game
         Game testGame = new Game();
-        Long testUserId = 1L;
+        Long testUserId = 2L;
         testGame.setBlackCard(testBlackCard);
         testGame.setUser(testUser);
         testGame.setGameStatus(GameStatus.ACTIVE);
