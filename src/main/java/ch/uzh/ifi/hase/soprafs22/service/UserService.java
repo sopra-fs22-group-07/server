@@ -906,7 +906,6 @@ public class UserService {
     userRepository.saveAndFlush(otherUser);
   }
 
-
   public String getLoginStatus(String token, long userId) {
     User user = getUserById(userId);
 
@@ -915,6 +914,7 @@ public class UserService {
     }
     return "offline";
   }
+
     /**
      * recursive function to delete past games without plays on it,
      * until one with plays on it is reached

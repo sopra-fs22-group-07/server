@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
-import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
@@ -27,7 +26,6 @@ import java.util.*;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -596,6 +594,23 @@ class UserControllerTest extends UserFiller {
                 .header("authorization", user1.getToken());
         mockMvc.perform(putRequest).andExpect(status().isNoContent());
         verify(userService).updatePreferences(any(User.class));
+    }
+
+    @Test
+    void getLoginStatus_success() throws Exception {
+        User user1 = fillUser(1L, "1");
+        doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/loginStatus", user1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", "1");
+
+        user1.setStatus(UserStatus.OFFLINE);
+        mockMvc.perform(getRequest).andExpect(status().isOk());
+
+        user1.setStatus(UserStatus.ONLINE);
+        mockMvc.perform(getRequest).andExpect(status().isOk());
+        //TODO: read the returned value
     }
 
   /**

@@ -1006,6 +1006,19 @@ class UserServiceTest {
       assertTrue(testUser.getGames().contains(active));
     }
 
+    @Test
+    void getLoginStatus_success() {
+        testUser.setToken("token");
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+
+        testUser.setStatus(UserStatus.OFFLINE);
+        assertEquals("offline", userService.getLoginStatus(testUser.getToken(), testUser.getId()));
+
+        testUser.setStatus(UserStatus.ONLINE);
+        assertEquals("online", userService.getLoginStatus(testUser.getToken(), testUser.getId()));
+    }
+
     private User fillUser(Long id, String name, String userName, String password) {
         User user = new User();
         user.setId(id);
