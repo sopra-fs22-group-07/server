@@ -887,8 +887,13 @@ public class UserService {
 
   public void updateLocation(long userId, double latitude, double longitude) {
     User user = getUserById(userId);
-    user.setLatitude(latitude);
-    user.setLongitude(longitude);
-    userRepository.saveAndFlush(user);
+
+    // only update if latitude and longitude are not 0
+    // else keep them at default 0, i.e. do nothing
+    if (latitude != 0 && longitude != 0) {
+      user.setLatitude(latitude);
+      user.setLongitude(longitude);
+    }
+
   }
 }
