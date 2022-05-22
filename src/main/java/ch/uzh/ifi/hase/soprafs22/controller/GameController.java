@@ -155,7 +155,11 @@ public class GameController {
     userService.checkSpecificAccess(token, id); // throws 401, 404
 
     User user = userService.getUserById(id);
-    // get one game (first get the old ones)
+    // delete all past games without plays
+
+    userService.deleteAllEmptyPastGames(user);
+
+      // get one game (first get the old ones)
     Game game = gameService.getGame(user.getGames());
     return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
   }

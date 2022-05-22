@@ -72,7 +72,10 @@ public class GameService {
      * @return the oldest Game
      */
     public Game getGame(List<Game> games) {
-        return games.isEmpty() ? null : games.get(0);
+        if (games.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no active game or past game with plays left");
+        }
+        return games.get(0);
     }
 
   /**
