@@ -40,7 +40,7 @@ public class UserService {
   private final GameService gameService;
   private boolean areInstantiatedDemoUsers = false;
   private static final String UNIQUE_VIOLATION = "Uniqueness Violation Occurred";
-  private static final Long GAME_DURATION = 2*Time.ONE_MINUTE;
+  private static final Long GAME_DURATION = Time.ONE_DAY;
 
 
   @Autowired
@@ -884,10 +884,11 @@ public class UserService {
   }
 
     /**
-     * recursive function to delete all past games without plays on it
+     * recursive function to delete past games without plays on it,
+     * till one with plays on it is reached
      * @param user user where games have to be deleted
      */
-    public void deleteAllEmptyPastGames(User user) {
+    public void deleteNotNeededPastGamesWithoutPlays(User user) {
         List<Game> games = user.getGames();
         // if empty list, nothing to delete
         if(games.isEmpty()){
@@ -900,7 +901,7 @@ public class UserService {
         }
         // delete pastGame without plays
         user.deletePastGame(oldestGame);
-        deleteAllEmptyPastGames(user);
+        deleteNotNeededPastGamesWithoutPlays(user);
 
     }
 }

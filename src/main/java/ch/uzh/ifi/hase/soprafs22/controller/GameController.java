@@ -155,9 +155,8 @@ public class GameController {
     userService.checkSpecificAccess(token, id); // throws 401, 404
 
     User user = userService.getUserById(id);
-    // delete all past games without plays
-
-    userService.deleteAllEmptyPastGames(user);
+    // delete past games without plays, till first with plays is reached
+      userService.deleteNotNeededPastGamesWithoutPlays(user);
 
       // get one game (first get the old ones)
     Game game = gameService.getGame(user.getGames());
