@@ -885,7 +885,7 @@ public class UserService {
 
     /**
      * recursive function to delete past games without plays on it,
-     * till one with plays on it is reached
+     * until one with plays on it is reached
      * @param user user where games have to be deleted
      */
     public void deleteNotNeededPastGamesWithoutPlays(User user) {
