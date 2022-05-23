@@ -66,6 +66,12 @@ public class User implements Serializable {
     private int maxAge;
 
     @Column
+    private double latitude;
+
+    @Column
+    private double longitude;
+
+    @Column
     private int maxRange;
 
     @Column
@@ -238,4 +244,10 @@ public class User implements Serializable {
     public void addBlockedUsers(User userToBlock) {
         this.blockedUsers.add(userToBlock);
     }
+
+    public double getLatitude() {return latitude;}
+    public void setLatitude(double latitude) {this.latitude = latitude;}
+
+    public double getLongitude() {return longitude;}
+    public void setLongitude(double longitude) {this.longitude = longitude;}
 }

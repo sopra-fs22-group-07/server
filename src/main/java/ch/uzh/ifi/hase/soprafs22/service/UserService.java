@@ -81,6 +81,8 @@ public class UserService {
     genderPreferences.add(Gender.OTHER);
     newUser.setGenderPreferences(genderPreferences);
     newUser.setMaxRange(10);
+    newUser.setLatitude(0);
+    newUser.setLongitude(0);
 
     checkIfUserExists(newUser);
 
@@ -906,6 +908,17 @@ public class UserService {
     userRepository.saveAndFlush(otherUser);
   }
 
+  public void updateLocation(long userId, double latitude, double longitude) {
+    User user = getUserById(userId);
+
+    // only update if latitude and longitude are not 0
+    // else keep them at default 0, i.e. do nothing
+    if (latitude != 0 && longitude != 0) {
+      user.setLatitude(latitude);
+      user.setLongitude(longitude);
+    }
+
+  }
   public String getLoginStatus(String token, long userId) {
     User user = getUserById(userId);
 
