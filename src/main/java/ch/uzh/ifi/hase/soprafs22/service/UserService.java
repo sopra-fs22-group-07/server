@@ -394,7 +394,6 @@ public class UserService {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();
-      // TODO: 12.04.2022 SaveAndFlush GameRepository here? (IDE doesn't complain until now)
       userRepository.saveAndFlush(user);
     }
     // case the active game is not older than 24 hours, just return
@@ -475,7 +474,7 @@ public class UserService {
    */
   public void setMatch(Match match) {
     // Get Users
-    Pair<User, User> userPair = match.getUserPair();
+    Pair<User, User> userPair = match.getUsers();
     User user1 = userPair.getObj1();
     User user2 = userPair.getObj2();
 
@@ -597,7 +596,7 @@ public class UserService {
 
         // map the users to the matches
         for (Match match : matches){
-            Pair<User,User> users = match.getUserPair();
+            Pair<User,User> users = match.getUsers();
             // add other user (by comparing it with the user, which is known)
             if(user.equals(users.getObj1())){
                 matchedUsers.add(users.getObj2());
@@ -636,7 +635,7 @@ public class UserService {
     // for all matches do:
     for (Match match : matches) {
       // get users from match and add to list the one that is not the user with id userId
-      Pair<User, User> userPair = match.getUserPair();
+      Pair<User, User> userPair = match.getUsers();
       if (userPair.getObj1().getId() != userId) {
         users.add(userPair.getObj1());
       } else {
@@ -771,15 +770,15 @@ public class UserService {
       BlackCard blackCard7 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard8 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard9 = gameService.getNRandomBlackCards(1).get(0);
-      Game game1 = gameService.createGame(blackCard1, demoUser1);
-      Game game2 = gameService.createGame(blackCard2, demoUser2);
-      Game game3 = gameService.createGame(blackCard3, demoUser3);
-      Game game4 = gameService.createGame(blackCard4, demoUser4);
-      Game game5 = gameService.createGame(blackCard5, demoUser5);
-      Game game6 = gameService.createGame(blackCard6, demoUser6);
-      Game game7 = gameService.createGame(blackCard7, demoUser7);
-      Game game8 = gameService.createGame(blackCard8, demoUser8);
-      Game game9 = gameService.createGame(blackCard9, demoUser9);
+      gameService.createGame(blackCard1, demoUser1);
+      gameService.createGame(blackCard2, demoUser2);
+      gameService.createGame(blackCard3, demoUser3);
+      gameService.createGame(blackCard4, demoUser4);
+      gameService.createGame(blackCard5, demoUser5);
+      gameService.createGame(blackCard6, demoUser6);
+      gameService.createGame(blackCard7, demoUser7);
+      gameService.createGame(blackCard8, demoUser8);
+      gameService.createGame(blackCard9, demoUser9);
 
 
       // ======= create likes and matches =======
@@ -904,8 +903,11 @@ public class UserService {
     User user = getUserById(userId);
     User otherUser = getUserById(otherUserId);
 
-    user.addBlockedUsers(otherUser);
-    otherUser.addBlockedUsers(user);
+    BlockedUserRelation blockedUserRelation = new BlockedUserRelation();
+    blockedUserRelation.setUserPair(new Pair<>(user, otherUser));
+
+    user.addBlockedUsers(blockedUserRelation);
+    otherUser.addBlockedUsers(blockedUserRelation);
 
     userRepository.saveAndFlush(user);
     userRepository.saveAndFlush(otherUser);

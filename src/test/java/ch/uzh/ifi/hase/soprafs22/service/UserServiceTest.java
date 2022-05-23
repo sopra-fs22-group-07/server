@@ -430,8 +430,8 @@ class UserServiceTest {
         //Comparing the First and second object of the pair of the matches. IF they are the same
         //Then the match contains the same pairs
         //Couldn't find a way to compare matches otherwise as the match is initialized in the method
-        assertEquals(testUser , isMatch.getUserPair().getObj1());
-        assertEquals(otherUser, isMatch.getUserPair().getObj2());
+        assertEquals(testUser , isMatch.getUsers().getObj1());
+        assertEquals(otherUser, isMatch.getUsers().getObj2());
     }
 
     @Test
@@ -858,10 +858,10 @@ class UserServiceTest {
 
     assertFalse(userService.doesMatchExist(testUser, otherUser));
 
-    if (!testUser.getBlockedUsers().contains(otherUser)){
+    if (!testUser.getBlockedUserRelations().contains(otherUser)){
       fail("Expected otherUser to be in testUsers block list");
     }
-    if (!otherUser.getBlockedUsers().contains(testUser)){
+    if (!otherUser.getBlockedUserRelations().contains(testUser)){
       fail("Expected testUser to be in otherUsers block list");
     }
   }

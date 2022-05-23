@@ -1,11 +1,10 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+
+import static ch.uzh.ifi.hase.soprafs22.entity.BlockedUserRelation.getUserPair;
 
 /**
  * This is the Match Entity, it saves two users into it, and has a unique ID. It receives and returns a Pair of users.
@@ -56,13 +55,10 @@ public class Match implements Serializable {
     this.users.add(userPair.getObj2());
   }
 
-  public Pair<User, User> getUserPair() {
+  public Pair<User, User> getUsers() {
     // convert Set to List
-    List<User> userList = new ArrayList<>(this.users);
-    if (userList.size() != 2) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Got Match with " + userList.size() + " users");
-    }
-    return new Pair<>(userList.get(0), userList.get(1));
+    // defined in BlockedUserRelation.java
+    return getUserPair(this.users);
   }
 
   public Chat getChat(){ return  this.chat; }

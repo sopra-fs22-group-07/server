@@ -99,9 +99,8 @@ public class User implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "users")
     private Set<Match> matches = new HashSet<>();
 
-    // cascade must not include remove, so that blocked users don't get deleted on user deletion
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    private Set<User> blockedUsers = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "users")
+    private Set<BlockedUserRelation> blockedUserRelations = new HashSet<>();
 
 
     // GETTERS AND SETTERS
@@ -239,12 +238,16 @@ public class User implements Serializable {
     public int getMaxRange(){return maxRange;}
     public void setMaxRange(int maxRange){this.maxRange = maxRange;}
 
-    public Set<User> getBlockedUsers() {
+    public Set<User> getBlockedUserRelations() {
+        Set<User> blockedUsers = new HashSet<>();
+        for (BlockedUserRelation blockedUserRelation : this.blockedUserRelations) {
+            blockedUsers.add(blockedUserRelation.getBlockedUserFromUser(this));
+        }
         return blockedUsers;
     }
 
-    public void addBlockedUsers(User userToBlock) {
-        this.blockedUsers.add(userToBlock);
+    public void addBlockedUsers(BlockedUserRelation blockedUserRelation) {
+        this.blockedUserRelations.add(blockedUserRelation);
     }
 
     public double getLatitude() {return latitude;}
