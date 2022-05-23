@@ -50,25 +50,19 @@ class UserServiceTest {
   private BlackCard otherBlackCard;
   private UserBlackCards userBlackCards;
   private Game testGame;
+  private Match testMatch;
+  private Match otherMatch;
 
   @BeforeEach
   public void setup() {
     MockitoAnnotations.openMocks(this);
     // given
-    testUser = new User();
-    testUser.setId(1L);
-    testUser.setName("testName");
-    testUser.setUsername("testUsername");
-    testUser.setPassword("1234");
+    testUser = fillUser(1L, "testName", "testUsername", "1234");
     testUser.setGender(Gender.OTHER);
     testUser.setBirthday(new Date());
 
     //other user for matching etc
-    otherUser = new User();
-    otherUser.setId(2L);
-    otherUser.setName("otherUser");
-    otherUser.setUsername("testOtherUsername");
-    otherUser.setPassword("1234");
+    otherUser = fillUser(2L, "otherUser", "testOtherUsername", "1234");
     otherUser.setGender(Gender.OTHER);
 
     //give; white card for testing
@@ -78,7 +72,6 @@ class UserServiceTest {
     testWhiteCards = new ArrayList<>();
     testWhiteCards.add(testWhiteCard);
 
-    testGame = new Game();
     testBlackCard = new BlackCard();
     testBlackCard.setText("GapText");
     testBlackCard.setId(22L);
@@ -86,6 +79,7 @@ class UserServiceTest {
     otherBlackCard.setId(33L);
     otherBlackCard.setText("some Text");
 
+    testGame = new Game();
     testGame.setId(111L);
     testGame.setUser(testUser);
     testGame.setBlackCard(testBlackCard);
@@ -165,11 +159,7 @@ class UserServiceTest {
   @Test
   void loginUser_success() {
       // given
-      User inputUser = new User();
-      inputUser.setId(testUser.getId());
-      inputUser.setName("testName");
-      inputUser.setUsername("testUsername");
-      inputUser.setPassword("1234");
+      User inputUser = fillUser(testUser.getId(), "testName", "testUsername", "1234");
 
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
@@ -187,11 +177,7 @@ class UserServiceTest {
   void loginUser_error() {
       // given -> a first user has already been created
       userService.createUser(testUser);
-      User inputUser = new User();
-      inputUser.setId(testUser.getId());
-      inputUser.setName("testName");
-      inputUser.setUsername("testUsername");
-      inputUser.setPassword("abcd");
+      User inputUser = fillUser(testUser.getId(), "testName", "testUsername", "abcd");
 
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
@@ -259,11 +245,7 @@ class UserServiceTest {
     @Test
     void updateUser_Conflict(){ //Test what happens when user tries to change username to a name that already is taken
         //Second user, that has the newUsername, that testUser wants
-        User conflictUser = new User();
-        conflictUser.setId(2L);
-        conflictUser.setName("conflictName");
-        conflictUser.setUsername("newUsername");
-        conflictUser.setPassword("1234");
+        User conflictUser = fillUser(2L, "conflictName", "newUsername", "1234");
         conflictUser.setGender(Gender.OTHER);
 
         userService.createUser(testUser);
@@ -279,6 +261,42 @@ class UserServiceTest {
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.updateUser(putUser));
         assertEquals(HttpStatus.CONFLICT, e.getStatus());
+    }
+
+    @Test
+    void updatePreferences_sucess() {
+        User user = userService.createUser(testUser);
+        Mockito.when(userRepository.findById(1L)).thenReturn(user);
+
+        User preferences = new User();
+        preferences.setId(1L);
+        assertDoesNotThrow(() -> userService.updatePreferences(preferences));
+        assertEquals(18, user.getMinAge());
+
+        preferences.setGenderPreferences(new HashSet<>(Collections.singleton(Gender.MALE)));
+        userService.updatePreferences(preferences);
+        assertEquals(18, user.getMinAge());
+        assertEquals(1, user.getGenderPreferences().size());
+        assertTrue(user.getGenderPreferences().contains(Gender.MALE));
+
+        preferences.setMinAge(70);
+        preferences.setMaxAge(75);
+        userService.updatePreferences(preferences);
+        assertEquals(70, user.getMinAge());
+        assertEquals(75, user.getMaxAge());
+
+        preferences.setMaxRange(33);
+        userService.updatePreferences(preferences);
+        assertEquals(33, user.getMaxRange());
+
+        // these are out of bound and should not change anything
+        preferences.setMaxRange(0);
+        userService.updatePreferences(preferences);
+        assertEquals(33, user.getMaxRange());
+
+        preferences.setMaxRange(20010);
+        userService.updatePreferences(preferences);
+        assertEquals(33, user.getMaxRange());
     }
 
     @Test
@@ -578,20 +596,18 @@ class UserServiceTest {
     @Test
     void doesMatchExist_false(){
         // given
-        User testUser2 = new User();
-        testUser2.setId(3L);
-        testUser2.setName("testName");
-        testUser2.setUsername("testUsername3");
-        testUser2.setPassword("1234");
-        testUser2.setGender(Gender.OTHER);
+        Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(0);
+        Mockito.when(matchRepository.countMatchByUserPair(otherUser, testUser)).thenReturn(0);
 
-        Match testMatch = userService.createMatch(otherUser, testUser2);
-        testMatch.setMatchId(2L);
-
-        Mockito.when(matchRepository.findByMatchId(2L)).thenReturn(testMatch);
-        userService.setMatch(testMatch);
         assertFalse(userService.doesMatchExist(testUser, otherUser));
         assertFalse(userService.doesMatchExist(otherUser, testUser));
+    }
+
+    @Test
+    void doesMatchExist_error(){
+        Mockito.when(matchRepository.countMatchByUserPair(testUser, otherUser)).thenReturn(2);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doesMatchExist(testUser, otherUser));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
     }
 
     @Test
@@ -848,7 +864,186 @@ class UserServiceTest {
     if (!otherUser.getBlockedUsers().contains(testUser)){
       fail("Expected testUser to be in otherUsers block list");
     }
-
   }
 
+  @Test
+  void agePreferenceCalculationsTest() {
+      Calendar cal = Calendar.getInstance();
+      cal.set(2000, Calendar.JANUARY, 1);
+      Date firstJan = cal.getTime();
+      testUser.setBirthday(firstJan);
+      cal.set(1999, Calendar.DECEMBER, 31);
+      Date thirty1Dez = cal.getTime();
+      otherUser.setBirthday(thirty1Dez);
+      cal.setTime(new Date());
+      cal.add(Calendar.DAY_OF_MONTH, -1);
+      cal.add(Calendar.YEAR, -21);
+      Date yesterdayBirthday = cal.getTime();
+      User thirdUser = fillUser(3L, "third", "thirdUser", "pw3");
+      thirdUser.setBirthday(yesterdayBirthday);
+      cal.add(Calendar.DAY_OF_MONTH, 2);
+      Date tomorrowBirthday = cal.getTime();
+      User fourthUser = fillUser(4L, "fourth", "fourthUser", "pw4");
+      fourthUser.setBirthday(tomorrowBirthday);
+
+      userService.createUser(testUser);
+      userService.createUser(otherUser);
+      userService.createUser(thirdUser);
+      userService.createUser(fourthUser);
+
+      Set<Gender> expectedGenders = new TreeSet<>();
+      expectedGenders.add(Gender.MALE);
+      expectedGenders.add(Gender.FEMALE);
+      expectedGenders.add(Gender.OTHER);
+
+      assertEquals(expectedGenders, testUser.getGenderPreferences());
+      assertEquals(expectedGenders, otherUser.getGenderPreferences());
+
+      assertEquals(18, thirdUser.getMinAge());
+      assertEquals(18, fourthUser.getMinAge());
+      assertTrue(testUser.getMinAge() > 18 && otherUser.getMinAge() > 18);
+      cal.setTime(new Date());
+      boolean exception = (cal.get(Calendar.MONTH) == Calendar.DECEMBER && cal.get(Calendar.DAY_OF_MONTH) == 31);
+      assertTrue(exception || testUser.getMaxAge() == otherUser.getMaxAge());
+      assertEquals(thirdUser.getMaxAge(), fourthUser.getMaxAge() + 1);
+  }
+
+  @Test
+  void getMatches_success() {
+      setupMatches(1);
+      assertEquals(List.of(testMatch), userService.getMatches(testUser));
+
+      //case multiple matches exist
+      setupMatches(2);
+      assertEquals(List.of(testMatch, otherMatch), userService.getMatches(testUser));
+  }
+
+    @Test
+    void getMatches_null() {
+        Mockito.when(matchRepository.getOne(Mockito.any())).thenReturn(null);
+        assertEquals(Collections.emptyList(), userService.getMatches(testUser));
+    }
+
+    @Test
+    void getUsersFromMatches_success() {
+        List<Match> matches = new ArrayList<>();
+        assertEquals(new ArrayList<>(), userService.getUsersFromMatches(testUser, matches));
+        setupMatches(1);
+        matches.add(testMatch);
+        assertEquals(List.of(otherUser), userService.getUsersFromMatches(testUser, matches));
+        setupMatches(2);
+        matches.add(otherMatch);
+        List<User> res = userService.getUsersFromMatches(testUser, matches);
+        assertEquals(2, res.size());
+        assertTrue(res.contains(otherUser));
+    }
+
+    @Test
+    void getMatchedUsers_success() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        assertEquals(new ArrayList<>(),userService.getMatchedUsers(testUser.getId()));
+        setupMatches(1);
+        assertEquals(List.of(otherUser), userService.getMatchedUsers(testUser.getId()));
+        setupMatches(2);
+        List<User> res = userService.getMatchedUsers(testUser.getId());
+        assertEquals(2, res.size());
+        assertTrue(res.contains(otherUser));
+    }
+
+    @Test
+    void getActiveGame_success() {
+      testUser.setActiveGame(testGame);
+      Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+      assertEquals(testGame, userService.getActiveGame(testUser.getId()));
+    }
+
+    @Test
+    void getActiveGame_fail() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.getActiveGame(1L));
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("No active game", e.getReason());
+    }
+
+    @Test
+    void getChatIds_success() {
+        setupMatches(1);
+        setupMatches(2);
+
+        Chat chat1 = new Chat();
+        chat1.setId(88);
+        testMatch.setChat(chat1);
+        Chat chat2 = new Chat();
+        chat2.setId(89);
+        otherMatch.setChat(chat2);
+
+        assertEquals(Collections.emptyList(), userService.getChatIds(new ArrayList<>()));
+        assertEquals(List.of(88L), userService.getChatIds(List.of(testMatch)));
+        assertEquals(List.of(88L, 89L), userService.getChatIds(List.of(testMatch, otherMatch)));
+    }
+
+    @Test
+    void deleteNotNeededPastGamesWithoutPlays_success() {
+      assertDoesNotThrow(() -> userService.deleteNotNeededPastGamesWithoutPlays(testUser));
+
+      Game empty = new Game();
+      testUser.addGame(empty);
+
+      Play play1 = new Play();
+      play1.setCard(testWhiteCard);
+      play1.setUserId(otherUser.getId());
+      testGame.enqueuePlay(play1);
+      testUser.addGame(testGame);
+
+      Game active = new Game();
+      active.setGameStatus(GameStatus.ACTIVE);
+      testUser.addGame(active);
+
+      assertEquals(3, testUser.getGames().size());
+      userService.deleteNotNeededPastGamesWithoutPlays(testUser);
+      assertEquals(2, testUser.getGames().size());
+      assertTrue(testUser.getGames().contains(testGame));
+      assertTrue(testUser.getGames().contains(active));
+    }
+
+    @Test
+    void getLoginStatus_success() {
+        testUser.setToken("token");
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+
+        testUser.setStatus(UserStatus.OFFLINE);
+        assertEquals("offline", userService.getLoginStatus(testUser.getToken(), testUser.getId()));
+
+        testUser.setStatus(UserStatus.ONLINE);
+        assertEquals("online", userService.getLoginStatus(testUser.getToken(), testUser.getId()));
+    }
+
+    private User fillUser(Long id, String name, String userName, String password) {
+        User user = new User();
+        user.setId(id);
+        user.setName(name);
+        user.setUsername(userName);
+        user.setPassword(password);
+        return user;
+    }
+
+    private void setupMatches(int whichMatch){
+        if (whichMatch == 1) {
+            testMatch = userService.createMatch(testUser, otherUser);
+            testMatch.setMatchId(222L);
+            testMatch.setUserPair(new Pair<>(testUser, otherUser));
+            userService.setMatch(testMatch);
+            Mockito.when(matchRepository.getOne(testMatch.getMatchId())).thenReturn(testMatch);
+            Mockito.when(matchRepository.findByMatchId(testMatch.getMatchId())).thenReturn(testMatch);
+        } else if (whichMatch == 2) {
+            User thirdUser = new User();
+            thirdUser.setId(13L);
+            otherMatch = userService.createMatch(thirdUser, testUser);
+            otherMatch.setMatchId(223L);
+            userService.setMatch(otherMatch);
+            Mockito.when(matchRepository.getOne(otherMatch.getMatchId())).thenReturn(otherMatch);
+            Mockito.when(matchRepository.findByMatchId(otherMatch.getMatchId())).thenReturn(otherMatch);
+        }
+    }
 }

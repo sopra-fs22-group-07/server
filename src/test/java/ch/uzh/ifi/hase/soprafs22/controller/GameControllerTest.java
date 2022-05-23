@@ -153,23 +153,22 @@ class GameControllerTest {
         mockMvc.perform(postRequest).andExpect(status().isCreated());
     }
 
-    /**TODO: Fix Test @Seraina
     @Test
     void givenBlackCards_whenGetBlackCardFromRandomUser() throws Exception {
-        given(userService.getUserById(isA(Long.class))).willReturn(user);
-        given(gameService.getGameFromRandomUser(isA(Long.class), isA(User.class))).willReturn(game);
+        given(userService.getUserById(otherUser.getId())).willReturn(otherUser);
+        given(gameService.getGameFromRandomUser(isA(User.class))).willReturn(game);
 
         // when
-        MockHttpServletRequestBuilder getRequest = get("/users/1/games/blackCards", user.getId())
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/blackCards", otherUser.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("authorization", user.getToken());
+                .header("authorization", "token");
 
         // then
         mockMvc.perform(getRequest).andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameId",is(111)))
                 .andExpect(jsonPath("$.blackCard.id",is(3)))
                 .andExpect(jsonPath("$.blackCard.text",is(blackCard.getText())));
-    }*/
+    }
 
     @Test
     void givenWhiteCards_whenGetWhiteCardsFromUser() throws Exception {
@@ -403,6 +402,32 @@ class GameControllerTest {
 
         // then
         mockMvc.perform(getRequest).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getActiveGame_givenActive() throws Exception {
+        given(userService.getActiveGame(user.getId())).willReturn(game);
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/activeGame", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isOk())
+                .andExpect(jsonPath("$.gameId", is(game.getId().intValue())))
+                .andExpect(jsonPath("$.blackCard.text", is(game.getBlackCard().getText())));
+
+    }
+
+    @Test
+    void getActiveGame_givenNoActive() throws Exception {
+        given(userService.getActiveGame(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/games/activeGame", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+
     }
 
     /**

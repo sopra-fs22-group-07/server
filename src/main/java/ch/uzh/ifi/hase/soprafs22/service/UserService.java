@@ -95,10 +95,6 @@ public class UserService {
     return newUser;
   }
 
-    private long getAgeInMilliSeconds(Date birthday) {
-        return new Date().getTime() - birthday.getTime();
-    }
-
     private int getAge(Date birthday) {
         int years;
         int months;
@@ -129,8 +125,8 @@ public class UserService {
     }
 
     private int findMinAgeDefault(Date userBirthday){
-        long age = getAgeInMilliSeconds(userBirthday);
-        return age - 3 * Time.ONE_YEAR < 18 * Time.ONE_YEAR ? 18 : getAge(userBirthday) - 3;
+        int age = getAge(userBirthday);
+        return Math.max(age - 3, 18);
     }
 
     private int findMaxAgeDefault(Date userBirthday) {
@@ -674,6 +670,9 @@ public class UserService {
       demoUser1.setName("Demo User 1");
       demoUser1.setGender(Gender.MALE);
       demoUser1.setBirthday(new Date());
+      demoUser1.setMaxAge(30);
+      demoUser1.setMinAge(18);
+      demoUser1.setMaxRange(30);
       demoUser1 = createUser(demoUser1);
 
       User demoUser2 = new User();
@@ -682,6 +681,9 @@ public class UserService {
       demoUser2.setName("Demo User 2");
       demoUser2.setGender(Gender.FEMALE);
       demoUser2.setBirthday(new Date());
+      demoUser2.setMaxAge(30);
+      demoUser2.setMinAge(18);
+      demoUser2.setMaxRange(30);
       demoUser2 = createUser(demoUser2);
 
       User demoUser3 = new User();
@@ -690,6 +692,9 @@ public class UserService {
       demoUser3.setName("Demo User 3");
       demoUser3.setGender(Gender.OTHER);
       demoUser3.setBirthday(new Date());
+      demoUser3.setMaxAge(30);
+      demoUser3.setMinAge(18);
+      demoUser3.setMaxRange(30);
       demoUser3 = createUser(demoUser3);
 
       User demoUser4 = new User();
@@ -698,6 +703,9 @@ public class UserService {
       demoUser4.setName("Demo User 4");
       demoUser4.setGender(Gender.OTHER);
       demoUser4.setBirthday(new Date());
+      demoUser4.setMaxAge(30);
+      demoUser4.setMinAge(18);
+      demoUser4.setMaxRange(30);
       demoUser4 = createUser(demoUser4);
 
       User demoUser5 = new User();
@@ -706,6 +714,9 @@ public class UserService {
       demoUser5.setName("Demo User 5");
       demoUser5.setGender(Gender.OTHER);
       demoUser5.setBirthday(new Date());
+      demoUser5.setMaxAge(30);
+      demoUser5.setMinAge(18);
+      demoUser5.setMaxRange(30);
       demoUser5 = createUser(demoUser5);
 
       User demoUser6 = new User();
@@ -714,6 +725,9 @@ public class UserService {
       demoUser6.setName("Demo User 6");
       demoUser6.setGender(Gender.OTHER);
       demoUser6.setBirthday(new Date());
+      demoUser6.setMaxAge(30);
+      demoUser6.setMinAge(18);
+      demoUser6.setMaxRange(30);
       demoUser6 = createUser(demoUser6);
 
       User demoUser7 = new User();
@@ -722,6 +736,9 @@ public class UserService {
       demoUser7.setName("Demo User 7");
       demoUser7.setGender(Gender.OTHER);
       demoUser7.setBirthday(new Date());
+      demoUser7.setMaxAge(30);
+      demoUser7.setMinAge(18);
+      demoUser7.setMaxRange(30);
       demoUser7 = createUser(demoUser7);
 
       User demoUser8 = new User();
@@ -730,6 +747,9 @@ public class UserService {
       demoUser8.setName("Demo User 8");
       demoUser8.setGender(Gender.OTHER);
       demoUser8.setBirthday(new Date());
+      demoUser8.setMaxAge(30);
+      demoUser8.setMinAge(18);
+      demoUser8.setMaxRange(30);
       demoUser8 = createUser(demoUser8);
 
       User demoUser9 = new User();
@@ -738,6 +758,9 @@ public class UserService {
       demoUser9.setName("Demo User 9");
       demoUser9.setGender(Gender.OTHER);
       demoUser9.setBirthday(new Date());
+      demoUser9.setMaxAge(30);
+      demoUser9.setMinAge(18);
+      demoUser9.setMaxRange(30);
       demoUser9 = createUser(demoUser9);
 
 
@@ -896,4 +919,34 @@ public class UserService {
     }
 
   }
+  public String getLoginStatus(String token, long userId) {
+    User user = getUserById(userId);
+
+    if (user.getToken().equals(token) && user.getStatus().equals(UserStatus.ONLINE)) {
+      return "online";
+    }
+    return "offline";
+  }
+
+    /**
+     * recursive function to delete past games without plays on it,
+     * until one with plays on it is reached
+     * @param user user where games have to be deleted
+     */
+    public void deleteNotNeededPastGamesWithoutPlays(User user) {
+        List<Game> games = user.getGames();
+        // if empty list, nothing to delete
+        if(games.isEmpty()){
+            return;
+        }
+        Game oldestGame = games.get(0);
+        // if game is null or has plays or is active, nothing to delete
+        if(oldestGame==null || (!oldestGame.getPlays().isEmpty()) || oldestGame.getGameStatus()==GameStatus.ACTIVE){
+            return;
+        }
+        // delete pastGame without plays
+        user.deletePastGame(oldestGame);
+        deleteNotNeededPastGamesWithoutPlays(user);
+
+    }
 }
