@@ -240,7 +240,7 @@ public class UserController {
       userService.instantiateDemoUsers();  // throws 400 if the function has been called previously since the server was started
   }
 
-  @PostMapping(value="/users/{userId}/location")
+  @PutMapping(value="/users/{userId}/location")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
   public void updateLocation(
