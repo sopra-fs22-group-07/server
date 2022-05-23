@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.LocationPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
@@ -609,6 +610,20 @@ class UserControllerTest extends UserFiller {
         user1.setStatus(UserStatus.ONLINE);
         mockMvc.perform(getRequest).andExpect(status().isOk());
         //TODO: read the returned value
+    }
+
+    @Test
+    void updateLocation_sucess() throws Exception {
+        User user1 = fillUser(1L, "1");
+        doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
+
+        LocationPostDTO locationDTO = new LocationPostDTO();
+
+        MockHttpServletRequestBuilder putRequest = put("/users/{userId}/preferences", user1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(locationDTO))
+                .header("authorization", user1.getToken());
+        mockMvc.perform(putRequest).andExpect(status().isNoContent());
     }
 
   /**
