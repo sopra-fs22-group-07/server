@@ -480,8 +480,8 @@ public class UserService {
     User user2 = userPair.getObj2();
 
     // Add Match to both users
-    user1.addMatch(match.getMatchId());
-    user2.addMatch(match.getMatchId());
+    user1.addMatch(match);
+    user2.addMatch(match);
 
     // Save and Flush
     userRepository.save(user1);

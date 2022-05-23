@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
+import java.util.*;
 
 /**
  * This is the Match Entity, it saves two users into it, and has a unique ID. It receives and returns a Pair of users.
@@ -18,14 +21,15 @@ public class Match implements Serializable {
   @Column
   private Date creationDate = new Date();
 
-  @OneToOne
-  private User user1;
+  @ManyToMany(fetch = FetchType.LAZY,
+  cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(name = "USER_MATCHES",
+  joinColumns = {@JoinColumn(referencedColumnName = "match_id")},
+  inverseJoinColumns = {@JoinColumn(referencedColumnName = "user_id")})
+  private Set<User> users = new HashSet<>();
 
-  @OneToOne
-  private User user2;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "chatId", referencedColumnName = "id")
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "chatId", referencedColumnName = "id")
   private Chat chat;
 
   // GETTERS AND SETTERS
@@ -47,12 +51,17 @@ public class Match implements Serializable {
   }
 
   public void setUserPair(Pair<User, User> userPair) {
-    this.user1 = userPair.getObj1();
-    this.user2 = userPair.getObj2();
+    this.users.add(userPair.getObj1());
+    this.users.add(userPair.getObj2());
   }
 
   public Pair<User, User> getUserPair() {
-    return new Pair<>(user1, user2);
+    // convert Set to List
+    List<User> userList = new ArrayList<>(this.users);
+    if (userList.size() != 2) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Got Match with " + userList.size() + " users");
+    }
+    return new Pair<>(userList.get(0), userList.get(1));
   }
 
   public Chat getChat(){ return  this.chat; }
