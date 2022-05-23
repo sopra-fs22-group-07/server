@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -67,4 +68,8 @@ public class Match implements Serializable {
       this.chat = chat;
   }
 
+  public User getMatchedUserFromUser(@NotNull User user) {
+    Pair<User, User> userPair = getUserPair(this.users);
+    return userPair.getObj1() == user ? userPair.getObj2() : userPair.getObj1();
+  }
 }

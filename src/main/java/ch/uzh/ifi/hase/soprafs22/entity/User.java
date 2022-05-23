@@ -238,7 +238,15 @@ public class User implements Serializable {
     public int getMaxRange(){return maxRange;}
     public void setMaxRange(int maxRange){this.maxRange = maxRange;}
 
-    public Set<User> getBlockedUserRelations() {
+    public Set<User> getMatchedUsers() {
+        Set<User> matchedUsers = new HashSet<>();
+        for (Match match : this.matches) {
+            matchedUsers.add(match.getMatchedUserFromUser(this));
+        }
+        return matchedUsers;
+    }
+
+    public Set<User> getBlockedUsers() {
         Set<User> blockedUsers = new HashSet<>();
         for (BlockedUserRelation blockedUserRelation : this.blockedUserRelations) {
             blockedUsers.add(blockedUserRelation.getBlockedUserFromUser(this));
