@@ -565,7 +565,10 @@ public class UserService {
    * @return boolean: true if a Match already exists, false otherwise.
    */
   public boolean doesMatchExist(User user, User otherUser) {
-    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    Set<Match> matches = user.getMatches();
+    // set intersection
+    matches.retainAll(otherUser.getMatches());
+    int count = matches.size();
     if (count > 1) {
       log.error(UNIQUE_VIOLATION);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
@@ -579,13 +582,8 @@ public class UserService {
      * @return List of Matches
      */
     public List<Match> getMatches(User user){
-        Set<Long> matchesOfUser = user.getMatches();
-        List<Match> matches = new ArrayList<>();
-        for(Long matchId : matchesOfUser){
-            matches.add(matchRepository.getOne(matchId));
-        }
-
-        return matches;
+        Set<Match> matchSet = user.getMatches();
+        return new ArrayList<>(matchSet);
     }
 
     /**
@@ -629,15 +627,14 @@ public class UserService {
   // return list of users that matched with the user with id "userId"
   public List<User> getMatchedUsers(long userId) {
 
-    // get id's of all matches of user with id userId
-    Set<Long> matches = getUserById(userId).getMatches();
+    // get all matches of user with id userId
+    Set<Match> matches = getUserById(userId).getMatches();
 
     // get user entities for all users with a match
     List<User> users = new ArrayList<>();
 
     // for all matches do:
-    for (long matchId : matches) {
-      Match match = matchRepository.findByMatchId(matchId);
+    for (Match match : matches) {
       // get users from match and add to list the one that is not the user with id userId
       Pair<User, User> userPair = match.getUserPair();
       if (userPair.getObj1().getId() != userId) {
@@ -869,22 +866,28 @@ public class UserService {
     User user = getUserById(userId);
     User otherUser = getUserById(otherUserId);
 
-    // count and check match
-    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    Set<Match> matches = user.getMatches();
+    // intersect matches with the matches of the other user
+    matches.retainAll(otherUser.getMatches());
+
+    int count = matches.size();
+
+    // case there exists no match between the two users
     if (count < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There exists no Match between the two users");
     }
+    // case there exists more than two matches between users, not really possible to reach, but rather a safety net
     else if (count > 1) {
       log.error(UNIQUE_VIOLATION);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
     }
+    // now, matches must definitely have size 1
     // get match
-    Match match = matchRepository.getMatchByUserPair(user, otherUser);
-    long matchId = match.getMatchId();
+    Match match = matches.iterator().next();
 
     // remove match from user
-    user.removeMatch(matchId);
-    otherUser.removeMatch(matchId);
+    user.removeMatch(match);
+    otherUser.removeMatch(match);
 
     userRepository.saveAndFlush(user);
     userRepository.saveAndFlush(otherUser);

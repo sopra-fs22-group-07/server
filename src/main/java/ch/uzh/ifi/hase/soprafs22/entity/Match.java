@@ -16,6 +16,7 @@ public class Match implements Serializable {
 
   @Id
   @GeneratedValue
+  @Column(name = "match_id")
   private long matchId;
 
   @Column

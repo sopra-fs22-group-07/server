@@ -165,7 +165,7 @@ public class User implements Serializable {
         return this.games;
     }
 
-    public Set<Long> getMatches() {return matches;}
+    public Set<Match> getMatches() {return matches;}
 
     public List<WhiteCard> getUserWhiteCards() {return userWhiteCards;}
     public void setUserWhiteCards(List<WhiteCard> usersWhiteCards) {this.userWhiteCards = usersWhiteCards;}
@@ -196,7 +196,6 @@ public class User implements Serializable {
     public void deletePastGame(Game game) {
         this.games.remove(game);
     }
-
 
     public void addMatch(Match match) {
         this.matches.add(match);
