@@ -53,4 +53,5 @@ public class UserPostDTO {
           this.gender = Gender.OTHER;
       }
   }
+
 }

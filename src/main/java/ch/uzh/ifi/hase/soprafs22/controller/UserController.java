@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 /**
  * User Controller
@@ -247,5 +250,21 @@ public class UserController {
   public void createDemoUsers(){
       userService.instantiateDemoUsers();  // throws 400 if the function has been called previously since the server was started
   }
+
+  @PutMapping(value="/users/{userId}/location")
+  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseBody
+  public void updateLocation(
+    @RequestHeader(value = "authorization", required = false) String token,
+    @RequestBody(required = true) LocationPostDTO locationDTO,
+    @PathVariable(value = "userId") long userId
+  ) {
+    double latitude = locationDTO.getLatitude();
+    double longitude = locationDTO.getLongitude();
+
+    userService.checkSpecificAccess(token, userId); // 401, 404
+    userService.updateLocation(userId, latitude, longitude);
+  }
+  
 
 }
