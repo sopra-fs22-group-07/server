@@ -229,8 +229,14 @@ public class GameService {
     Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
     // count the possible games
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
-            user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers());
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(
+      user.getId(),
+      user,
+      user.getGender(), 
+      minAgeDate, 
+      maxAgeDate, 
+      user.getBlockedUsers()
+    );
 
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -243,10 +249,69 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
-        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers());
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(
+      pageRequest, 
+      user.getId(), 
+      user,
+      user.getGender(), 
+      minAgeDate, 
+      maxAgeDate, 
+      user.getBlockedUsers()
+    );
+
+    // subset the page of users to only users that have a haversine distance of less than user.getMaxRange()
+    List<Game> games = somePage.getContent();
+    List<Game> gamesWithDistance = new ArrayList<>();
+    // go over all games that match the other criteria
+    for(Game game : games){
+      // for each game get the user that the game belongs to
+      User gameUser = game.getUser();
+
+      // calculate the distance between the two users
+      double distance = haversineDistance(
+        user.getLatitude(), 
+        user.getLongitude(), 
+        gameUser.getLatitude(), 
+        gameUser.getLongitude()
+      );
+
+      // if the distance is less than the max range, add the game to the list
+      if(distance <= user.getMaxRange()){
+        gamesWithDistance.add(game);
+      }
+    }
 
     // return the game
-    return somePage.getContent().get(0);
+    return gamesWithDistance.get(0);
   }
+
+
+  /**
+   * based on: https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude but adapted
+   * 
+   * Calculate distance between two points in latitude and longitude taking. 
+   * Uses Haversine method as its base.
+   * 
+   * lat1, lon1 Start point; lat2, lon2 End point
+   * @returns Distance in km
+   */
+  public static double haversineDistance(
+    double lat1, 
+    double lon1, 
+    double lat2, 
+    double lon2) {
+
+    final int R = 6371; // Radius of the earth
+
+    double latDistance = Math.toRadians(lat2 - lat1);
+    double lonDistance = Math.toRadians(lon2 - lon1);
+    double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+            * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    double distance = R * c; // distance in km
+
+    return distance;
+  }
+
 }
