@@ -858,10 +858,10 @@ class UserServiceTest {
 
     assertFalse(userService.doesMatchExist(testUser, otherUser));
 
-    if (!testUser.getBlockedUserRelations().contains(otherUser)){
+    if (!testUser.getBlockedUsers().contains(otherUser)){
       fail("Expected otherUser to be in testUsers block list");
     }
-    if (!otherUser.getBlockedUserRelations().contains(testUser)){
+    if (!otherUser.getBlockedUsers().contains(testUser)){
       fail("Expected testUser to be in otherUsers block list");
     }
   }
