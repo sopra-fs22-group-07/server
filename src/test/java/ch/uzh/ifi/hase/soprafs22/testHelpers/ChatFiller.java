@@ -42,8 +42,8 @@ public class ChatFiller {
         match.setMatchId(matchID);
         match.setUserPair(userPair);
         match.setChat(chat);
-        userPair.getObj1().addMatch(matchID);
-        userPair.getObj2().addMatch(matchID);
+        userPair.getObj1().addMatch(match);
+        userPair.getObj2().addMatch(match);
         return match;
     }
 }

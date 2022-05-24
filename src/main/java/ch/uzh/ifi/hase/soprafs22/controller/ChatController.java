@@ -44,7 +44,7 @@ public class ChatController {
     // get chatID
     List<Long> chatIds = userService.getChatIds(matches);
     // get matchedUser
-    List<User> usersMatched = userService.getUsersFromMatches(user, matches);
+    List<User> usersMatched = userService.getUsersFromMatches(user);
     // get the last Message from the matches/ chats
     List<Message> msg = chatService.getFirstMessages(matches);
 

@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
+import ch.uzh.ifi.hase.soprafs22.entity.Match;
 import ch.uzh.ifi.hase.soprafs22.entity.UserBlackCards;
 import ch.uzh.ifi.hase.soprafs22.entity.WhiteCard;
 
@@ -22,7 +23,7 @@ public class UserGetDetailsDTO {
   private UserBlackCards userBlackCards;
   private List<WhiteCard> userWhiteCards;
   private Set<Long> likedByUsers;
-  private Set<Long> matchIds;
+  private Set<Match> matches;
 
   public Long getId() {
     return id;
@@ -112,14 +113,6 @@ public class UserGetDetailsDTO {
     this.likedByUsers = likedByUsers;
   }
 
-  public Set<Long> getMatchIds() {
-    return matchIds;
-  }
-
-  public void setMatchIds(Set<Long> matchIds) {
-    this.matchIds = matchIds;
-  }
-
   public UserBlackCards getUserBlackCards() {
     return userBlackCards;
   }
@@ -134,5 +127,13 @@ public class UserGetDetailsDTO {
 
   public void setUserWhiteCards(List<WhiteCard> userWhiteCards) {
     this.userWhiteCards = userWhiteCards;
+  }
+
+  public Set<Match> getMatches() {
+    return matches;
+  }
+
+  public void setMatches(Set<Match> matches) {
+    this.matches = matches;
   }
 }

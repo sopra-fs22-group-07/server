@@ -63,7 +63,7 @@ public interface DTOMapper {
   @Mapping(source = "userBlackCards", target = "userBlackCards")
   @Mapping(source = "userWhiteCards", target = "userWhiteCards")
   @Mapping(source = "likedByUsers", target = "likedByUsers")
-  @Mapping(source = "matches", target = "matchIds")
+  @Mapping(source = "matches", target = "matches")
   UserGetDetailsDTO convertEntityToUserGetDetailsDTO(User user);
 
   @Mapping(source = "id", target = "id")

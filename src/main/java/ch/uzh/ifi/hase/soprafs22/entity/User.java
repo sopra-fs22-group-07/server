@@ -82,7 +82,8 @@ public class User implements Serializable {
     @JsonManagedReference
     private List<Game> games = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    // cascade must not include remove, so that white cards don't get deleted on user deletion
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<WhiteCard> userWhiteCards = new ArrayList<>();
 
     @OneToOne
@@ -94,11 +95,12 @@ public class User implements Serializable {
     @ElementCollection
     private Set<Long> likedByUsers = new TreeSet<>();
 
-    @ElementCollection
-    private Set<Long> matches = new TreeSet<>();
+    // cascade must include remove, so that the matches are deleted as well (important)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "users")
+    private Set<Match> matches = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
-    private Set<User> blockedUsers = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "users")
+    private Set<BlockedUserRelation> blockedUserRelations = new HashSet<>();
 
 
     // GETTERS AND SETTERS
@@ -162,7 +164,7 @@ public class User implements Serializable {
         return this.games;
     }
 
-    public Set<Long> getMatches() {return matches;}
+    public Set<Match> getMatches() {return matches;}
 
     public List<WhiteCard> getUserWhiteCards() {return userWhiteCards;}
     public void setUserWhiteCards(List<WhiteCard> usersWhiteCards) {this.userWhiteCards = usersWhiteCards;}
@@ -194,13 +196,12 @@ public class User implements Serializable {
         this.games.remove(game);
     }
 
-
-    public void addMatch(Long matchId) {
-        this.matches.add(matchId);
+    public void addMatch(Match match) {
+        this.matches.add(match);
     }
 
-    public void removeMatch(long matchId) {
-        this.matches.remove(matchId);
+    public void removeMatch(Match match) {
+        this.matches.remove(match);
     }
 
     public Set<Long> getLikedByUsers() {
@@ -237,12 +238,24 @@ public class User implements Serializable {
     public int getMaxRange(){return maxRange;}
     public void setMaxRange(int maxRange){this.maxRange = maxRange;}
 
+    public Set<User> getMatchedUsers() {
+        Set<User> matchedUsers = new HashSet<>();
+        for (Match match : this.matches) {
+            matchedUsers.add(match.getMatchedUserFromUser(this));
+        }
+        return matchedUsers;
+    }
+
     public Set<User> getBlockedUsers() {
+        Set<User> blockedUsers = new HashSet<>();
+        for (BlockedUserRelation blockedUserRelation : this.blockedUserRelations) {
+            blockedUsers.add(blockedUserRelation.getBlockedUserFromUser(this));
+        }
         return blockedUsers;
     }
 
-    public void addBlockedUsers(User userToBlock) {
-        this.blockedUsers.add(userToBlock);
+    public void addBlockedUsers(BlockedUserRelation blockedUserRelation) {
+        this.blockedUserRelations.add(blockedUserRelation);
     }
 
     public double getLatitude() {return latitude;}

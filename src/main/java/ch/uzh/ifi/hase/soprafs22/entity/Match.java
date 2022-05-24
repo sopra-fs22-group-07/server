@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Date;
+import java.util.*;
+
+import static ch.uzh.ifi.hase.soprafs22.entity.BlockedUserRelation.getUserPair;
 
 /**
  * This is the Match Entity, it saves two users into it, and has a unique ID. It receives and returns a Pair of users.
@@ -13,19 +16,21 @@ public class Match implements Serializable {
 
   @Id
   @GeneratedValue
+  @Column(name = "match_id")
   private long matchId;
 
   @Column
   private Date creationDate = new Date();
 
-  @OneToOne
-  private User user1;
+  @ManyToMany(fetch = FetchType.LAZY,
+  cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @JoinTable(name = "USER_MATCHES",
+  joinColumns = {@JoinColumn(referencedColumnName = "match_id")},
+  inverseJoinColumns = {@JoinColumn(referencedColumnName = "user_id")})
+  private Set<User> users = new HashSet<>();
 
-  @OneToOne
-  private User user2;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "chatId", referencedColumnName = "id")
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "chatId", referencedColumnName = "id")
   private Chat chat;
 
   // GETTERS AND SETTERS
@@ -47,12 +52,14 @@ public class Match implements Serializable {
   }
 
   public void setUserPair(Pair<User, User> userPair) {
-    this.user1 = userPair.getObj1();
-    this.user2 = userPair.getObj2();
+    this.users.add(userPair.getObj1());
+    this.users.add(userPair.getObj2());
   }
 
-  public Pair<User, User> getUserPair() {
-    return new Pair<>(user1, user2);
+  public Pair<User, User> getUsers() {
+    // convert Set to List
+    // defined in BlockedUserRelation.java
+    return getUserPair(this.users);
   }
 
   public Chat getChat(){ return  this.chat; }
@@ -61,4 +68,8 @@ public class Match implements Serializable {
       this.chat = chat;
   }
 
+  public User getMatchedUserFromUser(@NotNull User user) {
+    Pair<User, User> userPair = getUserPair(this.users);
+    return userPair.getObj1() == user ? userPair.getObj2() : userPair.getObj1();
+  }
 }
