@@ -838,8 +838,7 @@ class UserServiceTest {
 
     userService.blockUser(testUser.getId(), otherUser.getId());
 
-    //assertFalse(userService.doesMatchExist(testUser, otherUser));
-    // currently the match does not get removed when blocking, thus this assertion fails
+    assertFalse(userService.doesMatchExist(testUser, otherUser));
 
     if (!testUser.getBlockedUsers().contains(otherUser)){
       fail("Expected otherUser to be in testUsers block list");
