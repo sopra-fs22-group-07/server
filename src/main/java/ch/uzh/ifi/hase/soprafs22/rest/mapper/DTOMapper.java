@@ -40,6 +40,8 @@ public interface DTOMapper {
   @Mapping(source = "minAge", target = "minAge")
   @Mapping(source = "maxAge", target = "maxAge")
   @Mapping(source = "maxRange", target = "maxRange")
+  @Mapping(source = "longitude", target = "longitude")
+  @Mapping(source = "latitude", target = "latitude")
   @Mapping(source = "genderPreferences", target = "genderPreferences")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
