@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.security.Principal;
 
+//@CrossOrigins(origins = "*")
 public class WebSocketNotificationController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;

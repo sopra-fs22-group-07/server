@@ -24,6 +24,7 @@ import java.util.*;
  * - OneToOne: 1:1 Relation with other entities
  */
 
+@EntityListeners(AuditTrailListener.class)
 @Entity
 @Table(name = "USER")
 @JsonIdentityInfo(
@@ -238,4 +239,17 @@ public class User implements Serializable {
     public void addBlockedUsers(User userToBlock) {
         this.blockedUsers.add(userToBlock);
     }
+}
+
+public class AuditTrailListener {
+
+    @PostPersist
+    @PostUpdate
+    @PostRemove
+    private void afterAnyUpdate(User user) {
+        //streamDateTime(user)
+        //log.info("[USER AUDIT] add/update/delete complete for user: " + user.getId());
+
+    }
+
 }
