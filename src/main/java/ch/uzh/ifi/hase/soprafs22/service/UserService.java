@@ -588,24 +588,10 @@ public class UserService {
     /**
      * Get all users which match with the known user
      * @param user: known user
-     * @param matches: all matches from suer
      * @return list of users which mach with known user
      */
-    public List<User> getUsersFromMatches(User user, List<Match> matches) {
-        List<User> matchedUsers = new ArrayList<>();
-
-        // map the users to the matches
-        for (Match match : matches){
-            Pair<User,User> users = match.getUsers();
-            // add other user (by comparing it with the user, which is known)
-            if(user.equals(users.getObj1())){
-                matchedUsers.add(users.getObj2());
-            }else{
-                matchedUsers.add(users.getObj1());
-            }
-        }
-
-        return matchedUsers;
+    public List<User> getUsersFromMatches(User user) {
+      return new ArrayList<>(user.getMatchedUsers());
     }
 
 
@@ -625,26 +611,7 @@ public class UserService {
    */
   // return list of users that matched with the user with id "userId"
   public List<User> getMatchedUsers(long userId) {
-
-    // get all matches of user with id userId
-    Set<Match> matches = getUserById(userId).getMatches();
-
-    // get user entities for all users with a match
-    List<User> users = new ArrayList<>();
-
-    // for all matches do:
-    for (Match match : matches) {
-      // get users from match and add to list the one that is not the user with id userId
-      Pair<User, User> userPair = match.getUsers();
-      if (userPair.getObj1().getId() != userId) {
-        users.add(userPair.getObj1());
-      } else {
-        users.add(userPair.getObj2());
-      }
-    }
-
-    // return list of users
-    return users;
+    return getUsersFromMatches(getUserById(userId));
   }
 
 
@@ -897,6 +864,9 @@ public class UserService {
   }
 
   public void blockUser(long userId, long otherUserId) {
+    // first, delete match between users
+    deleteMatchBetweenUsers(userId, otherUserId);
+
     // because it is easier to check in one direction, we make the block in both direction, that is, both users block each
     // other. This works only because blocking is irreversible. Must be taken care of if blocking user should become reversible.
 

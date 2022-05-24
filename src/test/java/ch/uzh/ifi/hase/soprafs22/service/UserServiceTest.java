@@ -426,9 +426,8 @@ class UserServiceTest {
     @Test
     void createMatch_success(){
         Match isMatch = userService.createMatch(testUser, otherUser);
-
-        assertTrue(isMatch.getUsers().getObj1() == testUser || isMatch.getUsers().getObj1() == otherUser);
-        assertTrue(isMatch.getUsers().getObj2() == testUser || isMatch.getUsers().getObj2() == otherUser);
+        assertEquals(otherUser, isMatch.getMatchedUserFromUser(testUser));
+        assertEquals(testUser, isMatch.getMatchedUserFromUser(otherUser));
         assertNotNull(isMatch.getChat());
     }
 
@@ -895,11 +894,12 @@ class UserServiceTest {
   @Test
   void getMatches_success() {
       setupMatches(1);
-      assertEquals(List.of(testMatch), userService.getMatches(testUser));
+      // test for set equality
+      assertEquals(Set.of(testMatch), new HashSet<>(userService.getMatches(testUser)));
 
       //case multiple matches exist
       setupMatches(2);
-      assertEquals(List.of(testMatch, otherMatch), userService.getMatches(testUser));
+      assertEquals(Set.of(testMatch, otherMatch), new HashSet<>(userService.getMatches(testUser)));
   }
 
     @Test
@@ -910,14 +910,11 @@ class UserServiceTest {
 
     @Test
     void getUsersFromMatches_success() {
-        List<Match> matches = new ArrayList<>();
-        assertEquals(new ArrayList<>(), userService.getUsersFromMatches(testUser, matches));
+        assertEquals(new ArrayList<>(), userService.getUsersFromMatches(testUser));
         setupMatches(1);
-        matches.add(testMatch);
-        assertEquals(List.of(otherUser), userService.getUsersFromMatches(testUser, matches));
+        assertEquals(List.of(otherUser), userService.getUsersFromMatches(testUser));
         setupMatches(2);
-        matches.add(otherMatch);
-        List<User> res = userService.getUsersFromMatches(testUser, matches);
+        List<User> res = userService.getUsersFromMatches(testUser);
         assertEquals(2, res.size());
         assertTrue(res.contains(otherUser));
     }

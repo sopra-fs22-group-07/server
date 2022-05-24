@@ -32,6 +32,11 @@ public class BlockedUserRelation implements Serializable {
           inverseJoinColumns = {@JoinColumn(referencedColumnName = "user_id")})
   private Set<User> users = new HashSet<>();
 
+
+
+  // ------- GETTERS AND SETTERS -------- //
+
+
   public Pair<User, User> getUsers() {
     // convert Set to List
     return getUserPair(this.users);
@@ -50,18 +55,6 @@ public class BlockedUserRelation implements Serializable {
   public void setUserPair(@NotNull Pair<User, User> userPair) {
     this.users.add(userPair.getObj1());
     this.users.add(userPair.getObj2());
-  }
-
-  public long getBlockedRelationId() {
-    return blockedRelationId;
-  }
-
-  public void setBlockedRelationId(long blockedRelationId) {
-    this.blockedRelationId = blockedRelationId;
-  }
-
-  public Date getCreationDate() {
-    return creationDate;
   }
 
 

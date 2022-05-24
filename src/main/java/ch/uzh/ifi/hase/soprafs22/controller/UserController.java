@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 /**
@@ -226,8 +224,7 @@ public class UserController {
             @PathVariable(value = "otherUserId") long otherUserId
     ) {
       userService.checkSpecificAccess(token, userId); // 401, 404
-      userService.deleteMatchBetweenUsers(userId, otherUserId);
-      userService.blockUser(userId, otherUserId);
+      userService.blockUser(userId, otherUserId); // 400
     }
 
   @DeleteMapping("/users/{userId}/matches/{otherUserId}")

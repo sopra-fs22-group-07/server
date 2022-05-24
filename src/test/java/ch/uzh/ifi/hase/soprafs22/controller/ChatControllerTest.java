@@ -93,7 +93,7 @@ class ChatControllerTest extends ChatFiller {
         given(userService.getUserById(user1.getId())).willReturn(user1);
         given(userService.getMatches(user1)).willReturn(matches.subList(0,1));
         given(userService.getChatIds(Mockito.anyList())).willReturn(chatIds.subList(0,1));
-        given(userService.getUsersFromMatches(eq(user1), Mockito.anyList())).willReturn(userMatched.subList(0,1));
+        given(userService.getUsersFromMatches(eq(user1))).willReturn(userMatched.subList(0,1));
         given(chatService.getFirstMessages(Mockito.anyList())).willReturn(messages.subList(0,1));
 
         // when
@@ -111,7 +111,7 @@ class ChatControllerTest extends ChatFiller {
         given(userService.getUserById(user1.getId())).willReturn(user1);
         given(userService.getMatches(user1)).willReturn(matches);
         given(userService.getChatIds(matches)).willReturn(chatIds);
-        given(userService.getUsersFromMatches(user1, matches)).willReturn(userMatched);
+        given(userService.getUsersFromMatches(user1)).willReturn(userMatched);
         given(chatService.getFirstMessages(matches)).willReturn(messages);
 
         // when

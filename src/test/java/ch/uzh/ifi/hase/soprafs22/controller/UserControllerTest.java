@@ -492,12 +492,12 @@ class UserControllerTest extends UserFiller {
     User user = fillUser(1L, "token");
     User otherUser = fillUser(2L, "token2");
 
-    Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).deleteMatchBetweenUsers(Mockito.anyLong(), Mockito.anyLong());
+    Mockito.doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(userService).blockUser(Mockito.anyLong(), Mockito.anyLong());
 
     mockMvc.perform(put("/users/"+ user.getId()+"/matches/"+otherUser.getId()+"/block")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("authorization", user.getToken()))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isBadRequest());
   }
 
   @Test
