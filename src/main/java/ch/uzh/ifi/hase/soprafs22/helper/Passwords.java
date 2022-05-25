@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs22.entity;
+package ch.uzh.ifi.hase.soprafs22.helper;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -12,9 +12,7 @@ import java.util.Random;
 // Code borrowed from https://stackoverflow.com/a/18143616/17532411 by @https://stackoverflow.com/users/829571/assylias
 /**
  * A utility class to hash passwords and check passwords vs hashed values. It uses a combination of hashing and unique
- * salt. The algorithm used is PBKDF2WithHmacSHA1 which, although not the best for hashing password (vs. bcrypt) is
- * still considered robust and <a href="https://security.stackexchange.com/a/6415/12614"> recommended by NIST </a>.
- * The hashed value has 256 bits.
+ * salt. The algorithm used is PBKDF2WithHmacSHA512. The hashed value has 512 bits.
  */
 public class Passwords {
 
