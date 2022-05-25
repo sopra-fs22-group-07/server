@@ -1,6 +1,8 @@
 package ch.uzh.ifi.hase.soprafs22.service;
 
-import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.entity.Chat;
+import ch.uzh.ifi.hase.soprafs22.entity.Match;
+import ch.uzh.ifi.hase.soprafs22.entity.Message;
 import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +113,25 @@ public class ChatService {
 
         }
         return unreadMessages;
+    }
+
+    /**
+     * Get the userId from the other user. Only gives the correct result, if there are already messages, because Chat
+     * does not have references to the users. If there exists at least a message, the returned id is correct, else it is
+     * null
+     * @param chatId: long, id of the chat
+     * @param userId: long, id of the caller of the function
+     * @return Long, null if there are no messages between the users
+     */
+    public Long getUserIdFromOtherUser(long chatId, long userId) {
+        Chat chat = chatRepository.findById(chatId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_EXISTS)
+        );
+        if (chat.getFirstMessage() != null) {
+            Long u = chat.getFirstMessage().getFromUserId();
+            return (u==userId) ? chat.getFirstMessage().getToUserId() : u;
+        }
+        return null;
     }
 
     /**
