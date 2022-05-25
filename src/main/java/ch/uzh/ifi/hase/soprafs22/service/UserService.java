@@ -888,11 +888,11 @@ public class UserService {
 
     // only update if latitude and longitude are not 0
     // else keep them at default 0, i.e. do nothing
-    if (latitude != 0 && longitude != 0) {
-      user.setLatitude(latitude);
-      user.setLongitude(longitude);
+    if (latitude == 0 && longitude == 0) {
+        return;
     }
-
+    user.setLatitude(latitude);
+    user.setLongitude(longitude);
   }
   public String getLoginStatus(String token, long userId) {
     User user = getUserById(userId);

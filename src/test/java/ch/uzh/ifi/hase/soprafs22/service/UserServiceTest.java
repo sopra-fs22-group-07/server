@@ -987,6 +987,25 @@ class UserServiceTest {
     }
 
     @Test
+    void updateLocation_success() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        testUser.setLatitude(1.1);
+        testUser.setLongitude(1.1);
+
+        double lati = 36.5;
+        double longi = 44.5;
+        userService.updateLocation(testUser.getId(), lati, longi);
+        assertEquals(lati, testUser.getLatitude());
+        assertEquals(longi, testUser.getLongitude());
+        userService.updateLocation(testUser.getId(), 0, 0);
+        assertEquals(lati, testUser.getLatitude());
+        assertEquals(longi, testUser.getLongitude());
+        userService.updateLocation(testUser.getId(), lati, 0);
+        assertEquals(lati, testUser.getLatitude());
+        assertEquals(0, testUser.getLongitude());
+    }
+
+    @Test
     void getLoginStatus_success() {
         testUser.setToken("token");
 

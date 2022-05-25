@@ -249,7 +249,7 @@ public class UserController {
   }
 
   @PutMapping(value="/users/{userId}/location")
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
   public void updateLocation(
     @RequestHeader(value = "authorization", required = false) String token,
