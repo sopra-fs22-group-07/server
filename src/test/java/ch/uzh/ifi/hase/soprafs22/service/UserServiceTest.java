@@ -180,7 +180,7 @@ class UserServiceTest {
       userService.createUser(testUser);
       User inputUser = fillUser(testUser.getId(), "testName", "testUsername", "abcd");
 
-      Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
+      Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(inputUser);
 
       // then error, because different password
       ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doLogin(inputUser, "1234"));
