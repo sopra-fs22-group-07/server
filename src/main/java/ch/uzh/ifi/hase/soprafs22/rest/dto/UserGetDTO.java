@@ -18,6 +18,8 @@ public class UserGetDTO {
   private int minAge;
   private int maxAge;
   private int maxRange;
+    private double latitude;
+  private double longitude;
   private Set<Gender> genderPreferences;
 
   public Long getId() {
@@ -100,5 +102,21 @@ public class UserGetDTO {
 
   public void setGenderPreferences(Set<Gender> genderPreferences) {
         this.genderPreferences = genderPreferences;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
