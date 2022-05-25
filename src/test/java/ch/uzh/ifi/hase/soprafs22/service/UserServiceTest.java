@@ -919,18 +919,6 @@ class UserServiceTest {
     }
 
     @Test
-    void getMatchedUsers_success() {
-        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
-        assertEquals(new ArrayList<>(),userService.getMatchedUsers(testUser.getId()));
-        setupMatches(1);
-        assertEquals(List.of(otherUser), userService.getMatchedUsers(testUser.getId()));
-        setupMatches(2);
-        List<User> res = userService.getMatchedUsers(testUser.getId());
-        assertEquals(2, res.size());
-        assertTrue(res.contains(otherUser));
-    }
-
-    @Test
     void getActiveGame_success() {
       testUser.setActiveGame(testGame);
       Mockito.when(userRepository.findById(1L)).thenReturn(testUser);

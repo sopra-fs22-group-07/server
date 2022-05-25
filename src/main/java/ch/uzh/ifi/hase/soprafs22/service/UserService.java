@@ -326,7 +326,6 @@ public class UserService {
     User user = getUserById(userId);
     user.setUserWhiteCards(whiteCards);
     userRepository.saveAndFlush(user);
-
   }
 
   /**
@@ -336,7 +335,6 @@ public class UserService {
    * @return : created Match
    */
   public Match createMatch(User user, User otherUser) {
-
     // first, delete likes
     user.removeLikeFromUser(otherUser);
     otherUser.removeLikeFromUser(user);
@@ -602,18 +600,6 @@ public class UserService {
   public void deleteUser(long userId){
       userRepository.deleteById(userId);
   }
-
-
-  /**
-   * get all users that user has matched with
-   * @param userId: userId of user
-   * @return list of users that matched with the user with id "userId"
-   */
-  // return list of users that matched with the user with id "userId"
-  public List<User> getMatchedUsers(long userId) {
-    return getUsersFromMatches(getUserById(userId));
-  }
-
 
   // instantiate demo users
   public void instantiateDemoUsers() {

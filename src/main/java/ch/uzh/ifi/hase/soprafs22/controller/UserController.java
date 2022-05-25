@@ -178,7 +178,8 @@ public class UserController {
           @PathVariable(value = "userId") long id){
 
       userService.checkSpecificAccess(token, id); // 401, 404
-      List<User> matchedUsers = userService.getMatchedUsers(id);
+      User selfUser = userService.getUserById(id);
+      List<User> matchedUsers = userService.getUsersFromMatches(selfUser);
 
       // create response object
       List<UserGetDTO> userGetDTOs = new ArrayList<>();
