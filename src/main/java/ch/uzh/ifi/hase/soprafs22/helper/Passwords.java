@@ -9,7 +9,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Random;
 
-// Code borrowed from https://stackoverflow.com/a/18143616/17532411 by @https://stackoverflow.com/users/829571/assylias
+// Code from https://stackoverflow.com/a/18143616/17532411 by @https://stackoverflow.com/users/829571/assylias
 /**
  * A utility class to hash passwords and check passwords vs hashed values. It uses a combination of hashing and unique
  * salt. The algorithm used is PBKDF2WithHmacSHA512. The hashed value has 512 bits.
