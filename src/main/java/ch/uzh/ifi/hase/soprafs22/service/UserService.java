@@ -71,6 +71,10 @@ public class UserService {
    * @return user that was created
    */
   public User createUser(User newUser) {
+    // must give: birthday
+    if (newUser.getBirthday() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Birthday not provided.");
+    }
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
     newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
@@ -189,16 +193,17 @@ public class UserService {
      * @throws org.springframework.web.server.ResponseStatusException: 401
      * @see User
      */
-    public User doLogin(User inputUser) {
-        User userByUsername = userRepository.findByUsername(inputUser.getUsername());
-        // test if user exists and correct password is given
-        if (userByUsername == null || !Objects.equals(inputUser.getPassword(), userByUsername.getPassword())){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "Your Username or password is incorrect");
-        }
-        userByUsername.setStatus(UserStatus.ONLINE);
-        userRepository.saveAndFlush(userByUsername);
-        return userByUsername;
+    public User doLogin(User inputUser, String password) {
+
+      User userByUsername = userRepository.findByUsername(inputUser.getUsername());
+      // test if user exists and correct password is given
+      if (userByUsername == null || !userByUsername.getIsPasswordCorrect(password)){
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                  "Your Username or password is incorrect");
+      }
+      userByUsername.setStatus(UserStatus.ONLINE);
+      userRepository.saveAndFlush(userByUsername);
+      return userByUsername;
     }
 
   /**
