@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.helper.Pair;
 import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
@@ -164,7 +165,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // when -> setup additional mocks for UserRepository
-      User returnUser = userService.doLogin(inputUser);
+      User returnUser = userService.doLogin(inputUser, "1234");
 
       // then
       assertEquals(testUser.getId(), returnUser.getId());
@@ -182,7 +183,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // then error, because different password
-      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doLogin(inputUser));
+      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doLogin(inputUser, "1234"));
       assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
   }
 
@@ -984,6 +985,25 @@ class UserServiceTest {
       assertEquals(2, testUser.getGames().size());
       assertTrue(testUser.getGames().contains(testGame));
       assertTrue(testUser.getGames().contains(active));
+    }
+
+    @Test
+    void updateLocation_success() {
+        Mockito.when(userRepository.findById(1L)).thenReturn(testUser);
+        testUser.setLatitude(1.1);
+        testUser.setLongitude(1.1);
+
+        double lati = 36.5;
+        double longi = 44.5;
+        userService.updateLocation(testUser.getId(), lati, longi);
+        assertEquals(lati, testUser.getLatitude());
+        assertEquals(longi, testUser.getLongitude());
+        userService.updateLocation(testUser.getId(), 0, 0);
+        assertEquals(lati, testUser.getLatitude());
+        assertEquals(longi, testUser.getLongitude());
+        userService.updateLocation(testUser.getId(), lati, 0);
+        assertEquals(lati, testUser.getLatitude());
+        assertEquals(0, testUser.getLongitude());
     }
 
     @Test
