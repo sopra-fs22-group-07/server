@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.entity;
 
+import ch.uzh.ifi.hase.soprafs22.helper.Pair;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -16,7 +18,7 @@ public class Match implements Serializable {
 
   @Id
   @GeneratedValue
-  @Column(name = "match_id")
+  @Column(name = "id")
   private long matchId;
 
   @Column
@@ -25,7 +27,7 @@ public class Match implements Serializable {
   @ManyToMany(fetch = FetchType.LAZY,
   cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @JoinTable(name = "USER_MATCHES",
-  joinColumns = {@JoinColumn(referencedColumnName = "match_id")},
+  joinColumns = {@JoinColumn(referencedColumnName = "id")},
   inverseJoinColumns = {@JoinColumn(referencedColumnName = "user_id")})
   private Set<User> users = new HashSet<>();
 

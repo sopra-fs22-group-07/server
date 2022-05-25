@@ -30,28 +30,6 @@ public class UserController {
     this.userService = userService;
   }
 
-  /**
-   * Not implemented by client, thus not documented in REST interface.
-   */
-  @GetMapping("/users")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public List<UserGetDTO> getAllUsers(@RequestHeader(value = "authorization", required = false) String token) {
-
-    // check if source of query has access token
-    userService.checkGeneralAccess(token); // 401, 404
-
-    // fetch all users in the internal representation
-    List<User> users = userService.getUsers();
-    List<UserGetDTO> userGetDTOs = new ArrayList<>();
-
-    // convert each user to the API representation
-    for (User user : users) {
-      userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-    }
-    return userGetDTOs;
-  }
-
   @PostMapping("/users")
   @ResponseBody
   public ResponseEntity<UserGetDTO> createUser(@RequestBody UserPostDTO userPostDTO) {
@@ -77,7 +55,7 @@ public class UserController {
       User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
       // check username and password, throws UNAUTHORIZED if false
-      User returnUser = userService.doLogin(userInput); // 401
+      User returnUser = userService.doLogin(userInput, userPostDTO.getPassword()); // 401
 
       // set header
       MultiValueMap<String, String> httpHeaders = new HttpHeaders();
@@ -111,7 +89,7 @@ public class UserController {
   @ResponseBody
   public UserGetDTO getUser(@RequestHeader(value = "authorization", required = false) String token,
                             @PathVariable(value = "userId") int userId) {
-    userService.checkGeneralAccess(token);
+    userService.checkSpecificAccess(token, userId);
     User user = userService.getUserById(userId);
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }

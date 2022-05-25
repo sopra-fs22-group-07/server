@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs22.entity;
 import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs22.helper.Passwords;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -50,11 +51,14 @@ public class User implements Serializable {
     @Column
     private Date creationDate = new Date();
 
-    // @Column(nullable = false)
+    @Column(nullable = false)
     private UserStatus status;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(length = 16, updatable = false)
+    private byte[] salt = Passwords.getNextSalt();
+
+    @Column(length = 64, nullable = false)
+    private byte[] password;
 
     @Column
     private Date birthday;
@@ -126,8 +130,8 @@ public class User implements Serializable {
     public Date getBirthday(){return this.birthday; }
     public void setBirthday(Date birthday){this.birthday = birthday; }
 
-    public String getPassword(){return this.password; }
-    public void setPassword(String password){this.password = password; }
+    public boolean getIsPasswordCorrect(String password){ return Passwords.isExpectedPassword(password.toCharArray(), this.salt, this.password); }
+    public void setPassword(String password){ this.password = Passwords.hash(password.toCharArray(), this.salt); }
 
     public Gender getGender(){return this.gender; }
     public void setGender(Gender gender){this.gender = gender; }

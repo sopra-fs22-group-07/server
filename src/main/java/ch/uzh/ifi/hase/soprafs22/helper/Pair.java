@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs22.entity;
+package ch.uzh.ifi.hase.soprafs22.helper;
 
 import java.util.Objects;
 

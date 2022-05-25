@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.helper.Pair;
 import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
@@ -164,7 +165,7 @@ class UserServiceTest {
       Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
 
       // when -> setup additional mocks for UserRepository
-      User returnUser = userService.doLogin(inputUser);
+      User returnUser = userService.doLogin(inputUser, "1234");
 
       // then
       assertEquals(testUser.getId(), returnUser.getId());
@@ -179,10 +180,10 @@ class UserServiceTest {
       userService.createUser(testUser);
       User inputUser = fillUser(testUser.getId(), "testName", "testUsername", "abcd");
 
-      Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(testUser);
+      Mockito.when(userRepository.findByUsername(inputUser.getUsername())).thenReturn(inputUser);
 
       // then error, because different password
-      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doLogin(inputUser));
+      ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> userService.doLogin(inputUser, "1234"));
       assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
   }
 
