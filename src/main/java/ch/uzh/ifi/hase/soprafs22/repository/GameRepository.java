@@ -33,7 +33,12 @@ public interface GameRepository extends JpaRepository<Game, Long> {
                                                             @Param("blocked") Set<User> blocked,
                                                             @Param("matched") Set<User> matched);
 
-    @Query(value = "select count (game) from Game game where game.user <> ?2 ")
+    @Query(value = "select count (game) from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
+            "and game.user <> ?2 " +
+            "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = ?1)" +
+            "and game in (select g from Game g, User u where u = g.user and u not in ?6 and u not in ?7)"+
+            "and game in (select g from Game g join User u on g.user=u where u.birthday between ?5 and ?4)" +
+            "and game in(select g from Game g, User u, User u2 where u = g.user and ?3 member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = ?1)")
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(long userId,
                                                         User user,
                                                         Gender gender,
