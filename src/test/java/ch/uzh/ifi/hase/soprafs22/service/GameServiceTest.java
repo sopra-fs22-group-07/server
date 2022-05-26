@@ -321,6 +321,7 @@ class GameServiceTest {
         assertEquals("404 NOT_FOUND \"white card with cardId 2 does not exist\"", exception.getMessage());
     }
 
+    /*
     @Test
     void getGameFromRandomUser_success() {
         List<Game> games = new ArrayList<>();
@@ -375,5 +376,6 @@ class GameServiceTest {
         // expect exception
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> gameService.getGameFromRandomUser(testUser));
         assertEquals("404 NOT_FOUND \"There is no black card of another user left\"", exception.getMessage());
-    }
+    }*/
+
 }
