@@ -18,7 +18,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     Game findById(long id);
 
     //Has to check both directions because user only wants to see cards from people that user is interested in and that are interested in user
-    @Query("select game from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
+    @Query(value = "select game from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
             "and game.user <> :user " +
             "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)" +
             "and game in (select g from Game g, User u where u = g.user and u not in :blocked and u not in :matched)"+
@@ -38,7 +38,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)" +
             "and game in (select g from Game g, User u where u = g.user and u not in :blocked and u not in :matched)"+
             "and game in (select g from Game g join User u on g.user=u where u.birthday between :maxAgeDate and :minAgeDate)" +
-            "and game in(select g from Game g, User u, User u2 where u = g.user and :gender member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = :userId)", nativeQuery = true)
+            "and game in(select g from Game g, User u, User u2 where u = g.user and :gender member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = :userId)")
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId,
                                                         @Param("user") User user,
                                                         @Param("gender") Gender gender,
