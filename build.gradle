@@ -49,9 +49,9 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
     // dependencies for database
     runtimeOnly 'com.h2database:h2'
-    implementation 'org.apache.tomcat:tomcat-jdbc'
     runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
