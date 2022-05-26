@@ -235,7 +235,8 @@ public class GameService {
       user.getGender(), 
       minAgeDate, 
       maxAgeDate, 
-      user.getBlockedUsers()
+      user.getBlockedUsers(),
+      user.getMatchedUsers()
     );
 
     if(numOfGames==0){
@@ -256,7 +257,8 @@ public class GameService {
       user.getGender(), 
       minAgeDate, 
       maxAgeDate, 
-      user.getBlockedUsers()
+      user.getBlockedUsers(),
+      user.getMatchedUsers()
     );
 
     // subset the page of users to only users that have a haversine distance of less than user.getMaxRange()

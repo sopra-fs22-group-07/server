@@ -160,7 +160,9 @@ public class GameController {
 
       // get one game (first get the old ones)
     Game game = gameService.getGame(user.getGames());
-    return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
+    GameGetDTO gameGetDTO = DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
+    gameGetDTO.setGameDuration(UserService.getGameDuration());
+    return gameGetDTO;
   }
 
   /**
@@ -180,7 +182,6 @@ public class GameController {
     // extract data from PutDTO
     long otherUserId = gameVotePutDTO.getUserId();
     boolean userLikesOtherUser = gameVotePutDTO.isLike();
-    // TODO: 20.04.2022 Assert that this value was actually passed - maybe with javax.validation?
 
     // the relationship from the call is: user likes otherUser (user is the caller of the URI)
     // get both users

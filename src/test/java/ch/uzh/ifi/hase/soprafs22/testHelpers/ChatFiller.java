@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs22.testHelpers;
 
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.helper.Pair;
 
 import java.util.List;
 
@@ -42,8 +43,8 @@ public class ChatFiller {
         match.setMatchId(matchID);
         match.setUserPair(userPair);
         match.setChat(chat);
-        userPair.getObj1().addMatch(matchID);
-        userPair.getObj2().addMatch(matchID);
+        userPair.getObj1().addMatch(match);
+        userPair.getObj2().addMatch(match);
         return match;
     }
 }

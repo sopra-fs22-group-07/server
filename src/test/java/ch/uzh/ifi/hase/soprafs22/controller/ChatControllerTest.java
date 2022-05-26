@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
 import ch.uzh.ifi.hase.soprafs22.constant.MessageType;
+import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.helper.Pair;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatMessagePutDTO;
 import ch.uzh.ifi.hase.soprafs22.service.ChatService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
@@ -30,8 +32,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ChatController.class)
 class ChatControllerTest extends ChatFiller {
@@ -93,7 +94,7 @@ class ChatControllerTest extends ChatFiller {
         given(userService.getUserById(user1.getId())).willReturn(user1);
         given(userService.getMatches(user1)).willReturn(matches.subList(0,1));
         given(userService.getChatIds(Mockito.anyList())).willReturn(chatIds.subList(0,1));
-        given(userService.getUsersFromMatches(eq(user1), Mockito.anyList())).willReturn(userMatched.subList(0,1));
+        given(userService.getUsersFromMatches(eq(user1))).willReturn(userMatched.subList(0,1));
         given(chatService.getFirstMessages(Mockito.anyList())).willReturn(messages.subList(0,1));
 
         // when
@@ -111,7 +112,7 @@ class ChatControllerTest extends ChatFiller {
         given(userService.getUserById(user1.getId())).willReturn(user1);
         given(userService.getMatches(user1)).willReturn(matches);
         given(userService.getChatIds(matches)).willReturn(chatIds);
-        given(userService.getUsersFromMatches(user1, matches)).willReturn(userMatched);
+        given(userService.getUsersFromMatches(user1)).willReturn(userMatched);
         given(chatService.getFirstMessages(matches)).willReturn(messages);
 
         // when
@@ -222,26 +223,34 @@ class ChatControllerTest extends ChatFiller {
     @Test
     void getNewMessages_oneElement() throws Exception {
         readExistingChat();
+        user2.setStatus(UserStatus.ONLINE);
         chat1.pushMessage(fillMessage(user2.getId(), user1.getId(), "Hi", false));
         given(chatService.getUnreadMessages(chat1.getId(), user1.getId())).willReturn(chat1.getMessages(0,1));
-        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/chats/{chatId}/newMsgs", user1.getId(), chat1.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("authorization", user1.getToken());
-        mockMvc.perform(getRequest).andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].content", is("Hi")));
-    }
-
-    @Test
-    void getNewMessages_severalElements() throws Exception {
-        readExistingChat();
-        fillChat(chat1, List.of(msg1unread, msg2unread, msg3unread));
-        given(chatService.getUnreadMessages(chat1.getId(), user1.getId())).willReturn(List.of(msg1unread, msg3unread));
+        given(chatService.getUserIdFromOtherUser(chat1.getId(), user1.getId())).willReturn(user2.getId());
+        given(userService.getUserById(user2.getId())).willReturn(user2);
         MockHttpServletRequestBuilder getRequest = get("/users/{userId}/chats/{chatId}/newMsgs", user1.getId(), chat1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("authorization", user1.getToken());
         mockMvc.perform(getRequest).andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].content", is("Hi")))
-                .andExpect(jsonPath("$[1].content", is("Bye")));
+                .andExpect(header().string("status", "ONLINE"));
+    }
+
+    @Test
+    void getNewMessages_severalElements() throws Exception {
+        user2.setStatus(UserStatus.OFFLINE);
+        readExistingChat();
+        fillChat(chat1, List.of(msg1unread, msg2unread, msg3unread));
+        given(chatService.getUnreadMessages(chat1.getId(), user1.getId())).willReturn(List.of(msg1unread, msg3unread));
+        given(chatService.getUserIdFromOtherUser(chat1.getId(), user1.getId())).willReturn(user2.getId());
+        given(userService.getUserById(user2.getId())).willReturn(user2);
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/chats/{chatId}/newMsgs", user1.getId(), chat1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("authorization", user1.getToken());
+        mockMvc.perform(getRequest).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].content", is("Hi")))
+                .andExpect(jsonPath("$[1].content", is("Bye")))
+                .andExpect(header().string("status", "OFFLINE"));
     }
 
     @Test

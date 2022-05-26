@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
+import ch.uzh.ifi.hase.soprafs22.helper.Pair;
 import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.UserBlackCardsRepository;
@@ -71,6 +72,10 @@ public class UserService {
    * @return user that was created
    */
   public User createUser(User newUser) {
+    // must give: birthday
+    if (newUser.getBirthday() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Birthday not provided.");
+    }
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
     newUser.setMinAge(findMinAgeDefault(newUser.getBirthday()));
@@ -189,16 +194,17 @@ public class UserService {
      * @throws org.springframework.web.server.ResponseStatusException: 401
      * @see User
      */
-    public User doLogin(User inputUser) {
-        User userByUsername = userRepository.findByUsername(inputUser.getUsername());
-        // test if user exists and correct password is given
-        if (userByUsername == null || !Objects.equals(inputUser.getPassword(), userByUsername.getPassword())){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "Your Username or password is incorrect");
-        }
-        userByUsername.setStatus(UserStatus.ONLINE);
-        userRepository.saveAndFlush(userByUsername);
-        return userByUsername;
+    public User doLogin(User inputUser, String password) {
+
+      User userByUsername = userRepository.findByUsername(inputUser.getUsername());
+      // test if user exists and correct password is given
+      if (userByUsername == null || !userByUsername.getIsPasswordCorrect(password)){
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                  "Your Username or password is incorrect");
+      }
+      userByUsername.setStatus(UserStatus.ONLINE);
+      userRepository.saveAndFlush(userByUsername);
+      return userByUsername;
     }
 
   /**
@@ -394,7 +400,6 @@ public class UserService {
       // update the user who was a candidate for black cards
       activeGame.setGameStatus(GameStatus.INACTIVE);
       user.flushGameToPastGames();
-      // TODO: 12.04.2022 SaveAndFlush GameRepository here? (IDE doesn't complain until now)
       userRepository.saveAndFlush(user);
     }
     // case the active game is not older than 24 hours, just return
@@ -475,13 +480,13 @@ public class UserService {
    */
   public void setMatch(Match match) {
     // Get Users
-    Pair<User, User> userPair = match.getUserPair();
+    Pair<User, User> userPair = match.getUsers();
     User user1 = userPair.getObj1();
     User user2 = userPair.getObj2();
 
     // Add Match to both users
-    user1.addMatch(match.getMatchId());
-    user2.addMatch(match.getMatchId());
+    user1.addMatch(match);
+    user2.addMatch(match);
 
     // Save and Flush
     userRepository.save(user1);
@@ -565,7 +570,10 @@ public class UserService {
    * @return boolean: true if a Match already exists, false otherwise.
    */
   public boolean doesMatchExist(User user, User otherUser) {
-    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    Set<Match> matches = user.getMatches();
+    // set intersection
+    matches.retainAll(otherUser.getMatches());
+    int count = matches.size();
     if (count > 1) {
       log.error(UNIQUE_VIOLATION);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
@@ -579,36 +587,17 @@ public class UserService {
      * @return List of Matches
      */
     public List<Match> getMatches(User user){
-        Set<Long> matchesOfUser = user.getMatches();
-        List<Match> matches = new ArrayList<>();
-        for(Long matchId : matchesOfUser){
-            matches.add(matchRepository.getOne(matchId));
-        }
-
-        return matches;
+        Set<Match> matchSet = user.getMatches();
+        return new ArrayList<>(matchSet);
     }
 
     /**
      * Get all users which match with the known user
      * @param user: known user
-     * @param matches: all matches from suer
      * @return list of users which mach with known user
      */
-    public List<User> getUsersFromMatches(User user, List<Match> matches) {
-        List<User> matchedUsers = new ArrayList<>();
-
-        // map the users to the matches
-        for (Match match : matches){
-            Pair<User,User> users = match.getUserPair();
-            // add other user (by comparing it with the user, which is known)
-            if(user.equals(users.getObj1())){
-                matchedUsers.add(users.getObj2());
-            }else{
-                matchedUsers.add(users.getObj1());
-            }
-        }
-
-        return matchedUsers;
+    public List<User> getUsersFromMatches(User user) {
+      return new ArrayList<>(user.getMatchedUsers());
     }
 
 
@@ -628,27 +617,7 @@ public class UserService {
    */
   // return list of users that matched with the user with id "userId"
   public List<User> getMatchedUsers(long userId) {
-
-    // get id's of all matches of user with id userId
-    Set<Long> matches = getUserById(userId).getMatches();
-
-    // get user entities for all users with a match
-    List<User> users = new ArrayList<>();
-
-    // for all matches do:
-    for (long matchId : matches) {
-      Match match = matchRepository.findByMatchId(matchId);
-      // get users from match and add to list the one that is not the user with id userId
-      Pair<User, User> userPair = match.getUserPair();
-      if (userPair.getObj1().getId() != userId) {
-        users.add(userPair.getObj1());
-      } else {
-        users.add(userPair.getObj2());
-      }
-    }
-
-    // return list of users
-    return users;
+    return getUsersFromMatches(getUserById(userId));
   }
 
 
@@ -774,15 +743,15 @@ public class UserService {
       BlackCard blackCard7 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard8 = gameService.getNRandomBlackCards(1).get(0);
       BlackCard blackCard9 = gameService.getNRandomBlackCards(1).get(0);
-      Game game1 = gameService.createGame(blackCard1, demoUser1);
-      Game game2 = gameService.createGame(blackCard2, demoUser2);
-      Game game3 = gameService.createGame(blackCard3, demoUser3);
-      Game game4 = gameService.createGame(blackCard4, demoUser4);
-      Game game5 = gameService.createGame(blackCard5, demoUser5);
-      Game game6 = gameService.createGame(blackCard6, demoUser6);
-      Game game7 = gameService.createGame(blackCard7, demoUser7);
-      Game game8 = gameService.createGame(blackCard8, demoUser8);
-      Game game9 = gameService.createGame(blackCard9, demoUser9);
+      gameService.createGame(blackCard1, demoUser1);
+      gameService.createGame(blackCard2, demoUser2);
+      gameService.createGame(blackCard3, demoUser3);
+      gameService.createGame(blackCard4, demoUser4);
+      gameService.createGame(blackCard5, demoUser5);
+      gameService.createGame(blackCard6, demoUser6);
+      gameService.createGame(blackCard7, demoUser7);
+      gameService.createGame(blackCard8, demoUser8);
+      gameService.createGame(blackCard9, demoUser9);
 
 
       // ======= create likes and matches =======
@@ -869,22 +838,28 @@ public class UserService {
     User user = getUserById(userId);
     User otherUser = getUserById(otherUserId);
 
-    // count and check match
-    int count = matchRepository.countMatchByUserPair(user, otherUser);
+    Set<Match> matches = user.getMatches();
+    // intersect matches with the matches of the other user
+    matches.retainAll(otherUser.getMatches());
+
+    int count = matches.size();
+
+    // case there exists no match between the two users
     if (count < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There exists no Match between the two users");
     }
+    // case there exists more than two matches between users, not really possible to reach, but rather a safety net
     else if (count > 1) {
       log.error(UNIQUE_VIOLATION);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, UNIQUE_VIOLATION);
     }
+    // now, matches must definitely have size 1
     // get match
-    Match match = matchRepository.getMatchByUserPair(user, otherUser);
-    long matchId = match.getMatchId();
+    Match match = matches.iterator().next();
 
     // remove match from user
-    user.removeMatch(matchId);
-    otherUser.removeMatch(matchId);
+    user.removeMatch(match);
+    otherUser.removeMatch(match);
 
     userRepository.saveAndFlush(user);
     userRepository.saveAndFlush(otherUser);
@@ -895,14 +870,20 @@ public class UserService {
   }
 
   public void blockUser(long userId, long otherUserId) {
+    // first, delete match between users
+    deleteMatchBetweenUsers(userId, otherUserId);
+
     // because it is easier to check in one direction, we make the block in both direction, that is, both users block each
     // other. This works only because blocking is irreversible. Must be taken care of if blocking user should become reversible.
 
     User user = getUserById(userId);
     User otherUser = getUserById(otherUserId);
 
-    user.addBlockedUsers(otherUser);
-    otherUser.addBlockedUsers(user);
+    BlockedUserRelation blockedUserRelation = new BlockedUserRelation();
+    blockedUserRelation.setUserPair(new Pair<>(user, otherUser));
+
+    user.addBlockedUsers(blockedUserRelation);
+    otherUser.addBlockedUsers(blockedUserRelation);
 
     userRepository.saveAndFlush(user);
     userRepository.saveAndFlush(otherUser);
@@ -913,11 +894,11 @@ public class UserService {
 
     // only update if latitude and longitude are not 0
     // else keep them at default 0, i.e. do nothing
-    if (latitude != 0 && longitude != 0) {
-      user.setLatitude(latitude);
-      user.setLongitude(longitude);
+    if (latitude == 0 && longitude == 0) {
+        return;
     }
-
+    user.setLatitude(latitude);
+    user.setLongitude(longitude);
   }
   public String getLoginStatus(String token, long userId) {
     User user = getUserById(userId);

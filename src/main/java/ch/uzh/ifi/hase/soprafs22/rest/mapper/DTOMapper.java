@@ -40,6 +40,8 @@ public interface DTOMapper {
   @Mapping(source = "minAge", target = "minAge")
   @Mapping(source = "maxAge", target = "maxAge")
   @Mapping(source = "maxRange", target = "maxRange")
+  @Mapping(source = "longitude", target = "longitude")
+  @Mapping(source = "latitude", target = "latitude")
   @Mapping(source = "genderPreferences", target = "genderPreferences")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
@@ -63,7 +65,7 @@ public interface DTOMapper {
   @Mapping(source = "userBlackCards", target = "userBlackCards")
   @Mapping(source = "userWhiteCards", target = "userWhiteCards")
   @Mapping(source = "likedByUsers", target = "likedByUsers")
-  @Mapping(source = "matches", target = "matchIds")
+  @Mapping(source = "matches", target = "matches")
   UserGetDetailsDTO convertEntityToUserGetDetailsDTO(User user);
 
   @Mapping(source = "id", target = "id")
@@ -74,7 +76,6 @@ public interface DTOMapper {
   BlackCard convertGamePostDTOToEntity(CardPostDTO cardPostDTO);
 
   @Mapping(source = "id", target = "gameId")
-  @Mapping(source = "user", target = "user")
   @Mapping(source = "plays", target = "plays")
   @Mapping(source = "blackCard", target = "blackCard")
   @Mapping(source = "gameStatus", target = "gameStatus")
