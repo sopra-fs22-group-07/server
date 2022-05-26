@@ -355,4 +355,35 @@ class GameServiceTest {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> gameService.getGameFromRandomUser(testUser));
         assertEquals("404 NOT_FOUND \"There is no black card of another user left\"", exception.getMessage());
     }
+
+    @Test
+    void haversineDistance_correctOutput() {
+
+        double lat1 = 0;
+        double lon1 = 0;
+        double lat2 = 10;
+        double lon2 = 10;
+        
+        double distance = GameService.haversineDistance(lat1, lon1, lat2, lon2);
+
+        // test if result is the same when rounded to 2 decimal places.
+        // actual result computed using: https://www.vcalc.com/wiki/vCalc/Haversine+-+Distance (not the same source as for the code)
+        assertEquals(distance, 1568.52, 0.01);
+    }
+
+    @Test
+    void haversineDistance_largeDistance_correctOutput() {
+            
+            double lat1 = -100;
+            double lon1 = -100;
+            double lat2 = 100;
+            double lon2 = 100;
+    
+            double distance = GameService.haversineDistance(lat1, lon1, lat2, lon2);
+    
+            // test if result is the same when rounded to nearest integer.
+            // actual result computed using: https://www.vcalc.com/wiki/vCalc/Haversine+-+Distance (not the same source as for the code)
+            assertEquals(distance, 19630, 1);
+    }
+
 }

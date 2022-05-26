@@ -275,6 +275,8 @@ public class GameService {
         gameUser.getLongitude()
       );
 
+      // QUESTION TO REVIEWER: right now i compute the distance for every user i find that matches the other preference criteria. However, I only need to compute it until I find one that has a distance that is 
+
       // if the distance is less than the max range, add the game to the list
       if(distance <= user.getMaxRange()){
         gamesWithDistance.add(game);
