@@ -9,8 +9,10 @@ import ch.uzh.ifi.hase.soprafs22.rest.dto.chat.ChatOverViewGetDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs22.service.ChatService;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class ChatController {
     // get chatID
     List<Long> chatIds = userService.getChatIds(matches);
     // get matchedUser
-    List<User> usersMatched = userService.getUsersFromMatches(user, matches);
+    List<User> usersMatched = userService.getUsersFromMatches(user);
     // get the last Message from the matches/ chats
     List<Message> msg = chatService.getFirstMessages(matches);
 
@@ -118,15 +120,24 @@ public class ChatController {
         userService.checkSpecificAccess(token, userId); // 404, 409
 
         List<Message> unreadMessages = chatService.getUnreadMessages(chatId, userId);
-        // return the black cards
         List<ChatMessageGetDTO> chatMessageGetDTOList= new ArrayList<>();
 
         // map messages
         for (Message message : unreadMessages){
             chatMessageGetDTOList.add(DTOMapper.INSTANCE.convertMessageToChatMessageGetDTO(message));
         }
+      MultiValueMap<String, String> headers = new HttpHeaders();
 
-        return new ResponseEntity<>(chatMessageGetDTOList, null, HttpStatus.OK);
+      Long u = chatService.getUserIdFromOtherUser(chatId, userId);
+        if (u != null){
+          User otherUser = userService.getUserById(u);
+          headers.set("status", otherUser.getStatus().toString());
+        }
+        else {
+          headers.set("status", "INACTIVE");
+        }
+
+      return new ResponseEntity<>(chatMessageGetDTOList, headers, HttpStatus.OK);
 
     }
 

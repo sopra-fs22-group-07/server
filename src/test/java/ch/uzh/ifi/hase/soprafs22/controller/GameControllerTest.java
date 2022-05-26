@@ -201,8 +201,7 @@ class GameControllerTest {
         mockMvc.perform(getRequest).andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameId",is(111)))
                 .andExpect(jsonPath("$.blackCard.id",is(3)))
-                .andExpect(jsonPath("$.blackCard.text",is(blackCard.getText())))
-                .andExpect(jsonPath("$.user.id", is(11)));
+                .andExpect(jsonPath("$.blackCard.text",is(blackCard.getText())));
     }
 
     @Test

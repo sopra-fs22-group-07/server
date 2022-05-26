@@ -11,7 +11,7 @@ public class UserBlackCards implements Serializable {
 
   @Id
   @GeneratedValue
-  @Column(name = "user_black_cards_id")
+  @Column(name = "id")
   private Long id;
 
   @ManyToMany
