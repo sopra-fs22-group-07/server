@@ -29,7 +29,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and game in(select g from Game g, User u, User u2 where u = g.user and :gender member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = :userId)") //We cannot pass genderPreferences as it is a set but should be a list i think
     */
     // SQL
-    @Query(value = "select game \n" +
+    @Query(value = "select * \n" +
             "from game g \n" +
             "where g.game_status = 'ACTIVE'\n" +
             "and g.user_id <> :userId\n" +
@@ -81,7 +81,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and game in (select g from Game g join User u on g.user=u where u.birthday between ?5 and ?4)" +
             "and game in(select g from Game g, User u, User u2 where u = g.user and ?3 member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = ?1)")
     */
-    @Query(value = "select count(game) \n" +
+    @Query(value = "select count(*) \n" +
             "from game g \n" +
             "where g.game_status = 'ACTIVE'\n" +
             "and g.user_id <> :userId\n" +
