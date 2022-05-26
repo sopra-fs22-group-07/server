@@ -24,7 +24,7 @@ import java.util.List;
  */
 
 @Entity
-@Table(name = "GAME")
+@Table(name = "game")
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id")
