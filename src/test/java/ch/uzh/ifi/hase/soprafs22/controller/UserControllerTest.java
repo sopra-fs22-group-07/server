@@ -545,7 +545,8 @@ class UserControllerTest extends UserFiller {
         User user1 = fillUser(1L, "1");
         User user2 = fillUser(2L, "2");
         doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
-        given(userService.getMatchedUsers(user1.getId())).willReturn(List.of(user2));
+        given(userService.getUserById(1L)).willReturn(user1);
+        given(userService.getUsersFromMatches(user1)).willReturn(List.of(user2));
         MockHttpServletRequestBuilder getRequest = get("/users/{userId}/matches", user1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("authorization", user1.getToken());
