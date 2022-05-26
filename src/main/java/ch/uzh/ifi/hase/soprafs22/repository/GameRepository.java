@@ -36,7 +36,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and g not in (\n" +
             "\t select g from game\n" +
             "\t join play p on g.id = p.game_id\n" +
-            "\t where p.user_id= userId)\n" +
+            "\t where p.user_id= :userId)\n" +
             " and g.user_id in (\n" +
             "\t select p.user_id\n" +
             "\t from user p\n" +
@@ -88,7 +88,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and g not in (\n" +
             "\t select g from game\n" +
             "\t join play p on g.id = p.game_id\n" +
-            "\t where p.user_id= userId)\n" +
+            "\t where p.user_id= :userId)\n" +
             " and g.user_id in (\n" +
             "\t select p.user_id\n" +
             "\t from user p\n" +
