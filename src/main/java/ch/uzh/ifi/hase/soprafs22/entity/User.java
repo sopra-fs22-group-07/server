@@ -26,7 +26,7 @@ import java.util.*;
  */
 
 @Entity
-@Table(name = "USER")
+@Table(name = "player")
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id")

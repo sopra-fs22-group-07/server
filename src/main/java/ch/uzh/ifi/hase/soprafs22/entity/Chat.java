@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @Entity
-@Table(name = "CHAT")
+@Table(name = "chat")
 public class Chat implements Serializable {
 
   @Id
