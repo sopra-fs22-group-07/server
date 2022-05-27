@@ -53,7 +53,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
             "and g in (\n" +
-            "\t select g from game\n" +
+            "\t select g from game g\n" +
             "\t join player p on g.user_id=p.user_id\n" +
             "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
             "and g in\n" +
@@ -129,7 +129,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
             "and g in (\n" +
-            "\t select g from game\n" +
+            "\t select g from game g \n" +
             "\t join player p on g.user_id=p.user_id\n" +
             "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
             "and g in (\n" +
