@@ -901,12 +901,9 @@ public class UserService {
     user.setLongitude(longitude);
   }
   public String getLoginStatus(String token, long userId) {
-    User user = getUserById(userId);
-
-    if (user.getToken().equals(token) && user.getStatus().equals(UserStatus.ONLINE)) {
-      return "online";
-    }
-    return "offline";
+    User user = this.userRepository.findById(userId);
+    return (user == null || !user.getToken().equals(token) || !user.getStatus().equals(UserStatus.ONLINE))
+            ? "offline" : "online";
   }
 
     /**
