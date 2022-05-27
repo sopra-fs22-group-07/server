@@ -1,19 +1,14 @@
 package ch.uzh.ifi.hase.soprafs22.repository;
 
-import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.entity.Game;
-import ch.uzh.ifi.hase.soprafs22.entity.Play;
-import ch.uzh.ifi.hase.soprafs22.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.Set;
+
 
 @Repository("gameRepository")
 public interface GameRepository extends JpaRepository<Game, Long> {
@@ -35,7 +30,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "where g.game_status = 'ACTIVE'\n" +
             "and g.user_id <> :userId\n" +
             "and g not in (\n" +
-            "\t select g from game\n" +
+            "\t select g from game g\n" +
             "\t join play p on g.id = p.game_id\n" +
             "\t where p.user_id= :userId)\n" +
             " and g.user_id in (\n" +
@@ -54,8 +49,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\twhere p.user_id = b.users_user_id))\n" +
             "and g in (\n" +
             "\t select g from game g\n" +
-            "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
+            "\t join player p on g.user_id = p.user_id\n" +
+            "\t p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
@@ -70,8 +65,13 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t and p2.user_id = :userId)",
             nativeQuery = true)
     Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable,
-
                                                             @Param("userId") long userId,
+                                                            @Param("gender") String gender,
+                                                            @Param("minAgeDate") Timestamp minAgeDate,
+                                                            @Param("maxAgeDate") Timestamp maxAgeDate);
+
+    /*
+                                                                @Param("userId") long userId,
                                                             //@Param("player") User user,
                                                             @Param("gender") String gender,
                                                             @Param("minAgeDate") Timestamp minAgeDate,
@@ -79,7 +79,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
                                                             //@Param("blocked") Set<User> blocked,
                                                             //@Param("matched") Set<User> matched);
 
-    /* @Query(value = "select count (game) from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
+    @Query(value = "select count (game) from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
             "and game.user <> ?2 " +
             "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = ?1)" +
             "and game in (select g from Game g, User u where u = g.user and u not in ?6 and u not in ?7)"+
@@ -111,7 +111,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "where g.game_status = 'ACTIVE'\n" +
             "and g.user_id <> :userId\n" +
             "and g not in (\n" +
-            "\t select g from game\n" +
+            "\t select g from game g \n" +
             "\t join play p on g.id = p.game_id\n" +
             "\t where p.user_id= :userId)\n" +
             " and g.user_id in (\n" +
@@ -129,9 +129,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
             "and g in (\n" +
-            "\t select g from game g \n" +
+            "\t select g from game g\n" +
             "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
+            "\t where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
             "and g in (\n" +
             "\tselect g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
@@ -146,12 +146,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t and p2.user_id = :userId)",
             nativeQuery = true)
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId,
-                                                        //@Param("player") User user,
                                                         @Param("gender") String gender,
                                                         @Param("minAgeDate") Timestamp minAgeDate,
                                                         @Param("maxAgeDate") Timestamp maxAgeDate);
-                                                        //Set<User> blocked,
-                                                        //Set<User> matched);
 
 }
 
