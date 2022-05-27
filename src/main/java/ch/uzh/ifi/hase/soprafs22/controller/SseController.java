@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -23,27 +25,30 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class SseController {
 
-        private final List<SseEmitter> emitters = new ArrayList<>();
+        private final Map<Long, SseEmitter> emittersMap = new HashMap<>();
 
         @GetMapping("/sse/enroll/{userId}")
-        public SseEmitter getEvents() {
-            SseEmitter emitter = new SseEmitter();
-            emitters.add(emitter);
-            emitter.onCompletion(() -> emitters.remove(emitter));
+        public SseEmitter enroll(@PathVariable Long userId) {
+            SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+            emittersMap.put(userId, emitter);
+            emitter.onCompletion(() -> emittersMap.remove(userId,emitter));
+            emitter.onTimeout(() -> emittersMap.remove(userId,emitter));
+            emitter.onError((e) -> emittersMap.remove(userId,emitter));
             return emitter;
         }
 
         @PostMapping("/notify/{userId}")
-        public void postMessage(String message){
-            for (SseEmitter emitter : emitters) {
+        public void postNotification(String message,
+                                @PathVariable Long userId){
+            SseEmitter emitter = emittersMap.get(userId);
+            if(emitter != null){
                 try {
-                    emitter.send(message);
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                    emitter.completeWithError(e);
+                    emitter.send(SseEmitter.event().name("latestMessage").data(message));
+                } catch (IOException e) {
+                    emittersMap.remove(userId, emitter);
                 }
             }
+
         }
 
     /*
