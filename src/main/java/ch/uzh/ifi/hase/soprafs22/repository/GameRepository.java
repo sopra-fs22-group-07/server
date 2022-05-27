@@ -52,10 +52,10 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tselect *\n" +
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
-            "and g in \n" +
-            "\t (select g from game\n" +
+            "and g in (\n" +
+            "\t select g from game\n" +
             "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
+            "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
@@ -99,6 +99,11 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\tjoin player p on g.user_id=p.user_id\n" +
             "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)" +
 
+                        "and g in (\n" +
+            "\t select g from game\n" +
+            "\t join player p on g.user_id=p.user_id\n" +
+            "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
+
      */
 
     @Query(value = "select count(*) \n" +
@@ -126,8 +131,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and g in (\n" +
             "\t select g from game\n" +
             "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
-            "and g in (" +
+            "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
+            "and g in (\n" +
             "\tselect g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
             "\t and :gender in\n" +
