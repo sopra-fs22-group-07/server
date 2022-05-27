@@ -26,7 +26,7 @@ import java.util.*;
  */
 
 @Entity
-@Table(name = "USER")
+@Table(name = "player")
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id")
@@ -79,6 +79,7 @@ public class User implements Serializable {
     private int maxRange;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @OneToMany(mappedBy = "user",
@@ -94,6 +95,7 @@ public class User implements Serializable {
     private UserBlackCards userBlackCards;
 
     @ElementCollection
+    @Enumerated(EnumType.STRING)
     private Set<Gender> genderPreferences = new TreeSet<>();
 
     @ElementCollection

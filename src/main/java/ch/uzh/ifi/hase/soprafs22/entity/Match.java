@@ -13,7 +13,7 @@ import static ch.uzh.ifi.hase.soprafs22.entity.BlockedUserRelation.getUserPair;
  * This is the Match Entity, it saves two users into it, and has a unique ID. It receives and returns a Pair of users.
  */
 @Entity
-@Table(name = "MATCH")
+@Table(name = "match")
 public class Match implements Serializable {
 
   @Id

@@ -6,6 +6,8 @@ import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.PlayRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.WhiteCardRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -15,8 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -30,7 +32,10 @@ import java.util.*;
 @Transactional
 public class GameService {
 
-    private final GameRepository gameRepository;
+  private final Logger log = LoggerFactory.getLogger(GameService.class);
+
+
+  private final GameRepository gameRepository;
     private final PlayRepository playRepository;
     private final WhiteCardRepository whiteCardRepository;
     private final BlackCardRepository blackCardRepository;
@@ -228,9 +233,13 @@ public class GameService {
 
     Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
+      Timestamp minAgeTimestamp = new Timestamp(minAgeDate.getTime());
+      Timestamp maxAgeTimestamp = new Timestamp(maxAgeDate.getTime());
     // count the possible games
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
-            user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
+      Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
+              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
+      String s = "counted " + numOfGames.toString() + " games";
+    log.info(s);
 
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -243,8 +252,8 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
-        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
+      Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(),
+              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
 
     // return the game
     return somePage.getContent().get(0);
