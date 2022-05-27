@@ -235,7 +235,8 @@ public class GameService {
     // count the possible games
     //Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
     //        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
-      Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),  user.getGender().name());
+      Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
+              user.getGender().name(), minAgeDate, maxAgeDate);
       String s = "counted " + numOfGames.toString() + " games";
     log.info(s);
     if(numOfGames==0){
@@ -252,7 +253,7 @@ public class GameService {
     //Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
     //    user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
       Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(),
-              user.getGender().name());
+              user.getGender().name(), minAgeDate, maxAgeDate);
 
 
     // return the game

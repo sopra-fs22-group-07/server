@@ -51,6 +51,11 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tselect *\n" +
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
+            "and g in (\n" +
+            "\tselect g\n" +
+            "\tfrom game g\n" +
+            "\tjoin player p on g.user_id=p.user_id" +
+            "where p.birthday between :minAgeDate and :maxAgeDate)" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
@@ -68,9 +73,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
 
                                                             @Param("userId") long userId,
                                                             //@Param("player") User user,
-                                                            @Param("gender") String gender);
-                                                            //@Param("minAgeDate") Date minAgeDate,
-                                                            //@Param("maxAgeDate") Date maxAgeDate,
+                                                            @Param("gender") String gender,
+                                                            @Param("minAgeDate") Date minAgeDate,
+                                                            @Param("maxAgeDate") Date maxAgeDate);
                                                             //@Param("blocked") Set<User> blocked,
                                                             //@Param("matched") Set<User> matched);
 
@@ -103,6 +108,11 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tselect *\n" +
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
+            "and g in (\n" +
+            "\tselect g\n" +
+            "\tfrom game g\n" +
+            "\tjoin player p on g.user_id=p.user_id" +
+            "where p.birthday between :minAgeDate and :maxAgeDate)" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
@@ -118,9 +128,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             nativeQuery = true)
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId,
                                                         //@Param("player") User user,
-                                                        @Param("gender") String gender);
-                                                        //Date minAgeDate,
-                                                        //Date maxAgeDate,
+                                                        @Param("gender") String gender,
+                                                        @Param("minAgeDate") Date minAgeDate,
+                                                        @Param("maxAgeDate") Date maxAgeDate);
                                                         //Set<User> blocked,
                                                         //Set<User> matched);
 
