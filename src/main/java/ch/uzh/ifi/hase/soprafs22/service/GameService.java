@@ -242,7 +242,8 @@ public class GameService {
               user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
       String s = "counted " + numOfGames.toString() + " games";
     log.info(s);
-    log.info("minAGeDate: "+ minAgeDate.toString());
+    log.info("minAgeDate: "+ minAgeDate.toString());
+    log.info("minAgeTimestamp: "+ minAgeTimestamp.toString());
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
     }
