@@ -25,7 +25,7 @@ public class SseController {
 
         private final List<SseEmitter> emitters = new ArrayList<>();
 
-        @GetMapping("/sse/enroll")
+        @GetMapping("/sse/enroll/{userId}")
         public SseEmitter getEvents() {
             SseEmitter emitter = new SseEmitter();
             emitters.add(emitter);
