@@ -74,8 +74,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
                                                             @Param("userId") long userId,
                                                             //@Param("player") User user,
                                                             @Param("gender") String gender,
-                                                            @Param("minAgeDate") String minAgeDate,
-                                                            @Param("maxAgeDate") String maxAgeDate);
+                                                            @Param("minAgeDate") Timestamp minAgeDate,
+                                                            @Param("maxAgeDate") Timestamp maxAgeDate);
                                                             //@Param("blocked") Set<User> blocked,
                                                             //@Param("matched") Set<User> matched);
 
@@ -143,8 +143,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId,
                                                         //@Param("player") User user,
                                                         @Param("gender") String gender,
-                                                        @Param("minAgeDate") String minAgeDate,
-                                                        @Param("maxAgeDate") String maxAgeDate);
+                                                        @Param("minAgeDate") Timestamp minAgeDate,
+                                                        @Param("maxAgeDate") Timestamp maxAgeDate);
                                                         //Set<User> blocked,
                                                         //Set<User> matched);
 

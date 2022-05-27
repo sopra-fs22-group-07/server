@@ -239,7 +239,7 @@ public class GameService {
     // Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
     //        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
       Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
-              user.getGender().name(), minAgeTimestamp.toString(), maxAgeTimestamp.toString());
+              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
       String s = "counted " + numOfGames.toString() + " games";
     log.info(s);
     log.info("maxAgeTimestamp: " + maxAgeTimestamp.toString());
@@ -258,7 +258,7 @@ public class GameService {
     //Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
     //    user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
       Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(),
-              user.getGender().name(), minAgeTimestamp.toString(), maxAgeTimestamp.toString());
+              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
 
 
     // return the game
