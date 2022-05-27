@@ -34,17 +34,15 @@ public class SseController {
         }
 
         @PostMapping("/notify/{userId}")
-        public void postMessage(String message) throws IOException {
+        public void postMessage(String message){
             for (SseEmitter emitter : emitters) {
                 try {
                     emitter.send(message);
-                    sleep(1, sseEmitter);
                 }
                 catch (IOException e) {
                     e.printStackTrace();
-                    sseEmitter.completeWithError(e);
+                    emitter.completeWithError(e);
                 }
-                emitter.send(message);
             }
         }
 
