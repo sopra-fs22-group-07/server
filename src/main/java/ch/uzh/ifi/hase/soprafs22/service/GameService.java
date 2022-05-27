@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
@@ -232,11 +233,13 @@ public class GameService {
 
     Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
+      Timestamp minAgeTimestamp = new Timestamp(minAgeDate.getTime());
+      Timestamp maxAgeTimestamp = new Timestamp(maxAgeDate.getTime());
     // count the possible games
     //Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
     //        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
       Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
-              user.getGender().name(), minAgeDate, maxAgeDate);
+              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
       String s = "counted " + numOfGames.toString() + " games";
     log.info(s);
     log.info("minAGeDate: "+ minAgeDate.toString());

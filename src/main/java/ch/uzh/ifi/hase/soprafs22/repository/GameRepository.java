@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Set;
 
@@ -74,8 +75,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
                                                             @Param("userId") long userId,
                                                             //@Param("player") User user,
                                                             @Param("gender") String gender,
-                                                            @Param("minAgeDate") Date minAgeDate,
-                                                            @Param("maxAgeDate") Date maxAgeDate);
+                                                            @Param("minAgeDate") Timestamp minAgeDate,
+                                                            @Param("maxAgeDate") Timestamp maxAgeDate);
                                                             //@Param("blocked") Set<User> blocked,
                                                             //@Param("matched") Set<User> matched);
 
@@ -129,8 +130,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId,
                                                         //@Param("player") User user,
                                                         @Param("gender") String gender,
-                                                        @Param("minAgeDate") Date minAgeDate,
-                                                        @Param("maxAgeDate") Date maxAgeDate);
+                                                        @Param("minAgeDate") Timestamp minAgeDate,
+                                                        @Param("maxAgeDate") Timestamp maxAgeDate);
                                                         //Set<User> blocked,
                                                         //Set<User> matched);
 
