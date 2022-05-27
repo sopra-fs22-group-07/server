@@ -56,7 +56,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\tselect g\n" +
             "\tfrom game g\n" +
             "\tjoin player p on g.user_id=p.user_id\n" +
-            "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)" +
+            "where (select * from player p " +
+            "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate))" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
@@ -86,7 +87,14 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and game in (select g from Game g, User u where u = g.user and u not in ?6 and u not in ?7)"+
             "and game in (select g from Game g join User u on g.user=u where u.birthday between ?5 and ?4)" +
             "and game in(select g from Game g, User u, User u2 where u = g.user and ?3 member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = ?1)")
-    */
+
+                        "and g in (\n" +
+            "\tselect g\n" +
+            "\tfrom game g\n" +
+            "\tjoin player p on g.user_id=p.user_id\n" +
+            "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)
+     */
+
     @Query(value = "select count(*) \n" +
             "from game g \n" +
             "where g.game_status = 'ACTIVE'\n" +
@@ -113,7 +121,8 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\tselect g\n" +
             "\tfrom game g\n" +
             "\tjoin player p on g.user_id=p.user_id\n" +
-            "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)" +
+            "where (select * from player p \" +\n" +
+            "\"where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate))" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
