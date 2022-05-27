@@ -236,13 +236,10 @@ public class GameService {
       Timestamp minAgeTimestamp = new Timestamp(minAgeDate.getTime());
       Timestamp maxAgeTimestamp = new Timestamp(maxAgeDate.getTime());
     // count the possible games
-    // Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user,
-    //        user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
       Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
               user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
       String s = "counted " + numOfGames.toString() + " games";
     log.info(s);
-    log.info("maxAgeTimestamp: " + maxAgeTimestamp.toString());
 
     if(numOfGames==0){
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -255,11 +252,8 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(pageIndex, 1);
 
     // get the page with the game
-    //Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
-    //    user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
       Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(),
               user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
-
 
     // return the game
     return somePage.getContent().get(0);

@@ -14,16 +14,7 @@ import java.sql.Timestamp;
 public interface GameRepository extends JpaRepository<Game, Long> {
 
     Game findById(long id);
-    /*
-    // JPQL
-    //Has to check both directions becauJPQLse user only wants to see cards from people that user is interested in and that are interested in user
-    @Query(value = "select game from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
-            "and game.user <> :player " +
-            "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = :userId)" +
-            "and game in (select g from Game g, User u where u = g.user and u not in :blocked and u not in :matched)"+
-            "and game in (select g from Game g join User u on g.user=u where u.birthday between :maxAgeDate and :minAgeDate)" +
-            "and game in(select g from Game g, User u, User u2 where u = g.user and :gender member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = :userId)") //We cannot pass genderPreferences as it is a set but should be a list i think
-    */
+
     // SQL
     @Query(value = "select * \n" +
             "from game g \n" +
@@ -41,18 +32,18 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\t from user_matches m\n" +
             "\t\t where p.user_id = m.users_user_id))\n" +
             "and g.user_id in (\n" +
-            "\tselect p.user_id\n" +
-            "\tfrom player p\n" +
-            "\twhere not exists (\n" +
-            "\t\tselect *\n" +
-            "\t\tfrom blocked_user_relation b\n" +
-            "\t\twhere p.user_id = b.users_user_id))\n" +
+            "\t select p.user_id\n" +
+            "\t from player p\n" +
+            "\t where not exists (\n" +
+            "\t\t select *\n" +
+            "\t\t from blocked_user_relation b\n" +
+            "\t\t where p.user_id = b.users_user_id))\n" +
             "and g in (\n" +
             "\t select g from game g\n" +
             "\t join player p on g.user_id=p.user_id\n" +
             "\t where p.birthday >= :maxAgeDate and p.birthday <= :minAgeDate)\n" +
             "and g in (\n" +
-            "\tselect g from game g, player p1, player p2\n" +
+            "\t select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
             "\t and :gender in\n" +
             "\t (select gender_preferences\n" +
@@ -70,41 +61,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
                                                             @Param("minAgeDate") Timestamp minAgeDate,
                                                             @Param("maxAgeDate") Timestamp maxAgeDate);
 
-    /*
-                                                                @Param("userId") long userId,
-                                                            //@Param("player") User user,
-                                                            @Param("gender") String gender,
-                                                            @Param("minAgeDate") Timestamp minAgeDate,
-                                                            @Param("maxAgeDate") Timestamp maxAgeDate);
-                                                            //@Param("blocked") Set<User> blocked,
-                                                            //@Param("matched") Set<User> matched);
-
-    @Query(value = "select count (game) from Game game where game.gameStatus = ch.uzh.ifi.hase.soprafs22.constant.GameStatus.ACTIVE " +
-            "and game.user <> ?2 " +
-            "and game not in (select g from Game g join Play p on g.id = p.gameId where p.userId = ?1)" +
-            "and game in (select g from Game g, User u where u = g.user and u not in ?6 and u not in ?7)"+
-            "and game in (select g from Game g join User u on g.user=u where u.birthday between ?5 and ?4)" +
-            "and game in(select g from Game g, User u, User u2 where u = g.user and ?3 member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = ?1)")
-
-                        "and g in (\n" +
-            "\tselect g\n" +
-            "\tfrom game g\n" +
-            "\tjoin player p on g.user_id=p.user_id\n" +
-            "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)
-
-
-            "and g.id in (\n" +
-            "\tselect g.id\n" +
-            "\tfrom game g\n" +
-            "\tjoin player p on g.user_id=p.user_id\n" +
-            "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)" +
-
-                        "and g in (\n" +
-            "\t select g from game\n" +
-            "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday between cast(:minAgeDate AS timestamp) and cast(:maxAgeDate AS timestamp))\n" +
-
-     */
 
     @Query(value = "select count(*) \n" +
             "from game g \n" +
