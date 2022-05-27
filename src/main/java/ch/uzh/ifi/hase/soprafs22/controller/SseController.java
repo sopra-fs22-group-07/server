@@ -3,7 +3,6 @@ package ch.uzh.ifi.hase.soprafs22.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +10,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -21,13 +21,71 @@ import java.util.concurrent.TimeUnit;
 
 
 @RestController
-public class SEEController {
+public class SseController {
+
+        private final List<SseEmitter> emitters = new ArrayList<>();
+
+        @GetMapping("/sse/enroll")
+        public SseEmitter getEvents() {
+            SseEmitter emitter = new SseEmitter();
+            emitters.add(emitter);
+            emitter.onCompletion(() -> emitters.remove(emitter));
+            return emitter;
+        }
+
+        @PostMapping("/notify/{userId}")
+        public void postMessage(String message) throws IOException {
+            for (SseEmitter emitter : emitters) {
+                try {
+                    emitter.send(message);
+                    sleep(1, sseEmitter);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    sseEmitter.completeWithError(e);
+                }
+                emitter.send(message);
+            }
+        }
+
+    /*
+
+    @GetMapping(value = "/sse/notification/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamDateTime( @PathVariable(value = "userId") long userId) {
+
+        SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
+
+        sseEmitter.onCompletion(() -> LOGGER.info("SseEmitter is completed"));
+
+        sseEmitter.onTimeout(() -> LOGGER.info("SseEmitter is timed out"));
+
+        sseEmitter.onError((ex) -> LOGGER.info("SseEmitter got error:", ex));
+
+        executor.execute(() -> {
+            for (int i = 0; i < 15; i++) {
+                try {
+                    sseEmitter.send(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss"))+" Id: "+userId);
+                    sleep(1, sseEmitter);
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                    sseEmitter.completeWithError(e);
+                }
+            }
+            sseEmitter.complete();
+        });
+
+        LOGGER.info("Controller exits");
+        return sseEmitter;
+    }
+
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
     @RestController
-    @RequestMapping("/sse/notification")
+    @RequestMapping("/sse/notification/{userId}")
     public class FolderWatchController implements AuditTrailListener<FolderChangeEvent> {
 
         private final FolderWatchService folderWatchService;
@@ -110,6 +168,6 @@ public class SEEController {
             e.printStackTrace();
             sseEmitter.completeWithError(e);
         }
-    }
+    }*/
 }
 
