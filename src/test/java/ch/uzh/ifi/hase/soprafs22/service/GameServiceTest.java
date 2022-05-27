@@ -321,7 +321,7 @@ class GameServiceTest {
         assertEquals("404 NOT_FOUND \"white card with cardId 2 does not exist\"", exception.getMessage());
     }
 
-    /*
+
     @Test
     void getGameFromRandomUser_success() {
         List<Game> games = new ArrayList<>();
@@ -331,22 +331,22 @@ class GameServiceTest {
         // then
         Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(
                 eq(1L),
-                        eq(testUser),
-                        eq(testUser.getGender()),
+                        //eq(testUser),
+                        eq(testUser.getGender().name()),
                         Mockito.any(),
-                        Mockito.any(),
-                        eq(testUser.getBlockedUsers()),
-                        eq(testUser.getMatchedUsers())))
+                        Mockito.any()))
+                        //eq(testUser.getBlockedUsers()),
+                        //eq(testUser.getMatchedUsers())))
                 .thenReturn(101L);
         Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(
                 Mockito.any(PageRequest.class),
                         eq(1L),
-                        eq(testUser),
-                        eq(testUser.getGender()),
+                        // eq(testUser),
+                        eq(testUser.getGender().name()),
                         Mockito.any(),
-                        Mockito.any(),
-                        eq(testUser.getBlockedUsers()),
-                        eq(testUser.getMatchedUsers())))
+                        Mockito.any()))
+                        // eq(testUser.getBlockedUsers()),
+                        // eq(testUser.getMatchedUsers())))
                 .thenReturn(somePage);
 
         // test
@@ -364,18 +364,18 @@ class GameServiceTest {
 
         // then
         Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L),
-                        eq(testUser),
-                        eq(testUser.getGender()),
+                        //eq(testUser),
+                        eq(testUser.getGender().name()),
                         Mockito.any(),
-                        Mockito.any(),
-                        eq(testUser.getBlockedUsers()),
-                        eq(testUser.getMatchedUsers())))
+                        Mockito.any()))
+                        //eq(testUser.getBlockedUsers()),
+                        // eq(testUser.getMatchedUsers())))
                 .thenReturn(0L);
 
         // test
         // expect exception
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> gameService.getGameFromRandomUser(testUser));
         assertEquals("404 NOT_FOUND \"There is no black card of another user left\"", exception.getMessage());
-    }*/
+    }
 
 }
