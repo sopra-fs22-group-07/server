@@ -30,7 +30,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "where g.game_status = 'ACTIVE'\n" +
             "and g.user_id <> :userId\n" +
             "and g not in (\n" +
-            "\t select g from game g\n" +
+            "\t select g from game g \n" +
             "\t join play p on g.id = p.game_id\n" +
             "\t where p.user_id= :userId)\n" +
             " and g.user_id in (\n" +
@@ -49,10 +49,10 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\twhere p.user_id = b.users_user_id))\n" +
             "and g in (\n" +
             "\t select g from game g\n" +
-            "\t join player p on g.user_id = p.user_id\n" +
-            "\t p.birthday >= :maxAgeDate and p.birthday <= :minAgeDate)\n" +
-            "and g in\n" +
-            "\t(select g from game g, player p1, player p2\n" +
+            "\t join player p on g.user_id=p.user_id\n" +
+            "\t where p.birthday >= :maxAgeDate and p.birthday <= :minAgeDate)\n" +
+            "and g in (\n" +
+            "\tselect g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
             "\t and :gender in\n" +
             "\t (select gender_preferences\n" +
