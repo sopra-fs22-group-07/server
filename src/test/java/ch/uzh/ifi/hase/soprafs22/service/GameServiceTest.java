@@ -389,7 +389,7 @@ class GameServiceTest {
 
         // test if result is the same when rounded to 2 decimal places.
         // actual result computed using: https://www.vcalc.com/wiki/vCalc/Haversine+-+Distance (not the same source as for the code)
-        assertEquals(distance, 1568.52, 0.01);
+        assertEquals(1568.52, distance, 0.01);
     }
 
     @Test
@@ -404,7 +404,7 @@ class GameServiceTest {
     
             // test if result is the same when rounded to nearest integer.
             // actual result computed using: https://www.vcalc.com/wiki/vCalc/Haversine+-+Distance (not the same source as for the code)
-            assertEquals(distance, 19630, 1);
+            assertEquals(19630, distance, 1);
     }
 
 }

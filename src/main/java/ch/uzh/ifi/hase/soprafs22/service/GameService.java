@@ -221,7 +221,7 @@ public class GameService {
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
    * @param user: user of the caller
-   * @return Game: a random Game.
+   * @return game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
   public Game getGameFromRandomUser(User user) {
@@ -246,10 +246,10 @@ public class GameService {
     // limit page size to 100
     int pageSize = (numOfGames < 100) ? numOfGames.intValue() : 100;
     int pageIndex = rand.nextInt(pageSize);
-    // only get one game
-    PageRequest pageRequest = PageRequest.of(pageIndex, 1);
+    // all games it found
+    PageRequest pageRequest = PageRequest.of(pageIndex, pageSize);
 
-    // get the page with the game
+    // get the page with the games
     Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(
       pageRequest, 
       user.getId(), 
@@ -263,7 +263,8 @@ public class GameService {
 
     // subset the page of users to only users that have a haversine distance of less than user.getMaxRange()
     List<Game> games = somePage.getContent();
-    List<Game> gamesWithDistance = new ArrayList<>();
+    Game matchingGame = null;
+
     // go over all games that match the other criteria
     for(Game game : games){
       // for each game get the user that the game belongs to
@@ -277,16 +278,17 @@ public class GameService {
         gameUser.getLongitude()
       );
 
-      // QUESTION TO REVIEWER: right now i compute the distance for every user i find that matches the other preference criteria. However, I only need to compute it until I find one that has a distance that is 
-
       // if the distance is less than the max range, add the game to the list
       if(distance <= user.getMaxRange()){
-        gamesWithDistance.add(game);
+        matchingGame = game;
+        break;
+      } else {
+        // throw 404 if no game was found
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
       }
     }
 
-    // return the game
-    return gamesWithDistance.get(0);
+    return matchingGame;
   }
 
 
