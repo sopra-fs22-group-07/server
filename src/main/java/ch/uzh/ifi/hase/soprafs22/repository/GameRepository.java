@@ -39,20 +39,20 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t where p.user_id= :userId)\n" +
             " and g.user_id in (\n" +
             "\t select p.user_id\n" +
-            "\t from user p\n" +
+            "\t from player p\n" +
             "\t where not exists (\n" +
             "\t\t select *\n" +
             "\t\t from user_matches m\n" +
             "\t\t where p.user_id = m.users_user_id))\n" +
             "and g.user_id in (\n" +
             "\tselect p.user_id\n" +
-            "\tfrom user p\n" +
+            "\tfrom player p\n" +
             "\twhere not exists (\n" +
             "\t\tselect *\n" +
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
             "and g in\n" +
-            "\t(select g from game g, user p1, user p2\n" +
+            "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
             "\t and :gender in\n" +
             "\t (select gender_preferences\n" +
@@ -91,20 +91,20 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t where p.user_id= :userId)\n" +
             " and g.user_id in (\n" +
             "\t select p.user_id\n" +
-            "\t from user p\n" +
+            "\t from player p\n" +
             "\t where not exists (\n" +
             "\t\t select *\n" +
             "\t\t from user_matches m\n" +
             "\t\t where p.user_id = m.users_user_id))\n" +
             "and g.user_id in (\n" +
             "\tselect p.user_id\n" +
-            "\tfrom user p\n" +
+            "\tfrom player p\n" +
             "\twhere not exists (\n" +
             "\t\tselect *\n" +
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
             "and g in\n" +
-            "\t(select g from game g, user p1, user p2\n" +
+            "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
             "\t and :gender in\n" +
             "\t (select gender_preferences\n" +
