@@ -54,7 +54,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and g in (\n" +
             "\tselect g\n" +
             "\tfrom game g\n" +
-            "\tjoin player p on g.user_id=p.user_id" +
+            "\tjoin player p on g.user_id=p.user_id\n" +
             "where p.birthday between :minAgeDate and :maxAgeDate)" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
@@ -111,7 +111,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and g in (\n" +
             "\tselect g\n" +
             "\tfrom game g\n" +
-            "\tjoin player p on g.user_id=p.user_id" +
+            "\tjoin player p on g.user_id=p.user_id\n" +
             "where p.birthday between :minAgeDate and :maxAgeDate)" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
