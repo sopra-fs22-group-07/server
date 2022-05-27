@@ -28,6 +28,11 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "and game in (select g from Game g, User u where u = g.user and u not in :blocked and u not in :matched)"+
             "and game in (select g from Game g join User u on g.user=u where u.birthday between :maxAgeDate and :minAgeDate)" +
             "and game in(select g from Game g, User u, User u2 where u = g.user and :gender member of u.genderPreferences and u.gender member of u2.genderPreferences and u2.id = :userId)") //We cannot pass genderPreferences as it is a set but should be a list i think
+
+     " and g in (\n" +
+            "\t select g from game\n" +
+            "\t join player p on g.user_id=p.user_id\n" +
+            "\t where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
     */
     // SQL
     @Query(value = "select * \n" +
@@ -52,10 +57,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tselect *\n" +
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
-            " and g in (\n" +
-            "\t select g from game\n" +
-            "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
             "and g in\n" +
             "\t(select g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
@@ -99,6 +100,11 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\tjoin player p on g.user_id=p.user_id\n" +
             "where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)" +
 
+            " and g in (\n" +
+            "\t select g from game\n" +
+            "\t join player p on g.user_id=p.user_id\n" +
+            "\t where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
+
      */
 
     @Query(value = "select count(*) \n" +
@@ -123,10 +129,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
             "\t\tselect *\n" +
             "\t\tfrom blocked_user_relation b\n" +
             "\t\twhere p.user_id = b.users_user_id))\n" +
-            " and g in (\n" +
-            "\t select g from game\n" +
-            "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday >= :minAgeDate and p.birthday <= :maxAgeDate)\n" +
             "and g in (" +
             "\tselect g from game g, player p1, player p2\n" +
             "\t where p1.user_id = g.user_id\n" +
