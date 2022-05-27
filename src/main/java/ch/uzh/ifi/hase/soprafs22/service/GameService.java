@@ -257,7 +257,7 @@ public class GameService {
     //Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
     //    user.getGender(), minAgeDate, maxAgeDate, user.getBlockedUsers(), user.getMatchedUsers());
       Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(),
-              user.getGender().name(), minAgeDate, maxAgeDate);
+              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
 
 
     // return the game
