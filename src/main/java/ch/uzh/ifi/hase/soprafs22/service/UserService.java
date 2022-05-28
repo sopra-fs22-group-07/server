@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.Time;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs22.controller.SseController;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.repository.ChatRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.MatchRepository;
@@ -38,9 +39,11 @@ public class UserService {
   private final MatchRepository matchRepository;
   private final ChatRepository chatRepository;
   private final GameService gameService;
+    private final SseController sseController;
   private boolean areInstantiatedDemoUsers = false;
   private static final String UNIQUE_VIOLATION = "Uniqueness Violation Occurred";
   private static final Long GAME_DURATION = Time.ONE_DAY;
+
 
 
   @Autowired
@@ -48,13 +51,15 @@ public class UserService {
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
                      @Qualifier("gameService") GameService gameService,
                      @Qualifier("MatchRepository") MatchRepository matchRepository,
-                     @Qualifier("ChatRepository")ChatRepository chatRepository) {
+                     @Qualifier("ChatRepository") ChatRepository chatRepository,
+                     @Qualifier("sseController") SseController sseController) {
 
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
     this.gameService = gameService;
     this.chatRepository = chatRepository;
+    this.sseController = sseController;
   }
 
     public List<User> getUsers() {
@@ -355,6 +360,7 @@ public class UserService {
     // new Chat gets added
     match.setChat(chat);
     matchRepository.saveAndFlush(match);
+    sseController.sendNotification(user, otherUser);
 
     return match;
   }

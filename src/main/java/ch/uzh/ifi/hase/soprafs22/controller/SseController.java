@@ -1,5 +1,9 @@
 package ch.uzh.ifi.hase.soprafs22.controller;
 
+import ch.uzh.ifi.hase.soprafs22.entity.User;
+import ch.uzh.ifi.hase.soprafs22.service.CardService;
+import ch.uzh.ifi.hase.soprafs22.service.SSEService;
+import ch.uzh.ifi.hase.soprafs22.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -24,12 +28,21 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 public class SseController {
+        // SseController(SSEService sseService) {
+        // this.sseService = sseService;
+        // }
 
-        private final Map<Long, SseEmitter> emittersMap = new HashMap<>();
+        // private final SSEService sseService;
 
-        @GetMapping("/sse/enroll/{userId}")
+        private final Logger log = LoggerFactory.getLogger(CardService.class);
+        //TODO: change to Repository?
+        public final Map<Long, SseEmitter> emittersMap = new HashMap<>();
+        // sseService.createEmitter(emitter, userId);
+
+    @GetMapping("/sse/enroll/{userId}")
         public SseEmitter enroll(@PathVariable Long userId) {
             SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+
             emittersMap.put(userId, emitter);
             emitter.onCompletion(() -> emittersMap.remove(userId,emitter));
             emitter.onTimeout(() -> emittersMap.remove(userId,emitter));
@@ -50,6 +63,21 @@ public class SseController {
             }
 
         }
+
+    public void sendNotification(User user1, User user2) {
+        SseEmitter emitterUser1 = emittersMap.get(user1.getId());
+        SseEmitter emitterUser2 = emittersMap.get(user2.getId());
+        try {
+            log.debug("Sending match between {} and {}", user1.getUsername(), user2.getUsername());
+            emitterUser1.send("match");
+            emitterUser2.send("match");
+        } catch (IOException | IllegalStateException e) {
+            log.debug("Error while sending match");
+        }
+    }
+
+
+
 
     /*
 
