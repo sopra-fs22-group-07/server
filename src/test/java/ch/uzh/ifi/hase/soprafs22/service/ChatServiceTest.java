@@ -126,6 +126,24 @@ class ChatServiceTest extends ChatFiller {
     }
 
     @Test
+    void getUserIdFromOtherUser_success() {
+        given(chatRepository.findById(chat1.getId())).willReturn(Optional.ofNullable(chat1));
+        assertEquals(2L, chatService.getUserIdFromOtherUser(chat1.getId(), user1.getId()));
+    }
+
+    @Test
+    void getUserIdFromOtherUser_returnNull() {
+        given(chatRepository.findById(100L)).willReturn(Optional.ofNullable(fillChat(100L, new ArrayList<>())));
+        assertNull(chatService.getUserIdFromOtherUser(100L, user1.getId()));
+    }
+
+    @Test
+    void getUserIdFromOtherUser_error() {
+        ResponseStatusException res = assertThrows(ResponseStatusException.class, () -> chatService.getUserIdFromOtherUser(100L, 101L));
+        assertEquals(HttpStatus.NOT_FOUND, res.getStatus());
+    }
+
+    @Test
     void getSize_success() {
         given(chatRepository.findById(chat1.getId())).willReturn(Optional.ofNullable(chat1));
         assertEquals(2, chatService.getSize(chat1.getId()));
