@@ -67,6 +67,7 @@ public class SseController {
     public void sendNotification(User user1, User user2) {
         SseEmitter emitterUser1 = emittersMap.get(user1.getId());
         SseEmitter emitterUser2 = emittersMap.get(user2.getId());
+        if(emitterUser1 != null && emitterUser2 != null){
         try {
             log.debug("Sending match between {} and {}", user1.getUsername(), user2.getUsername());
             emitterUser1.send("match");
@@ -74,6 +75,7 @@ public class SseController {
         } catch (IOException | IllegalStateException e) {
             log.debug("Error while sending match");
         }
+    }
     }
 
 
