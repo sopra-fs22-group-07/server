@@ -130,6 +130,13 @@ class UserServiceTest {
     assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
   }
 
+  @Test
+  void createUser_BirthdayMissing_fails() {
+      testUser.setBirthday(null);
+      ResponseStatusException res = assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
+      assertEquals(HttpStatus.BAD_REQUEST, res.getStatus());
+  }
+
 
   @Test
   void createUser_duplicateInputs_throwsException() {
