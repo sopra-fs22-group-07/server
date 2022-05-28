@@ -19,7 +19,7 @@ Users can set preferences such as gender, age or a maximum distance which restri
 # Technologies
 
 ## Client
-For the client we used React and JSX aswell as the package manager npm
+For the client we used React and JSX as well as the package manager npm.
 
 ## Server
 For the server we created a springboot application with java. We also used the build automation tool Gradle.
