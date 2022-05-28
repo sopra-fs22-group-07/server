@@ -89,7 +89,9 @@ public class UserService {
     newUser.setLatitude(0);
     newUser.setLongitude(0);
 
-    checkIfUserExists(newUser);
+    if (!isUsernameAvailable(newUser.getUsername())) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "The username provided is not unique.");
+    }
 
     // saves the given entity but data is only persisted in the database once
     // flush() is called
@@ -148,27 +150,6 @@ public class UserService {
 
     userToBeLoggedOut.setStatus(UserStatus.OFFLINE);
     return userToBeLoggedOut;
-  }
-
-  /**
-   * This is a helper method that will check the uniqueness criteria of the
-   * username and the name
-   * defined in the User entity. The method will do nothing if the input is unique
-   * and throw an error otherwise.
-   *
-   * @param userToBeCreated- User that shall be saved to database
-   * @throws org.springframework.web.server.ResponseStatusException: conflict
-   * @see User
-   */
-  private void checkIfUserExists(User userToBeCreated) {
-    User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-
-    // ERROR 409: user already exists with Username
-    String baseErrorMessage = "The %s provided %s not unique.";
-    if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-              String.format(baseErrorMessage, "username", "is"));
-    }
   }
 
   /**
@@ -332,7 +313,6 @@ public class UserService {
     User user = getUserById(userId);
     user.setUserWhiteCards(whiteCards);
     userRepository.saveAndFlush(user);
-
   }
 
   /**
@@ -342,7 +322,6 @@ public class UserService {
    * @return : created Match
    */
   public Match createMatch(User user, User otherUser) {
-
     // first, delete likes
     user.removeLikeFromUser(otherUser);
     otherUser.removeLikeFromUser(user);
@@ -608,18 +587,6 @@ public class UserService {
   public void deleteUser(long userId){
       userRepository.deleteById(userId);
   }
-
-
-  /**
-   * get all users that user has matched with
-   * @param userId: userId of user
-   * @return list of users that matched with the user with id "userId"
-   */
-  // return list of users that matched with the user with id "userId"
-  public List<User> getMatchedUsers(long userId) {
-    return getUsersFromMatches(getUserById(userId));
-  }
-
 
   // instantiate demo users
   public void instantiateDemoUsers() {
@@ -901,12 +868,9 @@ public class UserService {
     user.setLongitude(longitude);
   }
   public String getLoginStatus(String token, long userId) {
-    User user = getUserById(userId);
-
-    if (user.getToken().equals(token) && user.getStatus().equals(UserStatus.ONLINE)) {
-      return "online";
-    }
-    return "offline";
+    User user = this.userRepository.findById(userId);
+    return (user == null || !user.getToken().equals(token) || !user.getStatus().equals(UserStatus.ONLINE))
+            ? "offline" : "online";
   }
 
     /**

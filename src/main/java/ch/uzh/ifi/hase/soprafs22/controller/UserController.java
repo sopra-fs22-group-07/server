@@ -156,7 +156,8 @@ public class UserController {
           @PathVariable(value = "userId") long id){
 
       userService.checkSpecificAccess(token, id); // 401, 404
-      List<User> matchedUsers = userService.getMatchedUsers(id);
+      User selfUser = userService.getUserById(id);
+      List<User> matchedUsers = userService.getUsersFromMatches(selfUser);
 
       // create response object
       List<UserGetDTO> userGetDTOs = new ArrayList<>();
@@ -189,7 +190,6 @@ public class UserController {
       @RequestHeader(value = "authorization", required = true) String token,
       @PathVariable(value = "userId") long userId){
 
-        userService.checkSpecificAccess(token, userId); // 401, 404
         return userService.getLoginStatus(token, userId);
     }
 
