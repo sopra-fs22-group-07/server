@@ -236,7 +236,7 @@ public class GameService {
       Timestamp minAgeTimestamp = new Timestamp(minAgeDate.getTime());
       Timestamp maxAgeTimestamp = new Timestamp(maxAgeDate.getTime());
     // count the possible games
-      Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
+     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
               user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
       String s = "counted " + numOfGames.toString() + " games";
     log.info(s);
