@@ -22,6 +22,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 
 @TestPropertySource(
         locations = "application-integrationtest.properties")
@@ -203,7 +204,7 @@ class GameServiceTest {
     @Test
     void getGameById_success() {
         // then
-        Mockito.when(gameRepository.findById(1L)).thenReturn(Optional.of(testGame));
+        Mockito.when(gameRepository.findById(1L)).thenReturn((testGame));
 
         Game game = gameService.getGameById(1L);
         // test if game is equal to testGame (expected, actual)
@@ -216,7 +217,7 @@ class GameServiceTest {
     @Test
     void getGameById_fail() {
         // then
-        Mockito.when(gameRepository.findById(2L)).thenReturn(Optional.empty());
+        doNothing().when(gameRepository.findById(2L));
         // expect exception
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
                 gameService.getGameById(2L));
@@ -329,24 +330,9 @@ class GameServiceTest {
         Page<Game> somePage = new PageImpl<>(games);
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(
-                eq(1L),
-                        //eq(testUser),
-                        eq(testUser.getGender().name()),
-                        Mockito.any(),
-                        Mockito.any()))
-                        //eq(testUser.getBlockedUsers()),
-                        //eq(testUser.getMatchedUsers())))
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any(), eq(testUser.getBlockedUsers()), eq(testUser.getMatchedUsers())))
                 .thenReturn(101L);
-        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(
-                Mockito.any(PageRequest.class),
-                        eq(1L),
-                        // eq(testUser),
-                        eq(testUser.getGender().name()),
-                        Mockito.any(),
-                        Mockito.any()))
-                        // eq(testUser.getBlockedUsers()),
-                        // eq(testUser.getMatchedUsers())))
+        Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(Mockito.any(PageRequest.class),eq(1L),eq(testUser),eq(testUser.getGender()), Mockito.any(), Mockito.any(), eq(testUser.getBlockedUsers()), eq(testUser.getMatchedUsers())))
                 .thenReturn(somePage);
 
         // test
@@ -363,13 +349,7 @@ class GameServiceTest {
     void getGameFromRandomUser_throwNotFound() {
 
         // then
-        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L),
-                        //eq(testUser),
-                        eq(testUser.getGender().name()),
-                        Mockito.any(),
-                        Mockito.any()))
-                        //eq(testUser.getBlockedUsers()),
-                        // eq(testUser.getMatchedUsers())))
+        Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L), eq(testUser), eq(testUser.getGender()), Mockito.any(), Mockito.any(), eq(testUser.getBlockedUsers()), eq(testUser.getMatchedUsers())))
                 .thenReturn(0L);
 
         // test
