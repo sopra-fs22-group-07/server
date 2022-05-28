@@ -226,19 +226,25 @@ public class GameService {
    * Gets a game from a random user, but not the game from the user calling himself, and neither a game that that user
    * already has played on
    * @param user: user of the caller
-   * @return Game: a random Game.
+   * @return game: a random Game.
    * @throws ResponseStatusException - 404: if there is no game of another user left
    */
   public Game getGameFromRandomUser(User user) {
 
     Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
     Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
-      Timestamp minAgeTimestamp = new Timestamp(minAgeDate.getTime());
-      Timestamp maxAgeTimestamp = new Timestamp(maxAgeDate.getTime());
+    Timestamp minAgeTimestamp = new Timestamp(minAgeDate.getTime());
+    Timestamp maxAgeTimestamp = new Timestamp(maxAgeDate.getTime());
+
     // count the possible games
-     Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(),
-              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
-      String s = "counted " + numOfGames.toString() + " games";
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(
+      user.getId(),
+      user.getGender().name(), 
+      minAgeTimestamp, 
+      maxAgeTimestamp
+    );
+
+    String s = "counted " + numOfGames.toString() + " games";
     log.info(s);
 
     if(numOfGames==0){
@@ -248,14 +254,75 @@ public class GameService {
     // limit page size to 100
     int pageSize = (numOfGames < 100) ? numOfGames.intValue() : 100;
     int pageIndex = rand.nextInt(pageSize);
-    // only get one game
-    PageRequest pageRequest = PageRequest.of(pageIndex, 1);
+    // all games it found
+    PageRequest pageRequest = PageRequest.of(pageIndex, pageSize);
 
-    // get the page with the game
-      Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(),
-              user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
+    // get the page with the games
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(
+      pageRequest, 
+      user.getId(), 
+      user.getGender().name(), 
+      minAgeTimestamp, 
+      maxAgeTimestamp
+    );
 
-    // return the game
-    return somePage.getContent().get(0);
+    // subset the page of users to only users that have a haversine distance of less than user.getMaxRange()
+    List<Game> games = somePage.getContent();
+    Game matchingGame = null;
+
+    // go over all games that match the other criteria
+    for(Game game : games){
+      // for each game get the user that the game belongs to
+      User gameUser = game.getUser();
+
+      // calculate the distance between the two users
+      double distance = haversineDistance(
+        user.getLatitude(), 
+        user.getLongitude(), 
+        gameUser.getLatitude(), 
+        gameUser.getLongitude()
+      );
+
+      // if the distance is less than the max range, add the game to the list
+      if(distance <= user.getMaxRange()){
+        matchingGame = game;
+        break;
+      } else {
+        // throw 404 if no game was found
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
+      }
+    }
+
+    return matchingGame;
   }
+
+
+  /**
+   * based on: https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude but adapted
+   * 
+   * Calculate distance between two points in latitude and longitude taking. 
+   * Uses Haversine method as its base.
+   * 
+   * lat1, lon1 Start point; lat2, lon2 End point
+   * @returns Distance in km
+   */
+  public static double haversineDistance(
+    double lat1, 
+    double lon1, 
+    double lat2, 
+    double lon2) {
+
+    final int R = 6371; // Radius of the earth
+
+    double latDistance = Math.toRadians(lat2 - lat1);
+    double lonDistance = Math.toRadians(lon2 - lon1);
+    double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+            * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    double distance = R * c; // distance in km
+
+    return distance;
+  }
+
 }
