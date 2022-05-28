@@ -360,7 +360,8 @@ public class UserService {
     // new Chat gets added
     match.setChat(chat);
     matchRepository.saveAndFlush(match);
-    sseController.sendNotification(user, otherUser);
+    sseController.sendNotification(user);
+      sseController.sendNotification(otherUser);
 
     return match;
   }
