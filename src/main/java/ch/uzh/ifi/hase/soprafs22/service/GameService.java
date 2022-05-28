@@ -89,12 +89,12 @@ public class GameService {
    * @return Game: game with unique gameId
    * @throws ResponseStatusException 404 if game does not exist
    */
-    public Game getGameById(long gameId) {
-        Game game = gameRepository.findById(gameId);
-        if(game == null){
+    public Game getGameById(Long gameId) {
+        Optional<Game> game = gameRepository.findById(gameId);
+        if(game.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "game does not exist");
         }
-        return game;
+        return game.get();
     }
 
     /**
