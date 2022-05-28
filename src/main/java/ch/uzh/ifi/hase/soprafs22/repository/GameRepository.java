@@ -62,7 +62,7 @@ public interface GameRepository extends JpaRepository<Game, Long> {
                                                             @Param("maxAgeDate") Timestamp maxAgeDate);
 
 
-    @Query(value = "select count(g.id) \n" +
+    @Query(value = "select count(*) \n" +
             "from game g \n" +
             "where g.game_status = 'ACTIVE'\n" +
             "and g.user_id <> :userId\n" +
