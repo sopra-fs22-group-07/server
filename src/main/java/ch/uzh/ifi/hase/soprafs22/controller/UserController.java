@@ -10,9 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 /**
  * User Controller
@@ -147,25 +144,6 @@ public class UserController {
 
       userService.checkSpecificAccess(token, userId); // 401, 404
       userService.deleteUser(userId);
-  }
-
-  @GetMapping("/users/{userId}/matches")
-  @ResponseStatus(HttpStatus.OK)
-  public List<UserGetDTO> getMatches(
-          @RequestHeader(value = "authorization", required = false) String token,
-          @PathVariable(value = "userId") long id){
-
-      userService.checkSpecificAccess(token, id); // 401, 404
-      User selfUser = userService.getUserById(id);
-      List<User> matchedUsers = userService.getUsersFromMatches(selfUser);
-
-      // create response object
-      List<UserGetDTO> userGetDTOs = new ArrayList<>();
-      for (User user : matchedUsers) {
-          userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-      }
-
-      return userGetDTOs;
   }
 
     @PutMapping("/users/{userId}/preferences")

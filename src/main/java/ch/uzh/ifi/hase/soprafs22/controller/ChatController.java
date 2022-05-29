@@ -16,7 +16,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -39,35 +38,23 @@ public class ChatController {
                                                                              @PathVariable(value = "userId") long userId) {
     userService.checkSpecificAccess(token, userId); // 404, 409
 
-      // get User by ID
+    // get User by ID
     User user = userService.getUserById(userId);
     // get all matches from user
     List<Match> matches = userService.getMatches(user);
-    // get chatID
-    List<Long> chatIds = userService.getChatIds(matches);
-    // get matchedUser
-    List<User> usersMatched = userService.getUsersFromMatches(user);
-    // get the last Message from the matches/ chats
-    List<Message> msg = chatService.getFirstMessages(matches);
+    matches.sort((o1, o2) -> (int)(o1.getCreationDate().getTime() - o2.getCreationDate().getTime()));
 
     List<ChatOverViewGetDTO> chatOverViewGetDTOList = new ArrayList<>();
 
-      // map messages, go through both lists and add them to chatOverViewGetDTOList
-      Iterator<User> matchedUser = usersMatched.iterator();
-      Iterator<Message> message = msg.iterator();
-      Iterator<Long> chatId = chatIds.iterator();
-      Iterator<Match> match = matches.iterator();
+    for (Match match : matches) {
+      ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
+      chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertUserToMiniUserGetDTO(match.getMatchedUserFromUser(user)));
+      chatOverViewGetDTO.setChatId(match.getChat().getId());
+      chatOverViewGetDTO.setMessage(match.getChat().getFirstMessage());
+      chatOverViewGetDTO.setMatchCreationDate(match.getCreationDate());
+      chatOverViewGetDTOList.add(chatOverViewGetDTO);
+    }
 
-      while (matchedUser.hasNext() && message.hasNext() && chatId.hasNext() && match.hasNext()) {
-          ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
-          chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(matchedUser.next()));
-          chatOverViewGetDTO.setMessage(message.next());
-          chatOverViewGetDTO.setChatId(chatId.next());
-          chatOverViewGetDTO.setMatchCreationDate(match.next().getCreationDate());
-          chatOverViewGetDTOList.add(chatOverViewGetDTO);
-      }
-
-    // I would not use the mapper here but do it myself
     return new ResponseEntity<>(chatOverViewGetDTOList, null, HttpStatus.OK);
   }
 
