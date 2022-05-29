@@ -39,6 +39,7 @@ class ChatControllerTest extends ChatFiller {
 
     User user1;
     User user2;
+    User user3;
     List<Match> matches;
     List<Long> chatIds;
     List<User> userMatched;
@@ -62,7 +63,7 @@ class ChatControllerTest extends ChatFiller {
     void setUp() {
         user1 = fillUser(1L, "1one");
         user2 = fillUser(2L, "2two");
-        User user3 = fillUser(3L, "3three");
+        user3 = fillUser(3L, "3three");
         Pair<User, User> userPair12 = new Pair<>(user1, user2);
         Pair<User, User> userPair13 = new Pair<>(user1, user3);
         Message message1 = fillMessage(1L, 2L, "first");
@@ -94,7 +95,6 @@ class ChatControllerTest extends ChatFiller {
         given(userService.getUserById(user1.getId())).willReturn(user1);
         given(userService.getMatches(user1)).willReturn(matches.subList(0,1));
         given(userService.getChatIds(Mockito.anyList())).willReturn(chatIds.subList(0,1));
-        given(userService.getUsersFromMatches(user1, matches.get(0))).willReturn(user2);
         given(chatService.getFirstMessages(Mockito.anyList())).willReturn(messages.subList(0,1));
 
         // when
@@ -112,8 +112,6 @@ class ChatControllerTest extends ChatFiller {
         given(userService.getUserById(user1.getId())).willReturn(user1);
         given(userService.getMatches(user1)).willReturn(matches);
         given(userService.getChatIds(matches)).willReturn(chatIds);
-        given(userService.getUsersFromMatches(user1, matches.get(0))).willReturn(user2);
-        given(userService.getUsersFromMatches(user1, matches.get(1))).willReturn(matches.get(1).getUsers().getObj2());
         given(chatService.getFirstMessages(matches)).willReturn(messages);
 
         // when

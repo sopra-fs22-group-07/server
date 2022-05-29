@@ -916,16 +916,6 @@ class UserServiceTest {
     }
 
     @Test
-    void getUsersFromMatches_success() {
-        assertNull(userService.getUsersFromMatches(testUser, testMatch));
-        setupMatches(1);
-        assertEquals(otherUser, userService.getUsersFromMatches(testUser, testMatch));
-        setupMatches(2);
-        assertEquals(otherUser, userService.getUsersFromMatches(testUser, testMatch));
-        assertEquals(testUser, userService.getUsersFromMatches(otherUser, testMatch));
-    }
-
-    @Test
     void getActiveGame_success() {
       testUser.setActiveGame(testGame);
       Mockito.when(userRepository.findById(1L)).thenReturn(testUser);

@@ -566,16 +566,6 @@ public class UserService {
         return new ArrayList<>(matchSet);
     }
 
-    /**
-     * Get all users which match with the known user
-     * @param user: known user
-     * @return list of users which mach with known user
-     */
-    public User getUsersFromMatches(User user, Match match) {
-      return match.getMatchedUserFromUser(user);
-    }
-
-
   /**
    * Deletes a User from Repo By the USer id
    * @param userId: userId of a user
