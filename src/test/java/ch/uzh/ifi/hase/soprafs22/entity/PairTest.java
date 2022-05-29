@@ -21,6 +21,5 @@ class PairTest {
         assertNotEquals(pair12, pair13);
         assertNotEquals(pair13, pair23);
         assertNotEquals(null, pair12);
-        assertNotEquals(pair21, new User());
     }
 }

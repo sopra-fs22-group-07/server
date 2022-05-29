@@ -105,7 +105,7 @@ class UserServiceTest {
     @Test
     void getUsers_not_empty(){
         User user = userService.createUser(testUser);
-        List<User> checkList = Arrays.asList(user);
+        List<User> checkList = List.of(user);
         List<User> userList = new ArrayList<>();
         userList.add(user);
 
@@ -913,17 +913,6 @@ class UserServiceTest {
     void getMatches_null() {
         Mockito.when(matchRepository.getOne(Mockito.any())).thenReturn(null);
         assertEquals(Collections.emptyList(), userService.getMatches(testUser));
-    }
-
-    @Test
-    void getUsersFromMatches_success() {
-        assertEquals(new ArrayList<>(), userService.getUsersFromMatches(testUser));
-        setupMatches(1);
-        assertEquals(List.of(otherUser), userService.getUsersFromMatches(testUser));
-        setupMatches(2);
-        List<User> res = userService.getUsersFromMatches(testUser);
-        assertEquals(2, res.size());
-        assertTrue(res.contains(otherUser));
     }
 
     @Test
