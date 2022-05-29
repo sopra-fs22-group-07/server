@@ -19,6 +19,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.Date;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -89,7 +90,7 @@ class GameServiceIntegrationTest {
     @Test
     void createGame_validInputs_success() {
         // given
-        assertNull(gameRepository.findById(1L));
+        assertEquals(Optional.empty(), gameRepository.findById(1L));
 
         Game testGame = new Game();
         Long testUserId = 2L;
