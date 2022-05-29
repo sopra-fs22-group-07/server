@@ -14,44 +14,39 @@ import java.sql.Timestamp;
 public interface GameRepository extends JpaRepository<Game, Long> {
 
     // SQL
-    @Query(value = "select * \n" +
-            "from game g \n" +
-            "where g.game_status = 'ACTIVE'\n" +
-            "and g.user_id <> :userId\n" +
-            "and g not in (\n" +
-            "\t select g from game g \n" +
-            "\t join play p on g.id = p.game_id\n" +
-            "\t where p.user_id= :userId)\n" +
-            "and g.user_id in (\n" +
-            "\t select p.user_id\n" +
-            "\t from player p\n" +
-            "\t where not exists (\n" +
-            "\t\t select *\n" +
-            "\t\t from user_matches m\n" +
-            "\t\t where p.user_id = m.users_user_id))\n" +
-            "and g.user_id in (\n" +
-            "\t select p.user_id\n" +
-            "\t from player p\n" +
-            "\t where not exists (\n" +
-            "\t\t select *\n" +
-            "\t\t from blocked_user_relation b\n" +
-            "\t\t where p.user_id = b.users_user_id))\n" +
-            "and g in (\n" +
-            "\t select g from game g\n" +
-            "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday >= :maxAgeDate and p.birthday <= :minAgeDate)\n" +
-            "and g in (\n" +
-            "\t select g from game g, player p1, player p2\n" +
-            "\t where p1.user_id = g.user_id\n" +
-            "\t and :gender in\n" +
-            "\t (select gender_preferences\n" +
-            "\t from user_gender_preferences ugp\n" +
-            "\t where ugp.user_user_id=p1.user_id)\n" +
-            "\t and p1.gender in \n" +
-            "\t (select gender_preferences\n" +
-            "\t from user_gender_preferences ugp\n" +
-            "\t where ugp.user_user_id=p2.user_id)\n" +
-            "\t and p2.user_id = :userId)",
+    @Query(value = """
+select *  from game g
+where g.game_status = 'ACTIVE'
+  and g.user_id <> :userId
+  and g not in (
+      select g from game g
+          join play p on g.id = p.game_id
+      where p.user_id= :userId)
+  and g.user_id in (
+      select p.user_id from player p
+      where not exists (
+          select * from user_matches m1, user_matches m2
+          where m1.matches_id = m2.matches_id and m1.users_user_id = :userId and m2.users_user_id = p.user_id))
+  and g.user_id in (
+      select p.user_id from player p
+      where not exists (
+          select * from blocked_user_relation b1, blocked_user_relation b2
+          where b1.blocked_user_relations_id = b2.blocked_user_relations_id and b1.users_user_id = :userId and b2.users_user_id = p.user_id))
+  and g in (
+      select g from game g
+          join player p on g.user_id=p.user_id
+      where p.birthday >= :maxAgeDate and p.birthday <= :minAgeDate)
+  and g in (
+      select g from game g, player p1, player p2
+      where p1.user_id = g.user_id
+        and :gender in
+            (select gender_preferences from user_gender_preferences ugp
+            where ugp.user_user_id=p1.user_id)
+        and p1.gender in
+            (select gender_preferences from user_gender_preferences ugp
+            where ugp.user_user_id=p2.user_id)
+        and p2.user_id = :userId)
+""",
             nativeQuery = true)
     Page<Game> getOtherUserWithActiveGameThatWasNotPlayedOn(Pageable pageable,
                                                             @Param("userId") long userId,
@@ -60,44 +55,39 @@ public interface GameRepository extends JpaRepository<Game, Long> {
                                                             @Param("maxAgeDate") Timestamp maxAgeDate);
 
 
-    @Query(value = "select count(*) \n" +
-            "from game g \n" +
-            "where g.game_status = 'ACTIVE'\n" +
-            "and g.user_id <> :userId\n" +
-            "and g not in (\n" +
-            "\t select g from game g \n" +
-            "\t join play p on g.id = p.game_id\n" +
-            "\t where p.user_id= :userId)\n" +
-            "and g.user_id in (\n" +
-            "\t select p.user_id\n" +
-            "\t from player p\n" +
-            "\t where not exists (\n" +
-            "\t\t select *\n" +
-            "\t\t from user_matches m\n" +
-            "\t\t where p.user_id = m.users_user_id))\n" +
-            "and g.user_id in (\n" +
-            "\tselect p.user_id\n" +
-            "\tfrom player p\n" +
-            "\twhere not exists (\n" +
-            "\t\tselect *\n" +
-            "\t\tfrom blocked_user_relation b\n" +
-            "\t\twhere p.user_id = b.users_user_id))\n" +
-            "and g in (\n" +
-            "\t select g from game g\n" +
-            "\t join player p on g.user_id=p.user_id\n" +
-            "\t where p.birthday >= :maxAgeDate and p.birthday <= :minAgeDate)\n" +
-            "and g in (\n" +
-            "\tselect g from game g, player p1, player p2\n" +
-            "\t where p1.user_id = g.user_id\n" +
-            "\t and :gender in\n" +
-            "\t (select gender_preferences\n" +
-            "\t from user_gender_preferences ugp\n" +
-            "\t where ugp.user_user_id=p1.user_id)\n" +
-            "\t and p1.gender in \n" +
-            "\t (select gender_preferences\n" +
-            "\t from user_gender_preferences ugp\n" +
-            "\t where ugp.user_user_id=p2.user_id)\n" +
-            "\t and p2.user_id = :userId)",
+    @Query(value = """
+select count (*)  from game g
+where g.game_status = 'ACTIVE'
+  and g.user_id <> :userId
+  and g not in (
+      select g from game g
+          join play p on g.id = p.game_id
+      where p.user_id= :userId)
+  and g.user_id in (
+      select p.user_id from player p
+      where not exists (
+          select * from user_matches m1, user_matches m2
+          where m1.matches_id = m2.matches_id and m1.users_user_id = :userId and m2.users_user_id = p.user_id))
+  and g.user_id in (
+      select p.user_id from player p
+      where not exists (
+          select * from blocked_user_relation b1, blocked_user_relation b2
+          where b1.blocked_user_relations_id = b2.blocked_user_relations_id and b1.users_user_id = :userId and b2.users_user_id = p.user_id))
+  and g in (
+      select g from game g
+          join player p on g.user_id=p.user_id
+      where p.birthday >= :maxAgeDate and p.birthday <= :minAgeDate)
+  and g in (
+      select g from game g, player p1, player p2
+      where p1.user_id = g.user_id
+        and :gender in
+            (select gender_preferences from user_gender_preferences ugp
+            where ugp.user_user_id=p1.user_id)
+        and p1.gender in
+            (select gender_preferences from user_gender_preferences ugp
+            where ugp.user_user_id=p2.user_id)
+        and p2.user_id = :userId)
+""",
             nativeQuery = true)
     Long countOtherUserWithActiveGameThatWasNotPlayedOn(@Param("userId") long userId,
                                                         @Param("gender") String gender,
