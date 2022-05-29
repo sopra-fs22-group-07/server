@@ -548,20 +548,6 @@ class UserControllerTest extends UserFiller {
     }
 
     @Test
-    void getMatches_success_single() throws Exception {
-        User user1 = fillUser(1L, "1");
-        User user2 = fillUser(2L, "2");
-        doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
-        given(userService.getUserById(1L)).willReturn(user1);
-        given(userService.getUsersFromMatches(user1)).willReturn(List.of(user2));
-        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/matches", user1.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("authorization", user1.getToken());
-        mockMvc.perform(getRequest).andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].id", is(user2.getId().intValue())));
-    }
-
-    @Test
     void updateUserPreferences_success() throws Exception {
         User user1 = fillUser(1L, "1");
         HashSet<Gender> genders = new HashSet<>();

@@ -917,13 +917,12 @@ class UserServiceTest {
 
     @Test
     void getUsersFromMatches_success() {
-        assertEquals(new ArrayList<>(), userService.getUsersFromMatches(testUser));
+        assertNull(userService.getUsersFromMatches(testUser, testMatch));
         setupMatches(1);
-        assertEquals(List.of(otherUser), userService.getUsersFromMatches(testUser));
+        assertEquals(otherUser, userService.getUsersFromMatches(testUser, testMatch));
         setupMatches(2);
-        List<User> res = userService.getUsersFromMatches(testUser);
-        assertEquals(2, res.size());
-        assertTrue(res.contains(otherUser));
+        assertEquals(otherUser, userService.getUsersFromMatches(testUser, testMatch));
+        assertEquals(testUser, userService.getUsersFromMatches(otherUser, testMatch));
     }
 
     @Test
