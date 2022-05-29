@@ -1,4 +1,4 @@
-# SoPra FS22 - Group 07 - Date Against Humanity - Server
+# SoPra FS22 - Group 07 - Date Against Humanity - Client
 
 Date against humanity helps you meet people with the same sense of humour and allows you to network with others in a fun way.
 
@@ -7,7 +7,7 @@ Each User gets to choose a Black Card every 24 hours which then gets displayed i
 The Black Cards have some text with a gap. Next to the Black Cards each user also gets a fixed number of White Cards whenever a new Black Card is chosen.
 The White Cards have some short text or phrase which gets used to fill in the gaps in the Black Cards in a funny or witty way.
 Users can rate the White Cards which get played to fill the gap in their Black Card and if both Users like each other's cards they match.
-When matched users can chat with each other. User can also unmatch or block previously matched users.
+When matched, users can chat with each other. User can also unmatch or block previously matched users.
 Users can set preferences such as gender, age or a maximum distance which restricts whose Black Cards get presented to them.
 
 ### Links:
@@ -19,28 +19,31 @@ Users can set preferences such as gender, age or a maximum distance which restri
 # Technologies
 
 ## Client
-For the client we used React and JSX as well as the package manager npm.
+For the client, React and JSX as well as the package manager npm are used.
+- Geolocation API: In order to retrieve location data about users we used `navigator.geolocation` [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) in order to access the browser geolocation information. This API uses the best available information to the browser in order to determine the location.
+- DiceBear API: For the Match Overview and the Chat, the Avatar Generator from https://avatars.dicebear.com/ is used
+  to create custom Avatar for every user
+- React Leaflet API: As map service react leaflet is used. It provides building between React and Leaflet.
+  Leaflet is an open-source JavaScript library for interactive maps. As source for the maps, Openstreetmap is used.
+
 
 ## Server
-For the server we created a springboot application with java. We also used the build automation tool Gradle.
+For the server, we created a spring boot application with Java. We also used the build automation tool Gradle.
 
-- Database: Andy
-- Geolocation API: Laurin
-- Little Faces API: (only maybe) David
-- Open Maps API: (only maybe) Andy
+- Database: A PostgreSQL database - fully managed from HEROKU - is used. At the moment, the connections are limited to 20, but it is possible to upgrade when needed.
 
 # High level components
 
 ## User
-The user is one of our main component, as it is the component that the player (or user) of the application impersonates.
-The user model has a lot of responsibilities, ranging from having an age, gender and location and preferences for all of them
+The user is one of our main components, as it is the component that the player (or user) of the application impersonates.
+The user model has a lot of responsibilities, ranging from having an age, gender and location and preferences
 up to having cards to play and to be played on.
 
 Main Classes User:
 ```
 ..\soprafs22\entity\User.java
 ..\soprafs22\controller\UserController.java
-..\soprafs22\service\UserService.java
+..\soprafs22\service\UserService.java 
 ```
 
 
@@ -49,9 +52,9 @@ The template for all our cards are from [JSON Agains Humanity](https://crhallber
 
 
 
-There exists two type of cards: White Cards and Black Cards. Every 24 hours each user gets a set of White Cards and one Black
-Card. The White Cards then get played on other users Black Cards. This realtime interaction then gets used for the
-matching. When two users like each others' White Cards a match gets created. Black Cards of one user only get presented
+There exists two types of cards: White Cards and Black Cards. Every 24 hours, each user gets a set of White Cards and one Black
+Card. The White Cards then can be played on other users' Black Cards. This realtime interaction is used for the
+matching. When two users like each other's White Cards, a match is created. Black Cards of one user only get presented
 to another user if it fits their preferences.
 
 Main Classes Cards:
@@ -60,7 +63,7 @@ Main Classes Cards:
 ..\soprafs22\controller\GameController.java
 ..\soprafs22\entity\Game.java
 ..\soprafs22\entity\WhiteCard.java
-..\soprafs22\entity\BlackCard.java
+..\soprafs22\entity\BlackCard.java 
 ```
 
 ## Chat
@@ -81,12 +84,14 @@ Main Classes Chat:
 ## Server
 ### Building with Gradle
 
-You can use the local Gradle Wrapper to build the application.
+You can use the local Gradle Wrapper to build the application. If you don't have a local PotgreSQL database, and you use H2
+in memory instead, you have to work with the local branch, in order for the SQL queries to work.
 -   macOS: `./gradlew`
 -   Linux: `./gradlew`
 -   Windows: `./gradlew.bat`
 
-More Information about [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) and [Gradle](https://gradle.org/docs/).
+More Information about [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)
+and [Gradle](https://gradle.org/docs/).
 
 #### Build
 To build the application:
@@ -171,34 +176,33 @@ It correctly bundles React in production mode and optimizes the build for the be
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
 
-
 # Roadmap
 ## Add Black Cards with Multiple Gaps
-Currently only Black Cards with one gap are implemented but in Cards against Humanity there exist
-Black Cards with up to 3 Gaps. Add the possibility for Black Cards with two and three gaps, adjust
+Currently, only Black Cards with one gap are implemented, yet in Cards against Humanity there exist
+Black Cards with up to 3 gaps. Add the possibility for Black Cards with two and three gaps, adjust
 the drawing of cards so playing on a multiple gap Black Card doesn't mean getting to play
 on less Black Cards on that day and make sure users with only 1 (or 2) White Cards left in their Hand
 don't have to play on Black Cards with 2 (or 3) gaps.
 
 ## Just for Fun Mode
-Add a seperate mode where each user has an infinite amount of White Cards to play
+Add a separate mode where each user has an infinite amount of White Cards to play
 per day. There is no matching in this mode as it is played purely out of fun. Implement a
 scoreboard where the like/dislike ratio for players gets displayed or even consider adding a
 feature where you rate White Cards on a scale from 1-10 in the just for fun mode.
 
 ## Family Friendly Filter
-Allow users to set a filter to only recieve cards from the "Family Friendly" version of the Game.
-Users who set this filter only recieve Black- and White Cards from these packs and only get shown
-Black Cards of Users who also have this filter activated. Users who don't have this filter activated can recieve cards
-from the "Family Friendly" edition but they can't play on Black Cards from users who have the filter on.
+Allow users to set a filter to only receive cards from the "Family Friendly" version of the Game.
+Users who set this filter only receive Black and White Cards from these packs and only get shown
+Black Cards of Users who also have this filter activated. Users who don't have this filter activated can receive cards
+from the "Family Friendly" edition, but they cannot play on Black Cards from users who have the filter on.
 
 # Authors and acknowledgement
 ## Authors
-- Seraina Schraff, seraina.schraff@uzh.ch, 20-710-513
-- Andreas Huwiler, andreas.huwiler@uzh.ch , 13-921-234
-- Laurin van den Bergh, laurin.vandenberg@uzh.ch, 16-744-401
-- David Moser, david.moser2@uzh.ch, 19-923-929
-- Joe Müller, joe.mueller@uzh.ch, 19-735-299
+- [Seraina Schraff](mailto:seraina.schraff@uzh.ch), 20-710-513
+- [Andreas Huwiler](mailto:andreas.huwiler@uzh.ch) , 13-921-234
+- [Laurin van den Bergh](mailto:laurin.vandenberg@uzh.ch), 16-744-401
+- [David Moser](mailto:david.moser2@uzh.ch), 19-923-929
+- [Joe Müller](mailto:joe.mueller@uzh.ch), 19-735-299
 
 ## Acknowledgement
 - The server is built on the SoPra RESTful Service Template FS22: https://github.com/HASEL-UZH/sopra-fs22-template-server
