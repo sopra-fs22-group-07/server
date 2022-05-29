@@ -38,8 +38,6 @@ public class UserService {
   private final UserBlackCardsRepository userBlackCardsRepository;
   private final MatchRepository matchRepository;
   private final ChatRepository chatRepository;
-  private final GameService gameService;
-  private boolean areInstantiatedDemoUsers = false;
   private static final String UNIQUE_VIOLATION = "Uniqueness Violation Occurred";
   private static final Long GAME_DURATION = Time.ONE_DAY;
 
@@ -47,14 +45,12 @@ public class UserService {
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository,
                      @Qualifier("userBlackCardsRepository") UserBlackCardsRepository userBlackCardsRepository,
-                     @Qualifier("gameService") GameService gameService,
                      @Qualifier("MatchRepository") MatchRepository matchRepository,
                      @Qualifier("ChatRepository")ChatRepository chatRepository) {
 
     this.userRepository = userRepository;
     this.userBlackCardsRepository = userBlackCardsRepository;
     this.matchRepository = matchRepository;
-    this.gameService = gameService;
     this.chatRepository = chatRepository;
   }
 
@@ -587,174 +583,6 @@ public class UserService {
   public void deleteUser(long userId){
       userRepository.deleteById(userId);
   }
-
-  // instantiate demo users
-  public void instantiateDemoUsers() {
-
-    if (areInstantiatedDemoUsers) {
-      // throw exception if demo users are already instantiated
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Demo users are already instantiated");
-
-    } else {
-
-      log.info("Instantiating demo users...");
-
-      // ======= create demo users =======
-      User demoUser1 = new User();
-      demoUser1.setUsername("demoUser1");
-      demoUser1.setPassword("demoUser1");
-      demoUser1.setName("Demo User 1");
-      demoUser1.setGender(Gender.MALE);
-      demoUser1.setBirthday(new Date());
-      demoUser1.setMaxAge(30);
-      demoUser1.setMinAge(18);
-      demoUser1.setMaxRange(30);
-      demoUser1 = createUser(demoUser1);
-
-      User demoUser2 = new User();
-      demoUser2.setUsername("demoUser2");
-      demoUser2.setPassword("demoUser2");
-      demoUser2.setName("Demo User 2");
-      demoUser2.setGender(Gender.FEMALE);
-      demoUser2.setBirthday(new Date());
-      demoUser2.setMaxAge(30);
-      demoUser2.setMinAge(18);
-      demoUser2.setMaxRange(30);
-      demoUser2 = createUser(demoUser2);
-
-      User demoUser3 = new User();
-      demoUser3.setUsername("demoUser3");
-      demoUser3.setPassword("demoUser3");
-      demoUser3.setName("Demo User 3");
-      demoUser3.setGender(Gender.OTHER);
-      demoUser3.setBirthday(new Date());
-      demoUser3.setMaxAge(30);
-      demoUser3.setMinAge(18);
-      demoUser3.setMaxRange(30);
-      demoUser3 = createUser(demoUser3);
-
-      User demoUser4 = new User();
-      demoUser4.setUsername("demoUser4");
-      demoUser4.setPassword("demoUser4");
-      demoUser4.setName("Demo User 4");
-      demoUser4.setGender(Gender.OTHER);
-      demoUser4.setBirthday(new Date());
-      demoUser4.setMaxAge(30);
-      demoUser4.setMinAge(18);
-      demoUser4.setMaxRange(30);
-      demoUser4 = createUser(demoUser4);
-
-      User demoUser5 = new User();
-      demoUser5.setUsername("demoUser5");
-      demoUser5.setPassword("demoUser5");
-      demoUser5.setName("Demo User 5");
-      demoUser5.setGender(Gender.OTHER);
-      demoUser5.setBirthday(new Date());
-      demoUser5.setMaxAge(30);
-      demoUser5.setMinAge(18);
-      demoUser5.setMaxRange(30);
-      demoUser5 = createUser(demoUser5);
-
-      User demoUser6 = new User();
-      demoUser6.setUsername("demoUser6");
-      demoUser6.setPassword("demoUser6");
-      demoUser6.setName("Demo User 6");
-      demoUser6.setGender(Gender.OTHER);
-      demoUser6.setBirthday(new Date());
-      demoUser6.setMaxAge(30);
-      demoUser6.setMinAge(18);
-      demoUser6.setMaxRange(30);
-      demoUser6 = createUser(demoUser6);
-
-      User demoUser7 = new User();
-      demoUser7.setUsername("demoUser7");
-      demoUser7.setPassword("demoUser7");
-      demoUser7.setName("Demo User 7");
-      demoUser7.setGender(Gender.OTHER);
-      demoUser7.setBirthday(new Date());
-      demoUser7.setMaxAge(30);
-      demoUser7.setMinAge(18);
-      demoUser7.setMaxRange(30);
-      demoUser7 = createUser(demoUser7);
-
-      User demoUser8 = new User();
-      demoUser8.setUsername("demoUser8");
-      demoUser8.setPassword("demoUser8");
-      demoUser8.setName("Demo User 8");
-      demoUser8.setGender(Gender.OTHER);
-      demoUser8.setBirthday(new Date());
-      demoUser8.setMaxAge(30);
-      demoUser8.setMinAge(18);
-      demoUser8.setMaxRange(30);
-      demoUser8 = createUser(demoUser8);
-
-      User demoUser9 = new User();
-      demoUser9.setUsername("demoUser9");
-      demoUser9.setPassword("demoUser9");
-      demoUser9.setName("Demo User 9");
-      demoUser9.setGender(Gender.OTHER);
-      demoUser9.setBirthday(new Date());
-      demoUser9.setMaxAge(30);
-      demoUser9.setMinAge(18);
-      demoUser9.setMaxRange(30);
-      demoUser9 = createUser(demoUser9);
-
-
-      // ======= create active games =======
-      BlackCard blackCard1 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard2 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard3 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard4 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard5 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard6 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard7 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard8 = gameService.getNRandomBlackCards(1).get(0);
-      BlackCard blackCard9 = gameService.getNRandomBlackCards(1).get(0);
-      gameService.createGame(blackCard1, demoUser1);
-      gameService.createGame(blackCard2, demoUser2);
-      gameService.createGame(blackCard3, demoUser3);
-      gameService.createGame(blackCard4, demoUser4);
-      gameService.createGame(blackCard5, demoUser5);
-      gameService.createGame(blackCard6, demoUser6);
-      gameService.createGame(blackCard7, demoUser7);
-      gameService.createGame(blackCard8, demoUser8);
-      gameService.createGame(blackCard9, demoUser9);
-
-
-      // ======= create likes and matches =======
-      Match demoMatch1 = createMatch(demoUser1, demoUser2);
-      setMatch(demoMatch1);
-
-      Match demoMatch2 = createMatch(demoUser1, demoUser3);
-      setMatch(demoMatch2);
-
-      Match demoMatch3 = createMatch(demoUser1, demoUser4);
-      setMatch(demoMatch3);
-
-      Match demoMatch4 = createMatch(demoUser1, demoUser5);
-      setMatch(demoMatch4);
-
-      Match demoMatch5 = createMatch(demoUser2, demoUser3);
-      setMatch(demoMatch5);
-
-      Match demoMatch6 = createMatch(demoUser2, demoUser6);
-      setMatch(demoMatch6);
-
-      Match demoMatch7 = createMatch(demoUser2, demoUser7);
-      setMatch(demoMatch7);
-
-      Match demoMatch8 = createMatch(demoUser3, demoUser8);
-      setMatch(demoMatch8);
-
-      Match demoMatch9 = createMatch(demoUser3, demoUser9);
-      setMatch(demoMatch9);
-
-      areInstantiatedDemoUsers = true;
-      log.info("Demo users instantiated.");
-
-    }
-  }
-
 
   /**
    * Gets the black card of a user, but throws 404 if the user has no active game or no black card selected yet
