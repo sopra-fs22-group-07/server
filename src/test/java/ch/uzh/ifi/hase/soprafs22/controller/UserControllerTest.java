@@ -4,7 +4,7 @@ import ch.uzh.ifi.hase.soprafs22.constant.Gender;
 import ch.uzh.ifi.hase.soprafs22.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs22.entity.*;
 import ch.uzh.ifi.hase.soprafs22.helper.Pair;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.LocationPostDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.LocationPutDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs22.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs22.service.UserService;
@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -225,6 +226,7 @@ class UserControllerTest extends UserFiller {
             .header("authorization", userToBeUpdated.getToken());
 
     mockMvc.perform(putRequest).andExpect(status().isNoContent());
+    verify(userService).updateUser(any(User.class));
   }
 
 
@@ -265,6 +267,7 @@ class UserControllerTest extends UserFiller {
             .header("authorization", userToBeUpdated.getToken());
 
     mockMvc.perform(putRequest).andExpect(status().isNoContent());
+    verify(userService).updateUser(any(User.class));
   }
 
 
@@ -363,6 +366,7 @@ class UserControllerTest extends UserFiller {
                     .content(asJsonString(userPutDTO))
                     .header("authorization", user.getToken()))
             .andExpect(status().isNoContent());
+    verify(userService).logoutUser(any(User.class));
   }
 
 
@@ -437,6 +441,7 @@ class UserControllerTest extends UserFiller {
     mockMvc.perform(delete("/users/" + user.getId()+ "/matches/"+otherUser.getId()).contentType(MediaType.APPLICATION_JSON)
             .header("authorization", user.getToken()))
             .andExpect(status().isNoContent());
+    verify(userService).deleteMatchBetweenUsers(user.getId(), otherUser.getId());
   }
 
   @Test
@@ -463,6 +468,7 @@ class UserControllerTest extends UserFiller {
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("authorization", user.getToken()))
             .andExpect(status().isNoContent());
+    verify(userService).blockUser(user.getId(), otherUser.getId());
   }
 
   @Test
@@ -528,6 +534,7 @@ class UserControllerTest extends UserFiller {
               .contentType(MediaType.APPLICATION_JSON)
               .header("authorization", user.getToken());
       mockMvc.perform(deleteRequest).andExpect(status().isNoContent());
+      verify(userService).deleteUser(user.getId());
   }
 
     @Test
@@ -591,17 +598,20 @@ class UserControllerTest extends UserFiller {
     }
 
     @Test
-    void updateLocation_sucess() throws Exception {
+    void updateLocation_success() throws Exception {
         User user1 = fillUser(1L, "1");
         doNothing().when(userService).checkSpecificAccess(user1.getToken(), user1.getId());
 
-        LocationPostDTO locationDTO = new LocationPostDTO();
+        LocationPutDTO locationDTO = new LocationPutDTO();
+        locationDTO.setLatitude(16.6);
+        locationDTO.setLongitude(18.8);
 
-        MockHttpServletRequestBuilder putRequest = put("/users/{userId}/preferences", user1.getId())
+        MockHttpServletRequestBuilder putRequest = put("/users/{userId}/location", user1.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(locationDTO))
                 .header("authorization", user1.getToken());
         mockMvc.perform(putRequest).andExpect(status().isNoContent());
+        verify(userService).updateLocation(user1.getId(), 16.6, 18.8);
     }
 
   /**

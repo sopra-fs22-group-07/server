@@ -1,6 +1,6 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto;
 
-public class LocationPostDTO {
+public class LocationPutDTO {
 
     private double latitude;
     private double longitude;

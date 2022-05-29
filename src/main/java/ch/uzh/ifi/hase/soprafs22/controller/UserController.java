@@ -231,7 +231,7 @@ public class UserController {
   @ResponseBody
   public void updateLocation(
     @RequestHeader(value = "authorization", required = false) String token,
-    @RequestBody(required = true) LocationPostDTO locationDTO,
+    @RequestBody(required = true) LocationPutDTO locationDTO,
     @PathVariable(value = "userId") long userId
   ) {
     double latitude = locationDTO.getLatitude();
