@@ -90,7 +90,7 @@ class GameServiceIntegrationTest {
     @Test
     void createGame_validInputs_success() {
         // given
-        assertEquals(Optional.empty(), gameRepository.findById(1L));
+        assertNull(gameRepository.findById(1L));
 
         Game testGame = new Game();
         Long testUserId = 2L;
