@@ -571,8 +571,8 @@ public class UserService {
      * @param user: known user
      * @return list of users which mach with known user
      */
-    public List<User> getUsersFromMatches(User user) {
-      return new ArrayList<>(user.getMatchedUsers());
+    public User getUsersFromMatches(User user, Match match) {
+      return match.getMatchedUserFromUser(user);
     }
 
 
@@ -621,7 +621,7 @@ public class UserService {
      * @return ids of the chats
      */
     public List<Long> getChatIds(List<Match> matches) {
-        List<Long> chatIds = new ArrayList<>();
+      List<Long> chatIds = new ArrayList<>();
       for(Match match: matches){
           Chat chat = match.getChat();
           chatIds.add(chat.getId());

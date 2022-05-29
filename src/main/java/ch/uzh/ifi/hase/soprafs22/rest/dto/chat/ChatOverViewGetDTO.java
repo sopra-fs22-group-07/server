@@ -1,21 +1,21 @@
 package ch.uzh.ifi.hase.soprafs22.rest.dto.chat;
 
 import ch.uzh.ifi.hase.soprafs22.entity.Message;
-import ch.uzh.ifi.hase.soprafs22.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs22.rest.dto.MiniUserGetDTO;
 
 import java.util.Date;
 
 public class ChatOverViewGetDTO {
-  private UserGetDTO user;
+  private MiniUserGetDTO user;
   private Message message;
   private Long chatId;
-    private Date matchCreationDate;
+  private Date matchCreationDate;
 
-  public UserGetDTO getUser() {
+  public MiniUserGetDTO getUser() {
     return user;
   }
 
-  public void setUser(UserGetDTO user) {
+  public void setUser(MiniUserGetDTO user) {
     this.user = user;
   }
 

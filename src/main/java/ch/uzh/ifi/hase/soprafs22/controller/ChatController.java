@@ -43,10 +43,15 @@ public class ChatController {
     User user = userService.getUserById(userId);
     // get all matches from user
     List<Match> matches = userService.getMatches(user);
+    matches.sort((o1, o2) -> (int)(o1.getCreationDate().getTime() - o2.getCreationDate().getTime()));
     // get chatID
     List<Long> chatIds = userService.getChatIds(matches);
     // get matchedUser
-    List<User> usersMatched = userService.getUsersFromMatches(user);
+    List<User> usersMatched = new ArrayList<>();
+    for(Match match : matches) {
+      usersMatched.add(userService.getUsersFromMatches(user, match));
+    }
+
     // get the last Message from the matches/ chats
     List<Message> msg = chatService.getFirstMessages(matches);
 
@@ -60,14 +65,13 @@ public class ChatController {
 
       while (matchedUser.hasNext() && message.hasNext() && chatId.hasNext() && match.hasNext()) {
           ChatOverViewGetDTO chatOverViewGetDTO = new ChatOverViewGetDTO();
-          chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertEntityToUserGetDTO(matchedUser.next()));
+          chatOverViewGetDTO.setUser(DTOMapper.INSTANCE.convertUserToMiniUserGetDTO(matchedUser.next()));
           chatOverViewGetDTO.setMessage(message.next());
           chatOverViewGetDTO.setChatId(chatId.next());
           chatOverViewGetDTO.setMatchCreationDate(match.next().getCreationDate());
           chatOverViewGetDTOList.add(chatOverViewGetDTO);
       }
 
-    // I would not use the mapper here but do it myself
     return new ResponseEntity<>(chatOverViewGetDTOList, null, HttpStatus.OK);
   }
 

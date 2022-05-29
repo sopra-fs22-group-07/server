@@ -100,4 +100,10 @@ public interface DTOMapper {
   @Mapping(source = "toUserId", target = "toUserId")
   Message convertChatMessagePutDTOToEntity(ChatMessagePutDTO chatMessagePutDTO);
 
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "username", target = "username")
+  @Mapping(source = "status", target = "status")
+  MiniUserGetDTO convertUserToMiniUserGetDTO(User user);
+
 }
