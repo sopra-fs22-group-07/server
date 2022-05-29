@@ -49,7 +49,7 @@ public class Game implements Serializable {
   @OneToOne
   private BlackCard blackCard;
 
-  @OneToMany
+  @OneToMany(cascade = CascadeType.ALL)
   private List<Play> plays = new ArrayList<>();
 
   // Getters and Setters
