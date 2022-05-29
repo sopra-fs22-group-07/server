@@ -604,7 +604,7 @@ class UserControllerTest extends UserFiller {
    * can be processed
    * Input will look like this: {"name": "Test User", "username": "testUsername"}
    * 
-   * @param object
+   * @param object: Object
    * @return string
    */
   private String asJsonString(final Object object) {

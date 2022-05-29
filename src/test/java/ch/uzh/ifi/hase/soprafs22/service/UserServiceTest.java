@@ -105,7 +105,7 @@ class UserServiceTest {
     @Test
     void getUsers_not_empty(){
         User user = userService.createUser(testUser);
-        List<User> checkList = Arrays.asList(user);
+        List<User> checkList = List.of(user);
         List<User> userList = new ArrayList<>();
         userList.add(user);
 
