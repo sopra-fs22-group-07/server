@@ -247,10 +247,7 @@ public class GameService {
     }
 
     // pageSize = how many games per page
-    // limit pageSize to 100
-    int maxPageSize = 100;
-    // if there are less than 100 games left, pageSize is just the number of games left.
-    int pageSize = Math.min(numOfGames, maxPageSize);
+    int pageSize = 100;
     // all games it found
     PageRequest pageRequest = PageRequest.of(page, pageSize);
 
@@ -273,7 +270,7 @@ public class GameService {
     }
 
     // recurse
-    return getGameFromRandomUserHelper(page+1, numOfGames-maxPageSize, user, minAgeTimestamp, maxAgeTimestamp);
+    return getGameFromRandomUserHelper(page+1, numOfGames-pageSize, user, minAgeTimestamp, maxAgeTimestamp);
 
   }
 
