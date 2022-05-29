@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Internal Game Representation
@@ -32,6 +33,7 @@ public class Game implements Serializable {
 
   @Id
   @GeneratedValue
+  @Column(name = "game_id")
   private Long id;
 
   @ManyToOne
@@ -49,7 +51,7 @@ public class Game implements Serializable {
   @OneToOne
   private BlackCard blackCard;
 
-  @OneToMany(cascade = CascadeType.ALL)
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "game")
   private List<Play> plays = new ArrayList<>();
 
   // Getters and Setters
@@ -73,7 +75,7 @@ public class Game implements Serializable {
     // safety net - assuming user has succeeded in inserting multiple plays into this game, we delete them all
     List<Play> toBeRemoved= new ArrayList<>();
     for(Play play : this.plays) {
-      if(play.getUserId() == userId){
+      if(Objects.equals(play.getUser().getId(), userId)){
         toBeRemoved.add(play);
       }
     }

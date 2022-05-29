@@ -113,17 +113,17 @@ public class GameService {
 
     /**
      * Create a Play (whiteCard and the userId from the played)
-     * @param userId id of user who creates play
+     * @param user user who creates play
      * @param cardId id of card to get added to the play
      * @return Play - created Play
      */
-    public Play createPlay(long userId, long cardId){
+    public Play createPlay(User user, long cardId){
       // instance of new play
       WhiteCard card = whiteCardRepository.findById(cardId);
       // set card and id
       Play play = new Play();
       play.setCard(card);
-      play.setUserId(userId);
+      play.setUser(user);
 
       // DO NOT SAVE AND FLUSH THE PLAY HERE (see putPlayInGame()).
       return play;
@@ -137,7 +137,7 @@ public class GameService {
     public void putPlayInGame(Game game, Play play) {
 
       // set gameId in play here for joining game and play repos
-      play.setGameId(game.getId());
+      play.setGame(game);
       game.enqueuePlay(play);
       // save and flush
       // we only saveAndFlush the play here (after it is checked)

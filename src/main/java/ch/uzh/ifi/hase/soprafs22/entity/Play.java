@@ -13,16 +13,25 @@ public class Play implements Serializable {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
     @OneToOne
     private WhiteCard whiteCard;
 
-    @Column
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinTable(name = "PLAY_USERS",
+            joinColumns = {@JoinColumn(referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(referencedColumnName = "user_id")})
+    private User user;
 
-    @Column
-    private Long gameId;
+    @ManyToOne(fetch = FetchType.LAZY,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinTable(name = "PLAY_GAMES",
+            joinColumns = {@JoinColumn(referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(referencedColumnName = "game_id")})
+    private Game game;
 
   public WhiteCard getCard(){
     return  this.whiteCard;
@@ -32,23 +41,23 @@ public class Play implements Serializable {
     }
 
 
-  public long getUserId(){
-    return userId;
-  }
-
-    public void setUserId(long userId){
-        this.userId= userId;
-    }
-
   public long getPlayId(){
         return this.id;
     }
 
-  public Long getGameId() {
-    return gameId;
+  public User getUser() {
+    return user;
   }
 
-  public void setGameId(Long gameId) {
-    this.gameId = gameId;
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public Game getGame() {
+    return game;
+  }
+
+  public void setGame(Game game) {
+    this.game = game;
   }
 }

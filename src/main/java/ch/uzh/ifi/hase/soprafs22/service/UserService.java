@@ -518,9 +518,9 @@ public class UserService {
    * @return boolean: true if user has already a play in the game
    */
   public boolean hasUserAlreadyPlayInGame(Game game, Play play) {
-    long userId = play.getUserId();
+    User user = play.getUser();
     for(Play p : game.getPlays()) {
-      if (p.getUserId() == userId){
+      if (p.getUser() == user){
         return true;
       }
     }
@@ -712,4 +712,10 @@ public class UserService {
         deleteNotNeededPastGamesWithoutPlays(user);
 
     }
+
+  public void assignPlayToUser(Long id, Play play) {
+    User user = getUserById(id);
+    user.addPlay(play);
+    userRepository.saveAndFlush(user);
+  }
 }

@@ -108,8 +108,14 @@ public class User implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "users")
     private Set<BlockedUserRelation> blockedUserRelations = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    private Set<Play> plays = new HashSet<>();
 
     // GETTERS AND SETTERS
+
+    public void addPlay(Play play) {
+        this.plays.add(play);
+    }
 
     public Long getId() {return id;}
     public void setId(Long id) {this.id = id;}

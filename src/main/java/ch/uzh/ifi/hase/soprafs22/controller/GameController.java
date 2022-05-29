@@ -234,6 +234,7 @@ public class GameController {
     // get the game that is voted on
     Game inputGame = DTOMapper.INSTANCE.convertGameIDPostDTOToEntity(gameIDPostDTO);
     Game game = gameService.getGameById(inputGame.getId()); // 404
+    User user = userService.getUserById(id);
 
     // make sure that the game does not belong to the caller himself, you shall not give a white card to your own game.
     if(userService.isGameBelongingToUser(game, userService.getUserById(id))) {
@@ -249,10 +250,12 @@ public class GameController {
                       "GET /users/" + id + "games/whiteCards \n to get your cards!");
     }
     // create a play
-    Play play = gameService.createPlay(id, cardId);
+    Play play = gameService.createPlay(user, cardId);
     // only assign the play to the game if user has not already played on that game (he won't lose his white card if he has)
     if(!userService.hasUserAlreadyPlayInGame(game, play)){
       gameService.putPlayInGame(game, play);
+      userService.assignPlayToUser(id, play);
+
       userService.deleteWhiteCard(id, whiteCard);
     }
   }
