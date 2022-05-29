@@ -218,14 +218,6 @@ public class UserController {
   }
 
 
-
-  @PostMapping("/users/demo")
-  @ResponseStatus(HttpStatus.CREATED)
-  @ResponseBody
-  public void createDemoUsers(){
-      userService.instantiateDemoUsers();  // throws 400 if the function has been called previously since the server was started
-  }
-
   @PutMapping(value="/users/{userId}/location")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
