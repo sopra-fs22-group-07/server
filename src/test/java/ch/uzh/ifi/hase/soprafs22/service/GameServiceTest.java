@@ -331,22 +331,22 @@ class GameServiceTest {
         // then
         Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(
                 eq(1L),
-                        //eq(testUser),
-                        eq(testUser.getGender().name()),
+                        eq(testUser),
+                        eq(testUser.getGender()),
                         Mockito.any(),
-                        Mockito.any()))
-                        //eq(testUser.getBlockedUsers()),
-                        //eq(testUser.getMatchedUsers())))
+                        Mockito.any(),
+                        eq(testUser.getBlockedUsers()),
+                        eq(testUser.getMatchedUsers())))
                 .thenReturn(101L);
         Mockito.when(gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(
                 Mockito.any(PageRequest.class),
                         eq(1L),
-                        // eq(testUser),
-                        eq(testUser.getGender().name()),
+                        eq(testUser),
+                        eq(testUser.getGender()),
                         Mockito.any(),
-                        Mockito.any()))
-                        // eq(testUser.getBlockedUsers()),
-                        // eq(testUser.getMatchedUsers())))
+                        Mockito.any(),
+                        eq(testUser.getBlockedUsers()),
+                        eq(testUser.getMatchedUsers())))
                 .thenReturn(somePage);
 
         // test
@@ -364,12 +364,12 @@ class GameServiceTest {
 
         // then
         Mockito.when(gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(eq(1L),
-                        //eq(testUser),
-                        eq(testUser.getGender().name()),
+                        eq(testUser),
+                        eq(testUser.getGender()),
                         Mockito.any(),
-                        Mockito.any()))
-                        //eq(testUser.getBlockedUsers()),
-                        // eq(testUser.getMatchedUsers())))
+                        Mockito.any(),
+                        eq(testUser.getBlockedUsers()),
+                        eq(testUser.getMatchedUsers())))
                 .thenReturn(0L);
 
         // test

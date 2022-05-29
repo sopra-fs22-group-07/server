@@ -229,18 +229,19 @@ public class GameService {
   public Game getGameFromRandomUser(User user) {
 
     // get timestamps
-    Timestamp minAgeTimestamp = new Timestamp(calculateAgePreferencesToDate(user.getMinAge()).getTime());
-    Timestamp maxAgeTimestamp = new Timestamp(calculateAgePreferencesToDate(user.getMaxAge()+1).getTime());
+    Date minAge = calculateAgePreferencesToDate(user.getMinAge());
+    Date maxAge = calculateAgePreferencesToDate(user.getMaxAge()+1);
 
     // count the possible games, these are all the games that match the user preferences, except for the location.
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user, user.getGender(),
+            minAge, maxAge, user.getBlockedUsers(), user.getMatchedUsers());
 
     // call recursive function that gets the game or throws an error
-    return getGameFromRandomUserHelper(0, Math.toIntExact(numOfGames), user, minAgeTimestamp, maxAgeTimestamp);
+    return getGameFromRandomUserHelper(0, Math.toIntExact(numOfGames), user, minAge, maxAge);
 
   }
 
-  private Game getGameFromRandomUserHelper(int page, int numOfGames, User user, Timestamp minAgeTimestamp, Timestamp maxAgeTimestamp) {
+  private Game getGameFromRandomUserHelper(int page, int numOfGames, User user, Date minAge, Date maxAge) {
     // base: if there are zero (0) games from the count, or <=  0 from recursion, there are no games left to check
     if (numOfGames <= 0) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
@@ -255,7 +256,8 @@ public class GameService {
     PageRequest pageRequest = PageRequest.of(page, pageSize);
 
     // get the page with the games
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user,
+            user.getGender(), minAge, maxAge, user.getBlockedUsers(), user.getMatchedUsers());
 
     // subset the page of users to only users that have a haversine distance of less than user.getMaxRange()
     List<Game> games = somePage.getContent();
@@ -273,7 +275,7 @@ public class GameService {
     }
 
     // recurse
-    return getGameFromRandomUserHelper(page+1, numOfGames-maxPageSize, user, minAgeTimestamp, maxAgeTimestamp);
+    return getGameFromRandomUserHelper(page+1, numOfGames-maxPageSize, user, minAge, maxAge);
 
   }
 
