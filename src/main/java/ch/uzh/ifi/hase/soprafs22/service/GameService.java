@@ -6,8 +6,6 @@ import ch.uzh.ifi.hase.soprafs22.repository.BlackCardRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.PlayRepository;
 import ch.uzh.ifi.hase.soprafs22.repository.WhiteCardRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -32,7 +30,6 @@ import java.util.*;
 @Transactional
 public class GameService {
 
-  private final Logger log = LoggerFactory.getLogger(GameService.class);
 
 
   private final GameRepository gameRepository;
@@ -231,69 +228,53 @@ public class GameService {
    */
   public Game getGameFromRandomUser(User user) {
 
-    Date minAgeDate = calculateAgePreferencesToDate(user.getMinAge());
-    Date maxAgeDate = calculateAgePreferencesToDate(user.getMaxAge()+1);
-    Timestamp minAgeTimestamp = new Timestamp(minAgeDate.getTime());
-    Timestamp maxAgeTimestamp = new Timestamp(maxAgeDate.getTime());
+    // get timestamps
+    Timestamp minAgeTimestamp = new Timestamp(calculateAgePreferencesToDate(user.getMinAge()).getTime());
+    Timestamp maxAgeTimestamp = new Timestamp(calculateAgePreferencesToDate(user.getMaxAge()+1).getTime());
 
-    // count the possible games
-    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(
-      user.getId(),
-      user.getGender().name(), 
-      minAgeTimestamp, 
-      maxAgeTimestamp
-    );
+    // count the possible games, these are all the games that match the user preferences, except for the location.
+    Long numOfGames = gameRepository.countOtherUserWithActiveGameThatWasNotPlayedOn(user.getId(), user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
 
-    String s = "counted " + numOfGames.toString() + " games";
-    log.info(s);
+    // call recursive function that gets the game or throws an error
+    return getGameFromRandomUserHelper(0, Math.toIntExact(numOfGames), user, minAgeTimestamp, maxAgeTimestamp);
 
-    if(numOfGames==0){
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
+  }
+
+  private Game getGameFromRandomUserHelper(int page, int numOfGames, User user, Timestamp minAgeTimestamp, Timestamp maxAgeTimestamp) {
+    // base: if there are zero (0) games from the count, or <=  0 from recursion, there are no games left to check
+    if (numOfGames <= 0) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
     }
 
-    // limit page size to 100
-    int pageSize = (numOfGames < 100) ? numOfGames.intValue() : 100;
-    int pageIndex = rand.nextInt(pageSize);
+    // pageSize = how many games per page
+    // limit pageSize to 100
+    int maxPageSize = 100;
+    // if there are less than 100 games left, pageSize is just the number of games left.
+    int pageSize = Math.min(numOfGames, maxPageSize);
     // all games it found
-    PageRequest pageRequest = PageRequest.of(pageIndex, pageSize);
+    PageRequest pageRequest = PageRequest.of(page, pageSize);
 
     // get the page with the games
-    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(
-      pageRequest, 
-      user.getId(), 
-      user.getGender().name(), 
-      minAgeTimestamp, 
-      maxAgeTimestamp
-    );
+    Page<Game> somePage = gameRepository.getOtherUserWithActiveGameThatWasNotPlayedOn(pageRequest, user.getId(), user.getGender().name(), minAgeTimestamp, maxAgeTimestamp);
 
     // subset the page of users to only users that have a haversine distance of less than user.getMaxRange()
     List<Game> games = somePage.getContent();
-    Game matchingGame = null;
 
-    // go over all games that match the other criteria
-    for(Game game : games){
-      // for each game get the user that the game belongs to
+    for (Game game : games) {
       User gameUser = game.getUser();
-
-      // calculate the distance between the two users
-      double distance = haversineDistance(
-        user.getLatitude(), 
-        user.getLongitude(), 
-        gameUser.getLatitude(), 
-        gameUser.getLongitude()
-      );
-
-      // if the distance is less than the max range, add the game to the list
-      if(distance <= user.getMaxRange()){
-        matchingGame = game;
-        break;
-      } else {
-        // throw 404 if no game was found
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no black card of another user left");
+      if (haversineDistance(
+              user.getLatitude(),
+              user.getLongitude(),
+              gameUser.getLatitude(),
+              gameUser.getLongitude()
+      ) <= user.getMaxRange()) {
+        return game;
       }
     }
 
-    return matchingGame;
+    // recurse
+    return getGameFromRandomUserHelper(page+1, numOfGames-maxPageSize, user, minAgeTimestamp, maxAgeTimestamp);
+
   }
 
 
@@ -304,7 +285,7 @@ public class GameService {
    * Uses Haversine method as its base.
    * 
    * lat1, lon1 Start point; lat2, lon2 End point
-   * @returns Distance in km
+   * @return: Distance in km
    */
   public static double haversineDistance(
     double lat1, 
@@ -320,9 +301,8 @@ public class GameService {
             + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
             * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
     double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    double distance = R * c; // distance in km
 
-    return distance;
+    return R * c;
   }
 
 }
